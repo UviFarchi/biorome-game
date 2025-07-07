@@ -21,7 +21,7 @@ function recallAssembly(tile) {
   if (tile.assembly) {
     const assemblyId = tile.assembly.id
     tile.assembly = null
-    const assembly = modules.assemblies.find(a => a.id === assemblyId)
+    const assembly = modules.activeAssemblies.find(a => a.id === assemblyId)
     if (assembly) assembly.deployed = false
     closeModal()
   }

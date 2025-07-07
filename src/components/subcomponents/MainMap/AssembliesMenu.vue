@@ -8,7 +8,7 @@ const modules = modulesStore()
 const tiles = tilesStore()
 
 const availableAssemblies = computed(() =>
-    modules.assemblies.filter(a => a.deployed === false)
+    modules.activeAssemblies.filter(a => a.deployed === false)
 )
 
 const showDeployModal = ref(false)
@@ -37,9 +37,9 @@ function closeDeployModal() {
 
 function confirmDeploy() {
   if (deployingAssemblyId.value != null) {
-    const idx = modules.assemblies.findIndex(a => a.id === deployingAssemblyId.value)
+    const idx = modules.activeAssemblies.findIndex(a => a.id === deployingAssemblyId.value)
     if (idx !== -1) {
-      const assembly = modules.assemblies[idx]
+      const assembly = modules.activeAssemblies[idx]
       const row = Number(selectedRow.value) - 1
       const col = Number(selectedCol.value) - 1
       if (
@@ -49,7 +49,7 @@ function confirmDeploy() {
         // --- Recall existing assembly if present
         const targetTile = tiles.tiles[row][col]
         if (targetTile.assembly) {
-          const recalled = modules.assemblies.find(a => a.id === targetTile.assembly.id)
+          const recalled = modules.activeAssemblies.find(a => a.id === targetTile.assembly.id)
           if (recalled) recalled.deployed = false
           targetTile.assembly = null
         }
@@ -79,7 +79,7 @@ function confirmDeploy() {
       >
         <ul class="modulesList">
           <li v-for="mod in assembly.modules" :key="mod">
-            {{ mod }}
+            {{ mod.name }}
           </li>
         </ul>
         <button class="deployBtn" @click="openDeployModal(assembly.id)">

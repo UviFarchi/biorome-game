@@ -4,7 +4,7 @@ import { ref, watch } from 'vue'
 export const userStore = defineStore('user', () => {
     const name = ref('')
     const avatar = ref('')
-    const gold = ref(100)
+    const gold = ref(1000)
     const difficulty = ref(3)
     if (localStorage.getItem('bioromeUser')) {
         const data = JSON.parse(localStorage.getItem('bioromeUser'))

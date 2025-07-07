@@ -78,7 +78,7 @@ const gold = computed(() => user.gold)
 <template>
   <div id="statusBarWrapper">
     <div id="gameLogo" class="statusBarCell" @click="eventBus.emit('nav', 'start')">
-      <img src="@/assets/logo.png" alt="Biorome, the game"/>
+      <img src="../../../assets/logo.png" alt="Biorome, the game"/>
     </div>
     <div id="player" title="Your name and avatar" class="statusBarCell">
       {{ userName }} {{ userAvatar }}
