@@ -78,7 +78,7 @@ function confirmDeploy() {
           class="assemblyCard"
       >
         <ul class="modulesList">
-          <li v-for="mod in assembly.modules" :key="mod">
+          <li v-for="mod in assembly.modules" :key="mod.name">
             {{ mod.name }}
           </li>
         </ul>

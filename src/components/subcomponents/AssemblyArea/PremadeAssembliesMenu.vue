@@ -7,11 +7,7 @@ const modules = modulesStore()
 const premadeAssemblies = modules.premadeAssemblies
 
 function selectAssembly(assembly) {
-  // Convert names to module objects
-  const moduleObjs = assembly.modules
-      .map(name => modules.availableModules.find(m => m.name === name))
-      .filter(Boolean)
-      .map(m => ({ ...m })) // shallow copy, so editing one doesn't edit all
+  const moduleObjs = assembly.modules.map(m => ({ ...m }))
   modules.currentAssembly.splice(0, modules.currentAssembly.length, ...moduleObjs)
   emit('close')
 }
@@ -44,7 +40,7 @@ function close() {
         >
           <div class="assembly-usage">{{ assembly.usage }}</div>
           <ul class="modules-list">
-            <li v-for="mod in assembly.modules" :key="mod">{{ mod }}</li>
+            <li v-for="mod in assembly.modules" :key="mod.name">{{ mod.name }}</li>
           </ul>
         </div>
       </div>

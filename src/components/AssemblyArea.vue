@@ -23,12 +23,7 @@ function handlePremadeSelect(assembly) {
   if (!assembly || !assembly.modules || assembly.modules.length === 0) {
     modules.currentAssembly.value = []
   } else {
-    // Convert string names to module objects
-    const mods = assembly.modules
-        .map(name => modules.availableModules.find(m => m.name === name))
-        .filter(Boolean)
-        .map(m => ({ ...m })) // shallow copy to avoid shared object issues
-    modules.currentAssembly.value = mods
+    modules.currentAssembly.value = assembly.modules.map(m => ({ ...m }))
   }
   closePremadeModal()
 }
