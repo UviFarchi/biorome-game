@@ -53,7 +53,7 @@ function addModuleToAssembly(moduleName) {
     showToast('You do not have any in stock.')
     return
   }
-  modules.currentAssembly.push(mod.name)
+  modules.currentAssembly.push({ ...mod })
   mod.count -= 1
   showToast(`Added ${mod.name} to assembly.`)
 }

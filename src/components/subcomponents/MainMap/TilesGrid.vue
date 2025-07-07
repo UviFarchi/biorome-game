@@ -32,7 +32,8 @@ function plantIsRipe(tile) {
   return tile.plant && (tile.plant.growthStage === 'Mature' || tile.plant.growthStage === 'Overripe')
 }
 function hasCollector(tile) {
-  return tile.assembly && tile.assembly.modules.includes('Collector')
+  return tile.assembly &&
+      tile.assembly.modules.some(m => m.name && m.name.includes('Collector'))
 }
 function canHarvestPlant(tile) {
   return plantIsRipe(tile) && hasCollector(tile)
@@ -59,7 +60,8 @@ function getAnimalProduct(animal) {
   return animals.products.find(p => p.key === animal.product)
 }
 function canHarvestProduct(tile) {
-  return tile.assembly && tile.assembly.modules.includes('Collector')
+  return tile.assembly &&
+      tile.assembly.modules.some(m => m.name && m.name.includes('Collector'))
 }
 function harvestAnimalProduct(tile) {
   if (!canHarvestProduct(tile)) return
@@ -114,7 +116,7 @@ const canMoveAnimal = computed(() =>
     selectedTile.value &&
     selectedTile.value.animal &&
     selectedTile.value.assembly &&
-    selectedTile.value.assembly.modules.includes('Robotic Arm')
+    selectedTile.value.assembly.modules.some(m => m.name && m.name.toLowerCase().includes('robotic arm'))
 )
 function openMoveAnimalModal(tile) {
   animalToMove.value = tile.animal
@@ -256,7 +258,7 @@ function confirmMoveAnimal() {
         <strong>Assembly:</strong>
         <span class="tileAssembly">{{ selectedTile.assembly.icon || '🤖' }}</span>
         Modules:
-        <span v-for="mod in selectedTile.assembly.modules" :key="mod">{{ mod }} </span>
+        <span v-for="mod in selectedTile.assembly.modules" :key="mod.name">{{ mod.name }} </span>
         <button @click="recallAssembly(selectedTile)">Recall</button>
       </div>
       <div v-else style="margin-top: 0.7em;">

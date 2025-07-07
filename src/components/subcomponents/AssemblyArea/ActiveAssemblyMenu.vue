@@ -15,10 +15,7 @@ function selectAssembly(assembly) {
   modules.currentAssembly.splice(
       0,
       modules.currentAssembly.length,
-      ...assembly.modules
-          .map(name => modules.availableModules.find(mod => mod.name === name))
-          .filter(Boolean)
-          .map(mod => ({ ...mod }))
+      ...assembly.modules.map(mod => ({ ...mod }))
   )
   modules.editingAssemblyName = assembly.name || '' // Optionally track name
   modules.editingAssemblyId = assembly.id || null   // Optionally track id
@@ -42,8 +39,8 @@ function selectAssembly(assembly) {
       >
         <div class="assembly-name">{{ assembly.name || 'Assembly' }}</div>
         <ul class="modules-list">
-          <li v-for="mod in assembly.modules" :key="mod">
-            {{ typeof mod === 'string' ? mod : mod.name }}
+          <li v-for="mod in assembly.modules" :key="mod.name">
+            {{ mod.name }}
           </li>
         </ul>
       </div>

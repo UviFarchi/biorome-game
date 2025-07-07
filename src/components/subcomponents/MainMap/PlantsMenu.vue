@@ -31,7 +31,7 @@ const availableTiles = computed(() => {
       // Only show empty tiles (no plant)
       if (!tile.plant && tile.assembly && tile.assembly.deployed) {
         // Require that one of the assembly's modules is a "Planter"
-        if (tile.assembly.modules.some(m => m.toLowerCase().includes('planter'))) {
+        if (tile.assembly.modules.some(mod => mod.name.toLowerCase().includes('planter'))) {
           result.push({row, col})
         }
       }
@@ -65,7 +65,7 @@ function confirmDeploy() {
   const row = Number(selectedRow.value) - 1
   const col = Number(selectedCol.value) - 1
   const tile = tiles.tiles[row][col]
-  if (!tile.plant && tile.assembly && tile.assembly.deployed && tile.assembly.modules.some(m => m.toLowerCase().includes('planter'))) {
+  if (!tile.plant && tile.assembly && tile.assembly.deployed && tile.assembly.modules.some(mod => mod.name.toLowerCase().includes('planter'))) {
     // Check user has enough gold
     if (user.gold < deployingPlant.value.cost) {
       alert("Not enough gold!")

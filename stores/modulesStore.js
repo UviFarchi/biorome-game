@@ -757,12 +757,18 @@ export const modulesStore = defineStore('modules', () => {
         ]
     )
 
+    const findModule = name => availableModules.value.find(m => m.name === name)
+    const resolveModules = names => names
+        .map(n => findModule(n))
+        .filter(Boolean)
+        .map(m => ({ ...m }))
+
     const premadeAssemblies =
         [
             // === Produce Cultivation (Field Zone) ===
             {
                 usage: "Field Planter",
-                modules: [
+                modules: resolveModules([
                     "UGV Transport (small)",
                     "Battery Pack",
                     "GPS Module",
@@ -770,11 +776,11 @@ export const modulesStore = defineStore('modules', () => {
                     "Robotic Arm (medium)",
                     "Hole-Borer",
                     "Camera Module (RGB)"
-                ]
+                ])
             },
             {
                 usage: "Field Planter (seedlings)",
-                modules: [
+                modules: resolveModules([
                     "UGV Transport (small)",
                     "Battery Pack",
                     "GPS Module",
@@ -782,50 +788,50 @@ export const modulesStore = defineStore('modules', () => {
                     "Robotic Arm (medium)",
                     "Gripper",
                     "Camera Module (RGB)"
-                ]
+                ])
             },
             {
                 usage: "Weeding Assembly (Cutter)",
-                modules: [
+                modules: resolveModules([
                     "UGV Transport (small)",
                     "Battery Pack",
                     "Camera Module (RGB)",
                     "Cutter/Saw"
-                ]
+                ])
             },
             {
                 usage: "Weeding Assembly (Sprayer)",
-                modules: [
+                modules: resolveModules([
                     "UGV Transport (small)",
                     "Battery Pack",
                     "Camera Module (RGB)",
                     "Tank",
                     "Sprayer"
-                ]
+                ])
             },
             {
                 usage: "Irrigation Assembly (Spot)",
-                modules: [
+                modules: resolveModules([
                     "UGV Transport (small)",
                     "Battery Pack",
                     "Tank",
                     "Sprayer",
                     "Camera Module (RGB)"
-                ]
+                ])
             },
             // Fixed field irrigation not an assembly, but could be a:
             {
                 usage: "Field Irrigation Station",
-                modules: [
+                modules: resolveModules([
                     "Pole",
                     "Tank",
                     "Valve module",   // Note: Add to modules list if you want!
                     "Pump module"     // Note: Add to modules list if you want!
-                ]
+                ])
             },
             {
                 usage: "Harvesting Assembly",
-                modules: [
+                modules: resolveModules([
                     "UGV Transport (small)",
                     "Battery Pack",
                     "GPS Module",
@@ -834,12 +840,12 @@ export const modulesStore = defineStore('modules', () => {
                     "Gripper",
                     "Suction Tool",
                     "Cart"
-                ]
+                ])
             },
             // Sorting/grading is just extra modules on harvester:
             {
                 usage: "Harvest Grader",
-                modules: [
+                modules: resolveModules([
                     "UGV Transport (small)",
                     "Battery Pack",
                     "GPS Module",
@@ -847,82 +853,82 @@ export const modulesStore = defineStore('modules', () => {
                     "Camera Module (RGB)",
                     "Weighing module",   // Add to modules list if desired
                     "Cart"
-                ]
+                ])
             },
 
             // === Land Modification ===
             {
                 usage: "Path Construction",
-                modules: [
+                modules: resolveModules([
                     "UGV Transport (large)",
                     "Battery Pack",
                     "GPS Module",
                     "Digger",
                     "Flattener module",   // Add if needed
                     "Grader module"       // Add if needed
-                ]
+                ])
             },
 
             // === Rainwater Management ===
             {
                 usage: "Rain Capture Station",
-                modules: [
+                modules: resolveModules([
                     "Barrel", // Add if needed
                     "Valve module",        // Add if needed
                     "Pump module"          // Add if needed
-                ]
+                ])
             },
 
             // === Habitat Management ===
             {
                 usage: "Sensor Deployment UGV",
-                modules: [
+                modules: resolveModules([
                     "UGV Transport (small)",
                     "Battery Pack",
                     "Camera Module (RGB)",
                     "Sensor Module (soil)",
                     "GPS Module"
-                ]
+                ])
             },
             {
                 usage: "Sensor Deployment Drone",
-                modules: [
+                modules: resolveModules([
                     "Drone Transport (quadcopter)",
                     "Battery Pack",
                     "Camera Module (RGB)",
                     "Sensor Module (air)",
                     "GPS Module"
-                ]
+                ])
             },
             {
                 usage: "Fixed Sensor Pole",
-                modules: [
+                modules: resolveModules([
                     "Pole",
                     "Battery Pack",
                     "Sensor Module (soil)",
                     "Sensor Module (air)",
                     "Camera Module (RGB)"
-                ]
+                ])
             },
             {
                 usage: "Sheep Monitor/Fence",
-                modules: [
+                modules: resolveModules([
                     "Pole",
                     "Battery Pack",
                     "Camera Module (RGB)",
                     "Communications Repeater"
-                ]
+                ])
             },
             {
                 usage: "Sheep GPS Collar",
-                modules: [
+                modules: resolveModules([
                     "GPS Module"
                     // "Collar Module" (if defined)
-                ]
+                ])
             },
             {
                 usage: "Poultry/Egg Collector",
-                modules: [
+                modules: resolveModules([
                     "UGV Transport (small)",
                     "Battery Pack",
                     "Camera Module (RGB)",
@@ -930,13 +936,13 @@ export const modulesStore = defineStore('modules', () => {
                     "Suction Tool",
                     "Cart",
                     "Mycelium Box"
-                ]
+                ])
             },
 
             // === Bioreactor & Mycelium ===
             {
                 usage: "Bioreactor Assembly",
-                modules: [
+                modules: resolveModules([
                     "Internal space module", // Add to list if you want
                     "Static actuator",       // Add to list if you want
                     "Heating Module",
@@ -946,92 +952,92 @@ export const modulesStore = defineStore('modules', () => {
                     "Tank",
                     "Pressing module",       // Add to list if you want
                     "Generator module"       // Add to list if you want
-                ]
+                ])
             },
             {
                 usage: "Mycelium Bricks Production",
-                modules: [
+                modules: resolveModules([
                     "Internal space module",   // Add to list if you want
                     "Robotic Shelf",
                     "Spore spreading module",  // Add to list if you want
                     "Heater/Humidifier module",// Add to list if you want
                     "Sensor Module (air)",
                     "Pressing module"          // Add to list if you want
-                ]
+                ])
             },
 
             // === Maintenance/Assembly ===
             {
                 usage: "Module Assembly Station",
-                modules: [
+                modules: resolveModules([
                     "Robotic Shelf",
                     "Robotic Arm (heavy)",
                     "Rotary plate module",    // Add to list if you want
                     "Onboard Computer",
                     "Cart"
-                ]
+                ])
             },
 
             // === Infrastructure ===
             {
                 usage: "Communications Backbone",
-                modules: [
+                modules: resolveModules([
                     "Pole",
                     "Battery Pack",
                     "Communications Repeater"
-                ]
+                ])
             },
             {
                 usage: "Solar Charging Station",
-                modules: [
+                modules: resolveModules([
                     "Pole",
                     "Solar Panel",
                     "Battery Pack",
                     "Rotary plate module",   // Add to list if you want
                     "Onboard Computer"
-                ]
+                ])
             },
 
             // === Mapping/Monitoring Variants ===
             {
                 usage: "Topographic Mapping UGV",
-                modules: [
+                modules: resolveModules([
                     "UGV Transport (small)",
                     "Battery Pack",
                     "GPS Module",
                     "Camera Module (RGB)",
                     "Sensor Module (soil)",
                     "LIDAR module"           // Add to list if you want
-                ]
+                ])
             },
             {
                 usage: "Topographic Mapping Drone",
-                modules: [
+                modules: resolveModules([
                     "Drone Transport (quadcopter)",
                     "Battery Pack",
                     "GPS Module",
                     "Camera Module (RGB)",
                     "LIDAR module"           // Add to list if you want
-                ]
+                ])
             },
 
             // === Habitat & Sensor Deployment (LIDAR variant) ===
             {
                 usage: "Habitat LIDAR Mapping",
-                modules: [
+                modules: resolveModules([
                     "UGV Transport (small)",
                     "Battery Pack",
                     "LIDAR module",
                     "Camera Module (RGB)",
                     "Sensor Module (soil)",
                     "GPS Module"
-                ]
+                ])
             },
 
             // === Harvest/Monitor (LIDAR add-on) ===
             {
                 usage: "LIDAR Harvester",
-                modules: [
+                modules: resolveModules([
                     "UGV Transport (small)",
                     "Battery Pack",
                     "GPS Module",
@@ -1040,7 +1046,7 @@ export const modulesStore = defineStore('modules', () => {
                     "LIDAR module",
                     "Gripper",
                     "Cart"
-                ]
+                ])
             }
         ];
 
@@ -1049,19 +1055,19 @@ export const modulesStore = defineStore('modules', () => {
         [
         {
             id: 'a6be11ee-e3a0-4189-baef-c59dcd4953b6',
-            modules: [
+            modules: resolveModules([
                 "UGV Transport (small)",
                 "Battery Pack",
                 "LIDAR module",
                 "Camera Module (RGB)",
                 "Sensor Module (soil)",
                 "GPS Module"
-            ],
+            ]),
             name: "Test A",
             deployed: false
         },        {
             id:'65012c5e-0ef3-488f-98e4-3a4366b3eb17',
-            modules: [
+            modules: resolveModules([
                 "UGV Transport (small)",
                 "Battery Pack",
                 "Camera Module (RGB)",
@@ -1069,13 +1075,13 @@ export const modulesStore = defineStore('modules', () => {
                 "Suction Tool",
                 "Cart",
                 "Mycelium Box"
-            ],
+            ]),
             name: "Test B",
             deployed: true
         },
     ]
     )
 
-    const currentAssembly = []
+    const currentAssembly = ref([])
     return {availableModules, activeAssemblies, premadeAssemblies, currentAssembly}
 })
