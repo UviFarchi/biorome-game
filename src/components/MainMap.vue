@@ -36,15 +36,31 @@ const acceptedOrdersDisplay = computed(() =>
 
 </script>
 <template>
-  <StatusBar/>
-  <AssembliesMenu title="Available Assemblies"/>
-  <AnimalsMenu/>
-  <TilesGrid/>
-  <OrdersMenu :items="acceptedOrdersDisplay"/>
- <PlantsMenu/>
-
+  <div class="main-map-wrapper">
+    <StatusBar />
+    <AssembliesMenu title="Available Assemblies" />
+    <div class="center-area">
+      <AnimalsMenu />
+      <TilesGrid />
+      <PlantsMenu />
+    </div>
+    <OrdersMenu :items="acceptedOrdersDisplay" />
+  </div>
 </template>
 
 <style scoped>
+.main-map-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
 
-</style>
+.center-area {
+  flex: 1 1 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: hidden;
+}</style>

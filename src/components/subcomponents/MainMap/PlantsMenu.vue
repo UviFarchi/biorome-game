@@ -134,13 +134,13 @@ function confirmDeploy() {
   border-radius: 10px;
   background: #e0f7fa;
   padding: 1rem 0.5rem;
-  margin: 0 1rem 0 0;
+  margin: 0 0 0 1rem;
   min-width: 170px;
   max-width: 220px;
   height: 60vh;
   display: flex;
   flex-direction: column;
-  float: right;
+  flex: 0 0 auto;
 }
 .verticalMenuScroll {
   display: flex;
@@ -197,6 +197,9 @@ function confirmDeploy() {
   border-radius: 12px;
   box-shadow: 0 4px 24px #0002;
   min-width: 250px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 1em;
