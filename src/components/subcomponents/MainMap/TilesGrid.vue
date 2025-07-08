@@ -370,6 +370,8 @@ function confirmMoveAnimal() {
   padding: 2.1em 2.4em;
   min-width: 290px;
   max-width: 360px;
+  max-height: 90vh;
+  overflow-y: auto;
   font-size: 1.11em;
   line-height: 1.45;
   position: relative;

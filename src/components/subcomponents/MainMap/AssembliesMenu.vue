@@ -197,6 +197,9 @@ function confirmDeploy() {
   border-radius: 12px;
   box-shadow: 0 4px 24px #0002;
   min-width: 250px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 1em;
