@@ -21,9 +21,11 @@ function closePremadeModal() {
 function handlePremadeSelect(assembly) {
   // If blank, assembly will be null or empty
   if (!assembly || !assembly.modules || assembly.modules.length === 0) {
-    modules.currentAssembly.value = []
+    // Replace the entire array so reactivity triggers correctly
+    modules.currentAssembly = []
   } else {
-    modules.currentAssembly.value = assembly.modules.map(m => ({ ...m }))
+    // Deep copy modules and replace the array
+    modules.currentAssembly = assembly.modules.map(m => ({ ...m }))
   }
   closePremadeModal()
 }
