@@ -4,11 +4,11 @@ import {ref} from 'vue'
 export const animalsStore = defineStore('animalTypes', () => {
     // Product list for mapping product keys to icons (and optional desc)
     const products = ref([
-        { key: 'Milk', icon: '🥛', label: 'Milk', frequency: 1 },          // Daily
-        { key: 'Eggs', icon: '🥚', label: 'Eggs', frequency: 1 },          // Daily
-        { key: 'Honey', icon: '🍯', label: 'Honey', frequency: 3 },        // Every 3 turns
-        { key: 'Wool', icon: '🧶', label: 'Wool', frequency: 10 },         // Every 10 turns
-        { key: 'Manure', icon: '💩', label: 'Manure', frequency: 2 }       // Every 2 turns
+        { key: 'Milk', icon: '🥛', label: 'Milk', frequency: 1, shelfLife: 1 },          // Daily
+        { key: 'Eggs', icon: '🥚', label: 'Eggs', frequency: 1, shelfLife: 3  },          // Daily
+        { key: 'Honey', icon: '🍯', label: 'Honey', frequency: 3, shelfLife: 1000  },        // Every 3 turns
+        { key: 'Wool', icon: '🧶', label: 'Wool', frequency: 10, shelfLife: 1000  },         // Every 10 turns
+        { key: 'Manure', icon: '💩', label: 'Manure', frequency: 2, shelfLife: 10 }       // Every 2 turns
     ])
 
     const animalTypes = ref([
@@ -20,8 +20,8 @@ export const animalsStore = defineStore('animalTypes', () => {
             thirstMax: 100,
             mood: 100,
             cost: 20,
-            product: 'Milk',            // <-- Matches product key
-            outputFrequency: 1          // Every turn (daily)
+            product: 'Milk',
+            outputFrequency: 1, shelfLife: 1
         },
         {
             type: 'Goat',
@@ -32,7 +32,7 @@ export const animalsStore = defineStore('animalTypes', () => {
             mood: 100,
             cost: 15,
             product: 'Milk',
-            outputFrequency: 2          // Every 2 turns (slower than cow, for gameplay balance)
+            outputFrequency: 2  , shelfLife: 1
         },
         {
             type: 'Chicken',
@@ -43,7 +43,7 @@ export const animalsStore = defineStore('animalTypes', () => {
             mood: 100,
             cost: 10,
             product: 'Eggs',
-            outputFrequency: 1
+            outputFrequency: 1, shelfLife: 1
         },
         {
             type: 'Pig',
@@ -54,7 +54,7 @@ export const animalsStore = defineStore('animalTypes', () => {
             mood: 100,
             cost: 12,
             product: 'Manure',
-            outputFrequency: 2
+            outputFrequency: 2, shelfLife: 1
         },
         {
             type: 'Bee',
@@ -65,7 +65,7 @@ export const animalsStore = defineStore('animalTypes', () => {
             mood: 100,
             cost: 15,
             product: 'Honey',
-            outputFrequency: 3
+            outputFrequency: 3, shelfLife: 1
         },
         {
             type: 'Sheep',
@@ -76,7 +76,7 @@ export const animalsStore = defineStore('animalTypes', () => {
             mood: 100,
             cost: 14,
             product: 'Wool',
-            outputFrequency: 10
+            outputFrequency: 10, shelfLife: 1
         }
     ])
 

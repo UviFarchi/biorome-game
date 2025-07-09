@@ -1,53 +1,71 @@
 <script setup>
-import {ref, computed} from 'vue'
-import {animalsStore} from '/stores/animalsStore.js'
-import {tilesStore} from '/stores/tilesStore.js'
-import {modulesStore} from '/stores/modulesStore.js'
-import {userStore} from '/stores/userStore.js'
+import { ref, computed } from 'vue'
+import { animalsStore } from '/stores/animalsStore.js'
+import { tilesStore } from '/stores/tilesStore.js'
+import { modulesStore } from '/stores/modulesStore.js'
+import { userStore } from '/stores/userStore.js'
+import eventBus from "@/eventBus.js"
 
 const animals = animalsStore()
 const tiles = tilesStore()
 const modules = modulesStore()
 const user = userStore()
 
-// Collar count from modulesStore
-const availableCollars = computed(() => {
-  const collar = modules.availableModules.find(m => m.type === 'collar')
-  return collar ? collar.count : 0
+// Collar assembly requirements
+const requiredCollarModules = [
+  "Animal Collar",
+  "Battery Pack",
+  "Audio Alarm",
+  "Mild Shocker",
+  "GPS Module"
+]
+
+const availableCollarAssemblies = computed(() => {
+  return (modules.activeAssemblies ?? []).filter(a => {
+    if (a.deployed) return false
+    const moduleNames = (a.modules || []).map(m => m.name)
+    return requiredCollarModules.every(req => moduleNames.includes(req))
+  })
 })
 
-// Modal state
+// For requirements modal: try to show closest assembly (or empty if none)
+const firstAssemblyMissing = computed(() => {
+  const a = (modules.activeAssemblies ?? []).find(a => !a.deployed)
+  if (!a) return requiredCollarModules
+  const moduleNames = (a.modules || []).map(m => m.name)
+  return requiredCollarModules.filter(req => !moduleNames.includes(req))
+})
+
 const showDeployModal = ref(false)
+const showRequirementsModal = ref(false)
 const deployingAnimal = ref(null)
 const selectedRow = ref(null)
 const selectedCol = ref(null)
 const useCollar = ref(false)
-const restrictedTiles = ref([]) // Array of {row, col}
+const restrictedTiles = ref([])
 
 const fieldRows = tiles.tiles.length
 const fieldCols = tiles.tiles[0].length
 const rowOptions = computed(() => Array.from({length: fieldRows}, (_, i) => i + 1))
 const colOptions = computed(() => Array.from({length: fieldCols}, (_, i) => i + 1))
 
-// Helper: all available tiles for animal deployment (no animal present)
 const availableTiles = computed(() => {
   let result = []
   for (let row = 0; row < fieldRows; row++) {
     for (let col = 0; col < fieldCols; col++) {
       const tile = tiles.tiles[row][col]
-      if (!tile.animal) result.push({row, col})
+      if (!tile.animal) result.push({ row, col })
     }
   }
   return result
 })
-
 
 function toggleTileRestriction(row, col) {
   const idx = restrictedTiles.value.findIndex(t => t.row === row && t.col === col)
   if (idx !== -1) {
     restrictedTiles.value.splice(idx, 1)
   } else if (restrictedTiles.value.length < 3) {
-    restrictedTiles.value.push({row, col})
+    restrictedTiles.value.push({ row, col })
   }
 }
 
@@ -79,32 +97,46 @@ function confirmDeploy() {
   const col = Number(selectedCol.value) - 1
   const tile = tiles.tiles[row][col]
   if (!tile.animal) {
-    // Check user gold
     if (user.gold < deployingAnimal.value.cost) {
       alert("Not enough gold!")
       return
     }
-    // Check collar availability
-    if (useCollar.value && availableCollars.value < 1) {
-      alert("No collars available!")
-      return
+    // If using collar, assign first available assembly (if exists)
+    if (useCollar.value) {
+      const collar = availableCollarAssemblies.value[0]
+      if (!collar) {
+        alert("No collar assembly available!")
+        return
+      }
+      collar.deployed = true
+      tile.assembly = collar
     }
-    // Deploy animal (copy template)
     tile.animal = {
       ...deployingAnimal.value,
-      mood: 100, // Reset mood on deploy
-      collar: useCollar.value ? {restrictedTiles: [...restrictedTiles.value]} : null
+      mood: 100,
+      collar: useCollar.value
+          ? { restrictedTiles: [...restrictedTiles.value] }
+          : null
     }
     user.gold -= deployingAnimal.value.cost
-    // Reduce collar count if used
-    if (useCollar.value) {
-      const collar = modules.availableModules.find(m => m.type === 'Animal Collar')
-      if (collar) collar.count--
-    }
     closeDeployModal()
   } else {
     alert("Tile already has an animal.")
   }
+}
+
+
+// Handle requirements modal—user wants to build a collar
+function goToAssemblyArea() {
+  closeDeployModal()
+  showRequirementsModal.value = false
+  setTimeout(() => {
+    eventBus.emit('nav', 'assembly')
+  }, 100)
+}
+
+function closeRequirementsModal() {
+  showRequirementsModal.value = false
 }
 </script>
 
@@ -143,45 +175,76 @@ function confirmDeploy() {
             </option>
           </select>
         </label>
-        <div class="collarSection" v-if="availableCollars > 0">
+        <div class="collarSection">
           <label>
             <input type="checkbox" v-model="useCollar" />
-            Use collar? ({{ availableCollars }} available)
+            Use collar?
           </label>
           <div v-if="useCollar">
-            <div>Select up to 3 tiles (for restriction):</div>
-            <div class="tileSelectGrid">
-              <button
-                  v-for="cell in fieldRows * fieldCols"
-                  :key="cell"
-                  :class="[
-              'tileBtn',
-              restrictedTiles.some(t =>
-                t.row === Math.floor((cell - 1) / fieldCols) &&
-                t.col === (cell - 1) % fieldCols
-              ) ? 'selected' : ''
-            ]"
-                  @click.prevent="
-              toggleTileRestriction(
-                Math.floor((cell - 1) / fieldCols),
-                (cell - 1) % fieldCols
-              )
-            "
-              >
-                {{ Math.floor((cell - 1) / fieldCols) + 1 }},{{ ((cell - 1) % fieldCols) + 1 }}
+            <div v-if="availableCollarAssemblies.length > 0" style="color: #388e3c;">
+              Collar assembly ready (will be assigned automatically).
+            </div>
+            <div v-else>
+              <div style="color:#e53935; margin-bottom:0.5em;">
+                No available collar assemblies.
+              </div>
+              <div>Required modules:</div>
+              {{requiredCollarModules}}
+              <button class="deployBtn" style="margin-top:0.5em;" @click="goToAssemblyArea">
+                Go to Assembly Area to Build
               </button>
             </div>
-            <div class="hint">(Tiles must be contiguous, otherwise the animal won't be able to move among them.)</div>
+            <div>
+              <div style="margin-top: 0.8em;">Select up to 3 tiles (restriction):</div>
+              <div class="tileSelectGrid">
+                <button
+                    v-for="cell in fieldRows * fieldCols"
+                    :key="cell"
+                    :class="[
+            'tileBtn',
+            restrictedTiles.some(t =>
+              t.row === Math.floor((cell - 1) / fieldCols) &&
+              t.col === (cell - 1) % fieldCols
+            ) ? 'selected' : ''
+          ]"
+                    @click.prevent="
+            toggleTileRestriction(
+              Math.floor((cell - 1) / fieldCols),
+              (cell - 1) % fieldCols
+            )
+          "
+                >
+                  {{ Math.floor((cell - 1) / fieldCols) + 1 }},{{ ((cell - 1) % fieldCols) + 1 }}
+                </button>
+              </div>
+              <div class="hint">(Tiles must be contiguous, otherwise the animal won't be able to move among them.)</div>
+            </div>
           </div>
         </div>
+
         <div class="modal-actions">
           <button @click="confirmDeploy">OK</button>
           <button @click="closeDeployModal">Cancel</button>
         </div>
       </div>
     </div>
+    <!-- Requirements Modal -->
+    <div v-if="showRequirementsModal" class="modal-overlay">
+      <div class="modal">
+        <h4>No collar assembly available</h4>
+        <div>Required modules:</div>
+        <ul>
+          <li v-for="mod in firstAssemblyMissing" :key="mod">{{ mod }}</li>
+        </ul>
+        <div class="modal-actions">
+          <button @click="goToAssemblyArea">Go to Assembly Area</button>
+          <button @click="closeRequirementsModal">Cancel</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
+
 
 <style scoped>
 .verticalMenuArea {
@@ -299,10 +362,7 @@ function confirmDeploy() {
   cursor: pointer;
 }
 
-.tileBtn.selected {
-  background: #00bcd4;
-  color: #fff;
-}
+
 
 .hint {
   font-size: 0.93em;

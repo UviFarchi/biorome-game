@@ -255,14 +255,9 @@ function confirmDeploy() {
     <div v-if="showDeployModal" class="modal-overlay">
       <div class="modal">
         <h4>Deploy {{ deployingPlant.type }} ({{ deployingPlant.icon }})</h4>
-        <label>
-          Planting type:
-          <select v-model="selectedPlantingType">
-            <option v-for="opt in deployingPlant.plantingOptions" :key="opt" :value="opt">
-              {{ opt }}
-            </option>
-          </select>
-        </label>
+        <div style="margin-bottom: 0.6em;">
+          Planting type: <b>{{ selectedPlantingType }}</b>
+        </div>
         <label>
           Tile:
           <select v-model="selectedRow">

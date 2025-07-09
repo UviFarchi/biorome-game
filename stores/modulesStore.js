@@ -550,6 +550,30 @@ export const modulesStore = defineStore('modules', () => {
                 count: 0, cost: 60,
                 actionsPerTurn: "unlimited"
             },
+            {
+                name: "Audio Alarm",
+                type: "alarm",
+                subtype: "audio",
+                attachesTo: ["collar"],
+                requires: ["battery"],
+                slots: [],
+                maxSlots: 0,
+                powerDraw: 1,
+                count: 0, cost: 2,
+                actionsPerTurn: "unlimited"
+            },
+            {
+                name: "Mild Shocker",
+                type: "alarm",
+                subtype: "electric",
+                attachesTo: ["collar"],
+                requires: ["battery"],
+                slots: [],
+                maxSlots: 0,
+                powerDraw: 1,
+                count: 0, cost: 2,
+                actionsPerTurn: "unlimited"
+            },
 
             {
                 name: "Valve module",
@@ -600,15 +624,15 @@ export const modulesStore = defineStore('modules', () => {
                 actionsPerTurn: "unlimited"
             },
             {
-                name: "Geofence Collar",
+                name: "Animal Collar",
                 type: "collar",
                 subtype: null,
-                attachesTo: [],
+                attachesTo: ["animal"],
                 requires: [],
                 slots: [],
                 maxSlots: 0,
-                powerDraw: 0.2,
-                count: 0, cost: 15,
+                powerDraw: 0,
+                count: 0, cost: 1,
                 actionsPerTurn: "unlimited"
             },
             {
@@ -766,6 +790,16 @@ export const modulesStore = defineStore('modules', () => {
 
     const premadeAssemblies =
         [
+            {
+                usage: "Animal Geofencing Collar",
+                modules: resolveModules([
+                    "Animal Collar",
+                    "Battery Pack",
+                    "Audio Alarm",
+                    "Mild Shocker",
+                    "GPS Module"
+                ])
+            },
             // === Produce Cultivation (Field Zone) ===
             {
                 usage: "Field Planter",
