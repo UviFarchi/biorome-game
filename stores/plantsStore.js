@@ -17,7 +17,7 @@ export const plantsStore = defineStore('plantTypes', () => {
             yield: 1,
             seedCost: 2,
             seedlingCost: 5,
-            shelfLife: 10, // For harvested product (turns)
+            basePrice:1, shelfLife: 10, // For harvested product (turns)
             icon: '🌱'
         },
         {
@@ -34,7 +34,7 @@ export const plantsStore = defineStore('plantTypes', () => {
             yield: 3,
             seedCost: 3,
             seedlingCost: 8,
-            shelfLife: 15,
+            basePrice:1, shelfLife: 15,
             icon: '🌽'
         },
         {
@@ -51,7 +51,7 @@ export const plantsStore = defineStore('plantTypes', () => {
             yield: 2,
             seedCost: 4,
             seedlingCost: 10,
-            shelfLife: 7,
+            basePrice:1, shelfLife: 7,
             icon: '🍅'
         },
         {
@@ -68,7 +68,7 @@ export const plantsStore = defineStore('plantTypes', () => {
             yield: 2,
             seedCost: 2,
             seedlingCost: 7,
-            shelfLife: 6,
+            basePrice:1, shelfLife: 6,
             icon: '🥬'
         },
         {
@@ -85,7 +85,7 @@ export const plantsStore = defineStore('plantTypes', () => {
             yield: 2,
             seedCost: 2,
             seedlingCost: 6,
-            shelfLife: 20,
+            basePrice:1, shelfLife: 20,
             icon: '🥕'
         },
         {
@@ -102,7 +102,7 @@ export const plantsStore = defineStore('plantTypes', () => {
             yield: 2,
             seedCost: 6,
             seedlingCost: 14,
-            shelfLife: 30,
+            basePrice:1, shelfLife: 30,
             icon: '☕'
         },
         {
@@ -119,7 +119,7 @@ export const plantsStore = defineStore('plantTypes', () => {
             yield: 4,
             seedCost: 4,
             seedlingCost: 12,
-            shelfLife: 40,
+            basePrice:1, shelfLife: 40,
             icon: '🎃'
         }
     ])
