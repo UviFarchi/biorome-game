@@ -4,6 +4,7 @@ import { plantsStore } from '/stores/plantsStore.js'
 import { tilesStore } from '/stores/tilesStore.js'
 import { modulesStore } from '/stores/modulesStore.js'
 import { userStore } from '/stores/userStore.js'
+import eventBus from "@/eventBus.js"
 
 const plants = plantsStore()
 const tiles = tilesStore()
@@ -11,99 +12,213 @@ const modules = modulesStore()
 const user = userStore()
 
 const showDeployModal = ref(false)
+const showRequirementsModal = ref(false)
+const showAssemblyChoiceModal = ref(false)
 const deployingPlant = ref(null)
 const selectedRow = ref(null)
 const selectedCol = ref(null)
 const selectedPlantingType = ref('Seed') // default to Seed
+const missingRequirements = ref([])
+const selectedAssemblyToDeploy = ref(null)
 
-const fieldRows = tiles.tiles.length
-const fieldCols = tiles.tiles[0].length
-const rowOptions = computed(() => Array.from({length: fieldRows}, (_, i) => i + 1))
-const colOptions = computed(() => Array.from({length: fieldCols}, (_, i) => i + 1))
-
-// Determine if an assembly is suitable for the planting type
-function isAssemblySuitable(assembly, plantingType) {
-  if (!assembly || !assembly.deployed) return false
-  const names = (assembly.modules || []).map(m => m.name || m)
-  // Accepts objects or strings
-  const hasTransport = names.some(n => n.toLowerCase().includes('transport'))
-  const hasRoboticArm = names.some(n => n.toLowerCase().includes('robotic arm'))
-  if (plantingType === 'Seed') {
-    return (
-        hasTransport &&
-        hasRoboticArm &&
-        names.some(n => n.toLowerCase().includes('seeder')) &&
-        names.some(n => n.toLowerCase().includes('hole-borer'))
-    )
-  } else if (plantingType === 'Seedling') {
-    return (
-        hasTransport &&
-        hasRoboticArm &&
-        names.some(n => n.toLowerCase().includes('cart')) &&
-        names.some(n => n.toLowerCase().includes('gripper'))
-    )
-  }
-  return false
+// Helper: Check assembly for SEED
+function assemblyCanPlantSeed(assembly) {
+  if (!assembly) return false
+  const types = (assembly.modules || []).map(m => m.type)
+  const subtypes = (assembly.modules || []).map(m => m.subtype)
+  return (
+      types.includes('transport') &&
+      types.includes('arm') &&
+      subtypes.includes('seeder') &&
+      subtypes.includes('borer')
+  )
+}
+// Helper: Check assembly for SEEDLING
+function assemblyCanPlantSeedling(assembly) {
+  if (!assembly) return false
+  const types = (assembly.modules || []).map(m => m.type)
+  const subtypes = (assembly.modules || []).map(m => m.subtype)
+  return (
+      types.includes('transport') &&
+      types.includes('arm') &&
+      types.includes('cart') &&
+      subtypes.includes('gripper')
+  )
 }
 
-// Returns all available tiles for this planting type
+// Suitable assemblies (NOT DEPLOYED) in the pool
+const availableAssembliesForPlanting = computed(() =>
+    modules.activeAssemblies.filter(a => !a.deployed && (
+        (selectedPlantingType.value === 'Seed' && assemblyCanPlantSeed(a)) ||
+        (selectedPlantingType.value === 'Seedling' && assemblyCanPlantSeedling(a))
+    ))
+)
+
+// Find tiles with suitable deployed assemblies
 const availableTiles = computed(() => {
   let result = []
-  for (let row = 0; row < fieldRows; row++) {
-    for (let col = 0; col < fieldCols; col++) {
+  for (let row = 0; row < tiles.tiles.length; row++) {
+    for (let col = 0; col < tiles.tiles[0].length; col++) {
       const tile = tiles.tiles[row][col]
-      if (!tile.plant && tile.assembly && isAssemblySuitable(tile.assembly, selectedPlantingType.value)) {
-        result.push({row, col})
+      if (!tile.plant && tile.assembly && tile.assembly.deployed) {
+        if (
+            (selectedPlantingType.value === 'Seed' && assemblyCanPlantSeed(tile.assembly)) ||
+            (selectedPlantingType.value === 'Seedling' && assemblyCanPlantSeedling(tile.assembly))
+        ) {
+          result.push({ row, col })
+        }
       }
     }
   }
   return result
 })
 
-// Modal logic
+// List missing requirements for modal
+function getMissingRequirements(assembly, plantingType) {
+  const reqs = []
+  if (!assembly) return reqs
+  const types = (assembly.modules || []).map(m => m.type)
+  const subtypes = (assembly.modules || []).map(m => m.subtype)
+  if (!types.includes('transport')) reqs.push('Transport module')
+  if (!types.includes('arm')) reqs.push('Robotic arm')
+  if (plantingType === 'Seed') {
+    if (!subtypes.includes('seeder')) reqs.push('Seeder tool')
+    if (!subtypes.includes('borer')) reqs.push('Hole-borer tool')
+  } else if (plantingType === 'Seedling') {
+    if (!types.includes('cart')) reqs.push('Cart')
+    if (!subtypes.includes('gripper')) reqs.push('Gripper tool')
+  }
+  return reqs
+}
+
+// Handle "Deploy" button click on a plant/type
 function openDeployModal(plant, plantingType) {
   deployingPlant.value = plant
   selectedPlantingType.value = plantingType
-  if (availableTiles.value.length > 0) {
-    selectedRow.value = availableTiles.value[0].row + 1
-    selectedCol.value = availableTiles.value[0].col + 1
-    showDeployModal.value = true
-  } else {
-    alert("No available tiles for planting (need matching assembly deployed)")
+
+  // 1. Any suitable deployed assembly?
+  let deployedMatch = false
+  for (let row = 0; row < tiles.tiles.length; row++) {
+    for (let col = 0; col < tiles.tiles[0].length; col++) {
+      const tile = tiles.tiles[row][col]
+      if (!tile.plant && tile.assembly && tile.assembly.deployed) {
+        if (
+            (plantingType === 'Seed' && assemblyCanPlantSeed(tile.assembly)) ||
+            (plantingType === 'Seedling' && assemblyCanPlantSeedling(tile.assembly))
+        ) {
+          deployedMatch = true
+        }
+      }
+    }
   }
+  if (deployedMatch && availableTiles.value.length > 0) {
+    selectedRow.value = availableTiles.value[0]?.row + 1
+    selectedCol.value = availableTiles.value[0]?.col + 1
+    showDeployModal.value = true
+    return
+  }
+
+  // 2. No deployed, but suitable assembly in pool? (not deployed)
+  if (availableAssembliesForPlanting.value.length > 0) {
+    // If only one, just deploy it
+    if (availableAssembliesForPlanting.value.length === 1) {
+      deployAssemblyToTile(availableAssembliesForPlanting.value[0])
+    } else {
+      showAssemblyChoiceModal.value = true
+    }
+    return
+  }
+
+  // 3. No matching assembly at all, show requirements and Assembly Area link
+  let anyInPool = modules.activeAssemblies.length > 0
+  if (anyInPool) {
+    missingRequirements.value = getMissingRequirements(modules.activeAssemblies[0], plantingType)
+  } else {
+    missingRequirements.value = [
+      'Transport module',
+      'Robotic arm',
+      ...(plantingType === 'Seed'
+          ? ['Seeder tool', 'Hole-borer tool']
+          : ['Cart', 'Gripper tool'])
+    ]
+  }
+  showRequirementsModal.value = true
 }
 
+// Actually deploy the chosen assembly to the first available tile (empty + no assembly)
+function deployAssemblyToTile(assembly) {
+  let placed = false
+  for (let row = 0; row < tiles.tiles.length; row++) {
+    for (let col = 0; col < tiles.tiles[0].length; col++) {
+      const tile = tiles.tiles[row][col]
+      if (!tile.plant && !tile.assembly) {
+        tile.assembly = assembly
+        assembly.deployed = true
+        placed = true
+        break
+      }
+    }
+    if (placed) break
+  }
+  showAssemblyChoiceModal.value = false
+  // Continue as normal, now with a suitable deployed assembly!
+  openDeployModal(deployingPlant.value, selectedPlantingType.value)
+}
+
+// When user selects one from the modal
+function handleSelectAssembly(assembly) {
+  deployAssemblyToTile(assembly)
+}
+
+// Modal closes
 function closeDeployModal() {
   showDeployModal.value = false
   deployingPlant.value = null
   selectedRow.value = null
   selectedCol.value = null
 }
+function closeRequirementsModal() {
+  showRequirementsModal.value = false
+  deployingPlant.value = null
+}
+function closeAssemblyChoiceModal() {
+  showAssemblyChoiceModal.value = false
+  deployingPlant.value = null
+}
 
+function goToAssemblyArea() {
+  closeRequirementsModal()
+  eventBus.emit('nav', 'assembly')
+}
+
+// Confirm planting on selected tile
 function confirmDeploy() {
   if (!deployingPlant.value) return
   const row = Number(selectedRow.value) - 1
   const col = Number(selectedCol.value) - 1
   const tile = tiles.tiles[row][col]
-  if (!tile.plant && tile.assembly && isAssemblySuitable(tile.assembly, selectedPlantingType.value)) {
-    // Check user has enough gold
-    const cost = selectedPlantingType.value === 'Seed'
-        ? deployingPlant.value.seedCost
-        : deployingPlant.value.seedlingCost
+  let suitable =
+      (selectedPlantingType.value === 'Seed' && assemblyCanPlantSeed(tile.assembly)) ||
+      (selectedPlantingType.value === 'Seedling' && assemblyCanPlantSeedling(tile.assembly))
+  if (!tile.plant && tile.assembly && suitable) {
+    const cost =
+        selectedPlantingType.value === 'Seed'
+            ? deployingPlant.value.seedCost
+            : deployingPlant.value.seedlingCost
     if (user.gold < cost) {
-      alert("Not enough gold!")
+      alert('Not enough gold!')
       return
     }
-    // Assign plant to tile
     tile.plant = {
       ...deployingPlant.value,
       plantingType: selectedPlantingType.value,
-      growthStage: selectedPlantingType.value // Start at "Seed" or "Seedling"
+      growthStage: selectedPlantingType.value // "Seed" or "Seedling"
     }
     user.gold -= cost
     closeDeployModal()
   } else {
-    alert("Invalid tile selected.")
+    // Should not reach here
+    alert('Invalid tile selected.')
   }
 }
 </script>
@@ -167,6 +282,47 @@ function confirmDeploy() {
         </div>
       </div>
     </div>
+
+    <!-- Assembly Selection Modal -->
+    <div v-if="showAssemblyChoiceModal" class="modal-overlay">
+      <div class="modal">
+        <h4>Select Assembly to Deploy for Planting</h4>
+        <div
+            v-for="assembly in availableAssembliesForPlanting"
+            :key="assembly.id"
+            class="assembly-option"
+        >
+          <div>
+            <b>{{ assembly.name }}</b>
+            <ul>
+              <li v-for="mod in assembly.modules" :key="mod.name">{{ mod.name }}</li>
+            </ul>
+          </div>
+          <button @click="handleSelectAssembly(assembly)">Deploy This</button>
+        </div>
+        <div class="modal-actions">
+          <button @click="closeAssemblyChoiceModal">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Requirements Modal -->
+    <div v-if="showRequirementsModal" class="modal-overlay">
+      <div class="modal">
+        <h4>No suitable assembly available for {{ deployingPlant?.type }} ({{ selectedPlantingType }})</h4>
+        <div style="margin: 0.6em 0 1em 0;">
+          <div>Required modules:</div>
+          <ul>
+            <li v-for="item in missingRequirements" :key="item">{{ item }}</li>
+          </ul>
+        </div>
+        <div class="modal-actions">
+          <button @click="closeRequirementsModal">OK</button>
+          <button @click="goToAssemblyArea">Go to Assembly Area</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -236,6 +392,35 @@ function confirmDeploy() {
   background: #00bcd4;
   color: #fff;
 }
+.assembly-option {
+  background: #f7f7f7;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px #0001;
+  margin: 0.8em 0;
+  padding: 0.7em 1em;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.2em;
+}
+.assembly-option ul {
+  margin: 0.5em 0 0 1.3em;
+  font-size: 0.97em;
+}
+.assembly-option button {
+  padding: 0.4em 1.3em;
+  border-radius: 7px;
+  background: #ffd600;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+}
+.assembly-option button:hover {
+  background: #ffb300;
+  color: #333;
+}
+
 .modal-overlay {
   position: fixed;
   z-index: 1000;

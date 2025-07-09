@@ -51,7 +51,6 @@ function handlePremadeSelect(assembly) {
     </div>
     <PremadeAssembliesMenu
         v-if="showPremadeModal"
-        @select="handlePremadeSelect"
         @close="closePremadeModal"
     />
   </div>

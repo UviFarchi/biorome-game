@@ -12,7 +12,7 @@ const user = userStore()
 
 // Collar count from modulesStore
 const availableCollars = computed(() => {
-  const collar = modules.availableModules.find(m => m.type === 'Animal Collar')
+  const collar = modules.availableModules.find(m => m.type === 'collar')
   return collar ? collar.count : 0
 })
 

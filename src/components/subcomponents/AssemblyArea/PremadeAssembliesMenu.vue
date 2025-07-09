@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+
 import { modulesStore } from '/stores/modulesStore.js'
 import { userStore } from '/stores/userStore.js'
 
@@ -50,6 +50,13 @@ function buyAllMissing(assembly) {
 
 function selectAssembly(assembly) {
   if (!canSelectAssembly(assembly)) return
+  // Deduct module counts from the store
+  for (const mod of assembly.modules) {
+    const storeMod = getModuleByName(mod.name)
+    if (storeMod && storeMod.count > 0) {
+      storeMod.count -= 1
+    }
+  }
   modules.currentAssembly.splice(0, modules.currentAssembly.length, ...assembly.modules.map(m => ({ ...m })))
   emit('close')
 }

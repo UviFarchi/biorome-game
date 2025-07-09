@@ -600,10 +600,10 @@ export const modulesStore = defineStore('modules', () => {
                 actionsPerTurn: "unlimited"
             },
             {
-                name: "GPS tag module",
-                type: "gpstag",
+                name: "Geofence Collar",
+                type: "collar",
                 subtype: null,
-                attachesTo: ["collar", "animal"],
+                attachesTo: [],
                 requires: [],
                 slots: [],
                 maxSlots: 0,
@@ -920,13 +920,7 @@ export const modulesStore = defineStore('modules', () => {
                     "Communications Repeater"
                 ])
             },
-            {
-                usage: "Sheep GPS Collar",
-                modules: resolveModules([
-                    "GPS Module"
-                    // "Collar Module" (if defined)
-                ])
-            },
+
             {
                 usage: "Poultry/Egg Collector",
                 modules: resolveModules([

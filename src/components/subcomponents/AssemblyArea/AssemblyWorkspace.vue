@@ -12,7 +12,8 @@ function saveAssembly() {
   modules.activeAssemblies.push({
     id,
     name: name.value || 'Custom Assembly',
-    modules: modules.currentAssembly.map(m => ({ ...m }))
+    modules: modules.currentAssembly.map(m => ({ ...m })),
+    deployed: false
   })
   // Clear the workspace for next assembly
   modules.currentAssembly.splice(0)
