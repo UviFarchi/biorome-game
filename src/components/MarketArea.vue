@@ -44,10 +44,67 @@ function getShelfLife(type) {
   return 0
 }
 
+function getBasePrice(type) {
+  const plant = plants.plantTypes.find(p => p.type === type)
+  if (plant) return plant.basePrice
+  const prod = animals.products.find(p => p.key === type)
+  if (prod) return prod.basePrice
+  const animal = animals.animalTypes.find(a => a.type === type)
+  if (animal) return animal.basePrice
+  return 1
+}
+
+function priceForProduct(type, villager) {
+  const base = getBasePrice(type)
+  const supply = market.harvestedProducts.find(p => p.type === type)?.qty || 0
+  const demand = [...market.requests, ...market.acceptedOrders].filter(r => r.productType === type)
+      .reduce((s, r) => s + r.quantity, 0)
+  const supplyDemandAdj = (demand - supply) * 0.1
+  const moodAdj = ((villager.mood - 50) / 50) * 0.5
+  const variance = (Math.random() - 0.5) * base * 0.2
+  return Math.max(1, Math.round(base + supplyDemandAdj + base * moodAdj + variance))
+}
+
+function generateDailyRequest() {
+  const villager = market.villagers[Math.floor(Math.random() * market.villagers.length)]
+  const products = [
+    ...plants.plantTypes.map(p => p.type),
+    ...animals.products.map(p => p.key)
+  ]
+  const productType = products[Math.floor(Math.random() * products.length)]
+  const quantity = Math.ceil(Math.random() * 5)
+  const dueDate = game.day + 1 + Math.ceil(Math.random() * 3)
+  const pricePerUnit = priceForProduct(productType, villager)
+  market.requests.push({
+    id: `req-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    villagerId: villager.id,
+    productType,
+    quantity,
+    dueDate,
+    pricePerUnit,
+    accepted: false,
+    fulfilled: false
+  })
+}
+
+function processShelfLife() {
+  for (let i = market.harvestedProducts.length - 1; i >= 0; i--) {
+    const item = market.harvestedProducts[i]
+    if (item.remainingLife === undefined) {
+      item.remainingLife = getShelfLife(item.type)
+    } else {
+      item.remainingLife -= 1
+    }
+    if (item.remainingLife <= 0) {
+      market.harvestedProducts.splice(i, 1)
+    }
+  }
+}
+
 const inventoryDisplay = computed(() =>
   market.harvestedProducts.map(p => ({
     ...p,
-    shelfLife: getShelfLife(p.type)
+    shelfLife: p.remainingLife ?? getShelfLife(p.type)
   }))
 )
 
@@ -57,6 +114,8 @@ function acceptRequest(req) {
     const order = { ...market.requests[idx], accepted: true }
     market.requests.splice(idx, 1)
     market.acceptedOrders.push(order)
+    const villager = market.villagers.find(v => v.id === req.villagerId)
+    if (villager) villager.mood = Math.min(100, villager.mood + 2)
   }
 }
 
@@ -81,6 +140,8 @@ function fulfillOrder(order) {
   const idx = market.acceptedOrders.findIndex(o => o.id === order.id)
   if (idx !== -1) market.acceptedOrders.splice(idx, 1)
   market.fulfilledOrders.push({ ...order, fulfilled: true })
+  const villager = market.villagers.find(v => v.id === order.villagerId)
+  if (villager) villager.mood = Math.min(100, villager.mood + 5)
 }
 
 function checkExpired() {
@@ -91,11 +152,22 @@ function checkExpired() {
     if (idx !== -1) market.acceptedOrders.splice(idx, 1)
     const villager = market.villagers.find(v => v.id === o.villagerId)
     if (villager) villager.mood = Math.max(0, villager.mood - 10)
+    user.gold = Math.max(0, user.gold - o.quantity)
     market.failedOrders.push({ ...o })
   })
 }
 
-watch(() => game.day, checkExpired, { immediate: true })
+let firstRun = true
+watch(
+  () => game.day,
+  () => {
+    processShelfLife()
+    checkExpired()
+    if (!firstRun) generateDailyRequest()
+    firstRun = false
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
