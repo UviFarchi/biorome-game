@@ -1,83 +1,64 @@
-import {defineStore} from 'pinia'
-import {ref} from 'vue'
+import { defineStore } from 'pinia'
 
-export const marketStore = defineStore('villagers', () => {
+export const marketStore = defineStore('villagers', {
+  state: () => ({
     // Master list of villagers (add more as you wish)
-    const villagers = ref(
-        [
-            {id: 1, name: 'Ana', mood: 100},
-            {id: 2, name: 'Mateo', mood: 90},
-            {id: 3, name: 'Juliana', mood: 100},
-            {id: 4, name: 'Luca', mood: 85},
-            {id: 5, name: 'Carlos', mood: 95}
-        ]
-    )
-
+    villagers: [
+      { id: 1, name: 'Ana', mood: 100 },
+      { id: 2, name: 'Mateo', mood: 90 },
+      { id: 3, name: 'Juliana', mood: 100 },
+      { id: 4, name: 'Luca', mood: 85 },
+      { id: 5, name: 'Carlos', mood: 95 }
+    ],
     // Requests reference villagerId
-    const requests = ref([
-        {
-            id: 1,
-            villagerId: 1, // Ana
-            requestedItems: ['Tomato', 'Eggs'],
-            offer: 15,
-            dueDate: 3
-        },
-        {
-            id: 2,
-            villagerId: 2,
-            requestedItems: ['Milk', 'Lettuce', 'Corn'],
-            offer: 22,
-            dueDate: 4
-        },
-        {
-            id: 3,
-            villagerId: 3,
-            requestedItems: ['Honey'],
-            offer: 12,
-            dueDate: 2
-        },
-        {
-            id: 4,
-            villagerId: 4,
-            requestedItems: ['Pumpkin', 'Wool'],
-            offer: 25,
-            dueDate: 5
-        },
-        {
-            id: 5,
-            villagerId: 5,
-            requestedItems: ['Coffee'],
-            offer: 18,
-            dueDate: 6
-        }
-    ])
-
+    requests: [
+      {
+        id: 'req-1',
+        villagerId: '1',
+        productType: 'Tomato',
+        quantity: 5,
+        dueDate: 3,
+        pricePerUnit: 3,
+        accepted: false,
+        fulfilled: false
+      },
+      {
+        id: 'req-2',
+        villagerId: '2',
+        productType: 'Milk',
+        quantity: 10,
+        dueDate: 4,
+        pricePerUnit: 4,
+        accepted: false,
+        fulfilled: false
+      },
+      {
+        id: 'req-3',
+        villagerId: '3',
+        productType: 'Honey',
+        quantity: 2,
+        dueDate: 2,
+        pricePerUnit: 6,
+        accepted: false,
+        fulfilled: false
+      }
+    ],
     // Accepted orders reference villagerId
-    const acceptedOrders = ref(
-        [
-            {
-                id: 6,
-                villagerId: 1,
-                requestedItems: ['Tomato'],
-                offer: 8,
-                dueDate: 3
-            },
-            {
-                id: 7,
-                villagerId: 3,
-                requestedItems: ['Honey'],
-                offer: 12,
-                dueDate: 2
-            },
-            {
-                id: 8,
-                villagerId: 2,
-                requestedItems: ['Lettuce'],
-                offer: 7,
-                dueDate: 4
-            }
-        ]
-    )
-    const harvestedProducts = ref([])
-    return {villagers, requests, acceptedOrders, harvestedProducts}
+    acceptedOrders: [
+      {
+        id: 'req-4',
+        villagerId: '1',
+        productType: 'Tomato',
+        quantity: 3,
+        dueDate: 3,
+        pricePerUnit: 3,
+        accepted: true,
+        fulfilled: false
+      }
+    ],
+    // History arrays for statistics
+    fulfilledOrders: [],
+    failedOrders: [],
+    harvestedProducts: []
+  })
 })
