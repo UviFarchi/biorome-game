@@ -2,7 +2,7 @@
 import {computed} from 'vue'
 import StatusBar from '@/components/subcomponents/MainMap/StatusBar.vue';
 import AssembliesMenu from "@/components/subcomponents/MainMap/AssembliesMenu.vue";
-import OrdersMenu from "@/components/subcomponents/MainMap/OrdersMenu.vue";
+import HarvestedMenu from "@/components/subcomponents/MainMap/HarvestedMenu.vue";
 import PlantsMenu from "@/components/subcomponents/MainMap/PlantsMenu.vue";
 import AnimalsMenu from "@/components/subcomponents/MainMap/AnimalsMenu.vue";
 import {modulesStore} from '/stores/modulesStore.js'
@@ -44,7 +44,7 @@ const acceptedOrdersDisplay = computed(() =>
       <TilesGrid />
       <PlantsMenu />
     </div>
-    <OrdersMenu :items="acceptedOrdersDisplay" />
+    <HarvestedMenu :items="acceptedOrdersDisplay" />
   </div>
 </template>
 

@@ -10,30 +10,50 @@ const tiles = tilesStore()
 const modules = modulesStore()
 const user = userStore()
 
-// Modal state
 const showDeployModal = ref(false)
 const deployingPlant = ref(null)
 const selectedRow = ref(null)
 const selectedCol = ref(null)
+const selectedPlantingType = ref('Seed') // default to Seed
 
-// For 6x6 grid
 const fieldRows = tiles.tiles.length
 const fieldCols = tiles.tiles[0].length
 const rowOptions = computed(() => Array.from({length: fieldRows}, (_, i) => i + 1))
 const colOptions = computed(() => Array.from({length: fieldCols}, (_, i) => i + 1))
 
-// Helper: returns list of available tiles for planting (no plant, has a deployed assembly with Planter module)
+// Determine if an assembly is suitable for the planting type
+function isAssemblySuitable(assembly, plantingType) {
+  if (!assembly || !assembly.deployed) return false
+  const names = (assembly.modules || []).map(m => m.name || m)
+  // Accepts objects or strings
+  const hasTransport = names.some(n => n.toLowerCase().includes('transport'))
+  const hasRoboticArm = names.some(n => n.toLowerCase().includes('robotic arm'))
+  if (plantingType === 'Seed') {
+    return (
+        hasTransport &&
+        hasRoboticArm &&
+        names.some(n => n.toLowerCase().includes('seeder')) &&
+        names.some(n => n.toLowerCase().includes('hole-borer'))
+    )
+  } else if (plantingType === 'Seedling') {
+    return (
+        hasTransport &&
+        hasRoboticArm &&
+        names.some(n => n.toLowerCase().includes('cart')) &&
+        names.some(n => n.toLowerCase().includes('gripper'))
+    )
+  }
+  return false
+}
+
+// Returns all available tiles for this planting type
 const availableTiles = computed(() => {
   let result = []
   for (let row = 0; row < fieldRows; row++) {
     for (let col = 0; col < fieldCols; col++) {
       const tile = tiles.tiles[row][col]
-      // Only show empty tiles (no plant)
-      if (!tile.plant && tile.assembly && tile.assembly.deployed) {
-        // Require that one of the assembly's modules is a "Planter"
-        if (tile.assembly.modules.some(mod => mod.name.toLowerCase().includes('planter'))) {
-          result.push({row, col})
-        }
+      if (!tile.plant && tile.assembly && isAssemblySuitable(tile.assembly, selectedPlantingType.value)) {
+        result.push({row, col})
       }
     }
   }
@@ -41,15 +61,15 @@ const availableTiles = computed(() => {
 })
 
 // Modal logic
-function openDeployModal(plant) {
+function openDeployModal(plant, plantingType) {
   deployingPlant.value = plant
-  // Default select first available, if any
+  selectedPlantingType.value = plantingType
   if (availableTiles.value.length > 0) {
     selectedRow.value = availableTiles.value[0].row + 1
     selectedCol.value = availableTiles.value[0].col + 1
     showDeployModal.value = true
   } else {
-    alert("No available tiles for planting (need empty tile with planter assembly)")
+    alert("No available tiles for planting (need matching assembly deployed)")
   }
 }
 
@@ -65,18 +85,22 @@ function confirmDeploy() {
   const row = Number(selectedRow.value) - 1
   const col = Number(selectedCol.value) - 1
   const tile = tiles.tiles[row][col]
-  if (!tile.plant && tile.assembly && tile.assembly.deployed && tile.assembly.modules.some(mod => mod.name.toLowerCase().includes('planter'))) {
+  if (!tile.plant && tile.assembly && isAssemblySuitable(tile.assembly, selectedPlantingType.value)) {
     // Check user has enough gold
-    if (user.gold < deployingPlant.value.cost) {
+    const cost = selectedPlantingType.value === 'Seed'
+        ? deployingPlant.value.seedCost
+        : deployingPlant.value.seedlingCost
+    if (user.gold < cost) {
       alert("Not enough gold!")
       return
     }
-    // Assign plant to tile (shallow copy so growthStage can advance independently)
+    // Assign plant to tile
     tile.plant = {
       ...deployingPlant.value,
-      growthStage: deployingPlant.value.growthStages[0] // Start at seedling
+      plantingType: selectedPlantingType.value,
+      growthStage: selectedPlantingType.value // Start at "Seed" or "Seedling"
     }
-    user.gold -= deployingPlant.value.cost
+    user.gold -= cost
     closeDeployModal()
   } else {
     alert("Invalid tile selected.")
@@ -95,10 +119,20 @@ function confirmDeploy() {
       >
         <span class="verticalMenu-icon">{{ plant.icon }}</span>
         <span class="verticalMenu-type">{{ plant.type }}</span>
-        <span class="verticalMenu-cost">{{ plant.cost }}💰</span>
-        <button class="deployBtn" @click="openDeployModal(plant)">
-          Deploy
-        </button>
+        <div class="deploy-buttons">
+          <button
+              class="deployBtn"
+              @click="openDeployModal(plant, 'Seed')"
+          >
+            Seed — {{ plant.seedCost }}💰
+          </button>
+          <button
+              class="deployBtn"
+              @click="openDeployModal(plant, 'Seedling')"
+          >
+            Seedling — {{ plant.seedlingCost }}💰
+          </button>
+        </div>
       </div>
     </div>
 
@@ -106,6 +140,14 @@ function confirmDeploy() {
     <div v-if="showDeployModal" class="modal-overlay">
       <div class="modal">
         <h4>Deploy {{ deployingPlant.type }} ({{ deployingPlant.icon }})</h4>
+        <label>
+          Planting type:
+          <select v-model="selectedPlantingType">
+            <option v-for="opt in deployingPlant.plantingOptions" :key="opt" :value="opt">
+              {{ opt }}
+            </option>
+          </select>
+        </label>
         <label>
           Tile:
           <select v-model="selectedRow">
@@ -152,31 +194,43 @@ function confirmDeploy() {
 }
 .verticalMenuCard {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  gap: 0.8em;
+  gap: 0.5em;
   background: #fff;
   border-radius: 7px;
   box-shadow: 0 1px 4px #0001;
-  padding: 0.4em 0.8em;
-  min-height: 45px;
+  padding: 0.7em 0.8em 0.8em 0.8em;
+  min-height: 125px;
+  position: relative;
+  justify-content: space-between;
 }
 .verticalMenu-icon {
-  font-size: 1.8em;
+  font-size: 2em;
 }
 .verticalMenu-type {
   font-weight: bold;
-  font-size: 1.1em;
+  font-size: 1.12em;
+}
+.deploy-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+  width: 100%;
+  align-items: stretch;
+  margin-top: 0.7em;
 }
 .deployBtn {
-  margin-left: auto;
-  padding: 0.2em 1em;
+  width: 100%;
+  padding: 0.45em 0.6em;
   border-radius: 7px;
   background: #b2dfdb;
   border: none;
-  color: #333;
+  color: #222;
   font-weight: bold;
   cursor: pointer;
+  font-size: 1em;
+  transition: background 0.14s;
 }
 .deployBtn:hover {
   background: #00bcd4;

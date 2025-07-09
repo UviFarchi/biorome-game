@@ -1,14 +1,56 @@
 <script setup>
+import { computed } from 'vue'
 import { modulesStore } from '/stores/modulesStore.js'
+import { userStore } from '/stores/userStore.js'
 
 const emit = defineEmits(['close'])
 
 const modules = modulesStore()
+const user = userStore()
 const premadeAssemblies = modules.premadeAssemblies
 
+// Helper to get module object by name from store
+function getModuleByName(name) {
+  return modules.availableModules.find(m => m.name === name)
+}
+
+// For each assembly, calculate missing modules & total buy cost
+function getAssemblyStatus(assembly) {
+  const missing = []
+  let totalCost = 0
+  for (const mod of assembly.modules) {
+    const storeMod = getModuleByName(mod.name)
+    if (!storeMod || (storeMod.count || 0) <= 0) {
+      missing.push(mod)
+      totalCost += storeMod ? storeMod.cost : 0
+    }
+  }
+  return { missing, totalCost }
+}
+
+function canSelectAssembly(assembly) {
+  return getAssemblyStatus(assembly).missing.length === 0
+}
+
+function canBuyAll(assembly) {
+  const status = getAssemblyStatus(assembly)
+  return status.missing.length > 0 && user.gold >= status.totalCost
+}
+
+// Buy all missing modules in this assembly
+function buyAllMissing(assembly) {
+  const status = getAssemblyStatus(assembly)
+  if (user.gold < status.totalCost) return
+  for (const mod of status.missing) {
+    const storeMod = getModuleByName(mod.name)
+    if (storeMod) storeMod.count = (storeMod.count || 0) + 1
+  }
+  user.gold -= status.totalCost
+}
+
 function selectAssembly(assembly) {
-  const moduleObjs = assembly.modules.map(m => ({ ...m }))
-  modules.currentAssembly.splice(0, modules.currentAssembly.length, ...moduleObjs)
+  if (!canSelectAssembly(assembly)) return
+  modules.currentAssembly.splice(0, modules.currentAssembly.length, ...assembly.modules.map(m => ({ ...m })))
   emit('close')
 }
 
@@ -20,6 +62,7 @@ function close() {
   emit('close')
 }
 </script>
+
 
 <template>
   <div class="modal-backdrop" @click.self="close">
@@ -36,13 +79,35 @@ function close() {
             v-for="assembly in premadeAssemblies"
             :key="assembly.usage"
             class="assembly-card"
-            @click="selectAssembly(assembly)"
+            :class="{ disabled: !canSelectAssembly(assembly) }"
         >
-          <div class="assembly-usage">{{ assembly.usage }}</div>
-          <ul class="modules-list">
-            <li v-for="mod in assembly.modules" :key="mod.name">{{ mod.name }}</li>
-          </ul>
+          <div
+              class="assembly-click-area"
+              @click="canSelectAssembly(assembly) ? selectAssembly(assembly) : null"
+          >
+            <div class="assembly-usage">{{ assembly.usage }}</div>
+            <ul class="modules-list">
+              <li
+                  v-for="mod in assembly.modules"
+                  :key="mod.name"
+                  :class="{ missing: (getModuleByName(mod.name)?.count || 0) <= 0 }"
+              >
+                {{ mod.name }}
+                <span v-if="(getModuleByName(mod.name)?.count || 0) <= 0"> (missing)</span>
+              </li>
+            </ul>
+          </div>
+          <button
+              v-if="getAssemblyStatus(assembly).missing.length"
+              class="buy-missing-btn"
+              :disabled="!canBuyAll(assembly)"
+              @click.stop="buyAllMissing(assembly)"
+          >
+            Buy all missing (💰{{ getAssemblyStatus(assembly).totalCost }})
+          </button>
         </div>
+
+
       </div>
       <button class="close-btn" @click="close">Cancel</button>
     </div>
@@ -50,6 +115,37 @@ function close() {
 </template>
 
 <style scoped>
+.assembly-card.disabled {
+  opacity: 0.65;
+  background: #eee;
+}
+
+.modules-list .missing {
+  color: #ba2525;
+  font-style: italic;
+}
+
+.buy-missing-btn {
+  margin-top: 0.9em;
+  background: #ffd600;
+  color: #222;
+  border: none;
+  border-radius: 7px;
+  font-weight: bold;
+  font-size: 1em;
+  cursor: pointer;
+  padding: 0.23em 1.3em;
+  transition: background 0.15s;
+}
+.buy-missing-btn:disabled {
+  background: #eee;
+  color: #aaa;
+  cursor: not-allowed;
+}
+.buy-missing-btn:not(:disabled):hover {
+  background: #ffb300;
+  color: #222;
+}
 .modal-backdrop {
   position: fixed;
   inset: 0;

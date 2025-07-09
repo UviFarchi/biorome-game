@@ -9,27 +9,27 @@ const assemblies = computed(() =>
     (modules.activeAssemblies ?? []).filter(a => !a.deployed)
 )
 
-// Load assembly into workspace for editing
 function selectAssembly(assembly) {
-  // Deep copy module list so edits don’t mutate the active assembly until “Save”
+  // Move modules into workspace for editing
   modules.currentAssembly.splice(
       0,
       modules.currentAssembly.length,
       ...assembly.modules.map(mod => ({ ...mod }))
   )
-  modules.editingAssemblyName = assembly.name || '' // Optionally track name
-  modules.editingAssemblyId = assembly.id || null   // Optionally track id
+  modules.editingAssemblyName = assembly.name || ''
+  modules.editingAssemblyId = assembly.id || null
+
+  // Remove from activeAssemblies (by id)
+  const idx = modules.activeAssemblies.findIndex(a => a.id === assembly.id)
+  if (idx !== -1) modules.activeAssemblies.splice(idx, 1)
 }
 
 
 </script>
 
 <template>
-  <div class="active-assemblies-menu">
-    <div class="assemblies-header">
-      <h3>Your Assemblies</h3>
 
-    </div>
+
     <div class="assemblies-scroll">
       <div
           v-for="assembly in assemblies"
@@ -46,36 +46,21 @@ function selectAssembly(assembly) {
       </div>
       <div v-if="assemblies.length === 0" class="empty">No assemblies yet.</div>
     </div>
-  </div>
+
 </template>
 
 <style scoped>
-.active-assemblies-menu {
-  width: 100%;
-  padding: 0.8em 0.2em 0 0.2em;
-  background: #e0f7fa;
-  border-radius: 10px;
-  box-shadow: 0 1px 7px #0001;
-  margin-bottom: 1em;
-}
-.assemblies-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.9em;
-}
-.assemblies-header h3 {
-  font-size: 1.16em;
-  font-weight: bold;
-  margin: 0;
-}
+
+
+
 
 .assemblies-scroll {
   display: flex;
   flex-direction: row;
   gap: 1.1em;
-  overflow-x: auto;
+  overflow-x: scroll;
   padding-bottom: 0.2em;
+  flex: 8;
 }
 .assembly-card {
   flex: 0 0 185px;

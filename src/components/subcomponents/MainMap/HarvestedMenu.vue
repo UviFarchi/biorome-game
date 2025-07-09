@@ -32,26 +32,6 @@ const harvested = computed(() => market.harvestedProducts)
       </template>
       <span v-else class="empty">No harvests yet.</span>
     </div>
-
-    <div class="bottomMenuScroll">
-      <div
-          v-for="item in items"
-          :key="item.id"
-          class="bottomMenuCard"
-      >
-        <div class="orderHeader">
-          <span class="villagerName">{{ item.villagerName }}</span>
-          <span class="orderType">{{ item.type }}</span>
-        </div>
-        <div class="dueDate">Due: {{ item.dueDateString }}</div>
-        <div class="orderItems">
-          <span v-for="req in item.requestedItems" :key="req">{{ req }}</span>
-        </div>
-      </div>
-      <div v-if="!items || items.length === 0" class="empty">
-        No accepted orders yet.
-      </div>
-    </div>
   </div>
 </template>
 
@@ -69,59 +49,7 @@ const harvested = computed(() => market.harvestedProducts)
   z-index: 100;
 }
 
-.bottomMenuScroll {
-  display: flex;
-  flex-direction: row;
-  gap: 1.2em;
-  overflow-x: auto;
-  padding: 0 1.2em;
-}
 
-.bottomMenuCard {
-  flex: 0 0 185px;
-  background: #fff;
-  border-radius: 8px;
-  min-height: 70px;
-  margin: 0.4rem 0;
-  padding: 0.7rem 1rem;
-  box-shadow: 0 1px 4px #0001;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-}
-
-.orderHeader {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.villagerName {
-  font-weight: bold;
-  font-size: 1.1em;
-}
-
-.orderType {
-  font-size: 0.95em;
-  color: #558b2f;
-  margin-left: auto;
-  padding-left: 1em;
-}
-
-.dueDate {
-  font-size: 0.98em;
-  margin-top: 0.2em;
-  color: #00796b;
-}
-
-.orderItems {
-  margin-top: 0.3em;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5em;
-  font-size: 0.97em;
-}
 .empty {
   color: #888;
   font-style: italic;

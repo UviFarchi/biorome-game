@@ -18,6 +18,14 @@ function saveAssembly() {
   modules.currentAssembly.splice(0)
   name.value = ''
 }
+
+function returnToPool(index) {
+  const [removed] = modules.currentAssembly.splice(index, 1)
+  if (!removed) return
+  const mod = modules.availableModules.find(m => m.name === removed.name)
+  if (mod) mod.count = (mod.count || 0) + 1
+}
+//TODO => Enforce compatibility rules and required modules, via attachesTo, maxSlots and requires fields in the modulesStore.
 </script>
 
 <template>
@@ -31,7 +39,8 @@ function saveAssembly() {
     />
     <ul class="current-modules-list">
       <li v-for="(mod, i) in modules.currentAssembly" :key="mod.name + i">
-        {{ mod.name }} — type: {{ mod.type }}
+        <span>{{ mod.name }} — type: {{ mod.type }}</span>
+        <button class="return-btn" @click="returnToPool(i)">return to module pool</button>
       </li>
       <li v-if="!modules.currentAssembly.length" class="empty-msg">No modules added yet.</li>
     </ul>

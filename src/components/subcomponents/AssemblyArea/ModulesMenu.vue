@@ -1,7 +1,7 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { modulesStore } from '/stores/modulesStore.js'
-import { userStore } from '/stores/userStore.js'
+import {ref, computed} from 'vue'
+import {modulesStore} from '/stores/modulesStore.js'
+import {userStore} from '/stores/userStore.js'
 
 const modules = modulesStore()
 const user = userStore()
@@ -53,16 +53,19 @@ function addModuleToAssembly(moduleName) {
     showToast('You do not have any in stock.')
     return
   }
-  modules.currentAssembly.push({ ...mod })
+  modules.currentAssembly.push({...mod})
   mod.count -= 1
   showToast(`Added ${mod.name} to assembly.`)
 }
 
 
 const toast = ref(null)
+
 function showToast(msg) {
   toast.value = msg
-  setTimeout(() => { toast.value = null }, 3000)
+  setTimeout(() => {
+    toast.value = null
+  }, 3000)
 }
 </script>
 
@@ -87,28 +90,30 @@ function showToast(msg) {
               <span class="mod-name">{{ mod.name }}</span>
               <span class="mod-count">x{{ mod.count || 0 }}</span>
               <span class="mod-cost">💰{{ mod.cost }}</span>
-              <button
-                  v-if="mod.count > 0"
-                  @click="addModuleToAssembly(mod.name)"
-                  class="add-btn"
-              >
-                + Add
-              </button>
-              <button
-                  @click="buyModule(mod.name)"
-                  :disabled="user.gold < mod.cost"
-                  class="buy-btn"
-              >
-                Buy
-              </button>
-              <button
-                  v-if="mod.count > 0"
-                  @click="sellModule(mod.name)"
-                  class="sell-btn"
-                  title="Sell for half price"
-              >
-                Sell
-              </button>
+              <div class="button-group">
+                <button
+                    v-if="mod.count > 0"
+                    @click="addModuleToAssembly(mod.name)"
+                    class="add-btn"
+                >
+                  + Add
+                </button>
+                <button
+                    @click="buyModule(mod.name)"
+                    :disabled="user.gold < mod.cost"
+                    class="buy-btn"
+                >
+                  Buy
+                </button>
+                <button
+                    v-if="mod.count > 0"
+                    @click="sellModule(mod.name)"
+                    class="sell-btn"
+                    title="Sell for half price"
+                >
+                  Sell
+                </button>
+              </div>
             </div>
           </div>
         </transition>
@@ -125,7 +130,6 @@ function showToast(msg) {
 
 .assembly-side-menu {
   width: 340px;
-  height: 95vh;
   min-width: 260px;
   background: #e0f7fa;
   border-radius: 14px;
@@ -135,6 +139,7 @@ function showToast(msg) {
   flex-direction: column;
   position: relative;
   overflow-y: auto;
+
 }
 
 h2 {
@@ -167,6 +172,7 @@ h2 {
   user-select: none;
   transition: background 0.2s;
 }
+
 .type-header:hover {
   background: #80deea;
 }
@@ -206,7 +212,6 @@ h2 {
 }
 
 .buy-btn {
-  margin-left: 0.9em;
   background: #ffd600;
   border: none;
   border-radius: 7px;
@@ -214,18 +219,19 @@ h2 {
   font-weight: bold;
   cursor: pointer;
 }
+
 .buy-btn:disabled {
   background: #eee;
   color: #aaa;
   cursor: not-allowed;
 }
+
 .buy-btn:not(:disabled):hover {
   background: #ffb300;
   color: #fff;
 }
 
 .sell-btn {
-  margin-left: 0.6em;
   background: #e0e0e0;
   border: none;
   border-radius: 7px;
@@ -235,11 +241,13 @@ h2 {
   color: #37474f;
   transition: background 0.15s;
 }
+
 .sell-btn:disabled {
   background: #eee;
   color: #aaa;
   cursor: not-allowed;
 }
+
 .sell-btn:not(:disabled):hover {
   background: #cfd8dc;
   color: #263238;
@@ -270,7 +278,6 @@ h2 {
 }
 
 
-
 .toast {
   position: fixed;
   left: 50%;
@@ -291,12 +298,12 @@ h2 {
 .fade-enter-active, .fade-leave-active {
   transition: opacity 0.2s;
 }
+
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
 }
 
 .add-btn {
-  margin-left: 0.6em;
   background: #c8e6c9;
   border: none;
   border-radius: 7px;
@@ -306,14 +313,36 @@ h2 {
   color: #388e3c;
   transition: background 0.15s;
 }
+
 .add-btn:disabled {
   background: #eee;
   color: #aaa;
   cursor: not-allowed;
 }
+
 .add-btn:not(:disabled):hover {
   background: #a5d6a7;
   color: #1b5e20;
 }
 
+.module-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  padding: 0.38em 0.5em 0.38em 0.1em;
+  background: #fff;
+  border-radius: 7px;
+  font-size: 1.03em;
+  box-shadow: 0 1px 4px #0001;
+  /* Add this to keep buttons at the right edge */
+  position: relative;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.42em;
+  margin-left: auto; /* Push to the right edge */
+  align-items: flex-end;
+}
 </style>

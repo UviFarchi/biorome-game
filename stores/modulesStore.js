@@ -14,7 +14,8 @@ export const modulesStore = defineStore('modules', () => {
                 slots: ["arm", "sensor", "camera", "cart", "tank", "sprayer", "seeder", "gps", "battery"],
                 maxSlots: 6,
                 powerDraw: 2,
-                count: 0, cost: 200,
+                count: 0,
+                cost: 200,
                 actionsPerTurn: 1
             },
             {
