@@ -8,13 +8,48 @@ import { animalsStore } from '/stores/animalsStore.js'
 // Store refs
 const tilesStoreInstance = tilesStore()
 const tiles = tilesStoreInstance.tiles
+const harvestRequirements = tilesStoreInstance.harvestRequirements;
 const flatTiles = computed(() => tiles.flat())
 const selectedTile = ref(null)
 const modules = modulesStore()
 const market = marketStore()
 const animals = animalsStore()
 
-// Helpers
+
+
+// --- HARVEST REQUIREMENT CHECK HELPERS ---
+function assemblyMeetsRequirements(assembly, requirements) {
+  if (!assembly || !assembly.modules) return false;
+  return requirements.every(req =>
+      assembly.modules.some(m =>
+          (!req.type || m.type === req.type) &&
+          (!req.subtype || m.subtype === req.subtype) &&
+          (!req.name || m.name === req.name)
+      )
+  )
+}
+function getMissingModules(assembly, requirements) {
+  if (!assembly || !assembly.modules) {
+    return requirements.map(req => req.name || req.type || JSON.stringify(req))
+  }
+  return requirements
+      .filter(req =>
+          !assembly.modules.some(m =>
+              (!req.type || m.type === req.type) &&
+              (!req.subtype || m.subtype === req.subtype) &&
+              (!req.name || m.name === req.name)
+          )
+      )
+      .map(req => req.name || req.type || JSON.stringify(req))
+}
+
+// Modal to show missing modules
+const showMissingModal = ref(false)
+const missingModules = ref([])
+const missingProductType = ref('')
+
+// --- UI/LOGIC HELPERS ---
+
 function closeModal() { selectedTile.value = null }
 
 function recallAssembly(tile) {
