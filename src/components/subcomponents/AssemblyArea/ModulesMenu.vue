@@ -66,6 +66,12 @@ function canAttach(mod) {
   })
 }
 
+function attachTooltip(mod) {
+  if (!mod.attachesTo || mod.attachesTo.length === 0) return ''
+  const hostNames = mod.attachesTo.map(t => t.charAt(0).toUpperCase() + t.slice(1)).join(', ')
+  return `Attach to: ${hostNames}`
+}
+
 
 function addModuleToAssembly(moduleName) {
   const mod = modules.availableModules.find(m => m.name === moduleName)
@@ -118,6 +124,8 @@ function showToast(msg) {
                 <button
                     v-if="mod.count > 0"
                     :disabled="!canAttach(mod)"
+                    :title="!canAttach(mod) ? attachTooltip(mod) : ''"
+
                     @click="addModuleToAssembly(mod.name)"
                     class="add-btn"
                 >
