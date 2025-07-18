@@ -38,6 +38,19 @@ function hasCollector(tile) {
 function canHarvestPlant(tile) {
   return plantIsRipe(tile) && hasCollector(tile)
 }
+// Return list of modules required for harvesting a plant that are missing
+function missingPlantHarvestModules(tile) {
+  const missing = []
+  if (!tile.assembly) {
+    missing.push('Collector module')
+    return missing
+  }
+  const names = tile.assembly.modules.map(m => m.name || '')
+  if (!names.some(n => n.includes('Collector'))) {
+    missing.push('Collector module')
+  }
+  return missing
+}
 function harvestPlant(tile) {
   if (!canHarvestPlant(tile)) return
   const existing = market.harvestedProducts.find(p => p.type === tile.plant.type)
@@ -204,7 +217,9 @@ function confirmMoveAnimal() {
         >Harvest</button>
         <span v-else class="harvest-msg">
           <span v-if="!plantIsRipe(selectedTile)">(Plant is not ripe for harvest)</span>
-          <span v-else-if="!hasCollector(selectedTile)">(Requires Collector assembly to harvest)</span>
+          <span v-else-if="!hasCollector(selectedTile)">
+            (Missing: {{ missingPlantHarvestModules(selectedTile).join(', ') }})
+          </span>
         </span>
       </div>
       <div v-else style="margin-top: 0.7em;">
