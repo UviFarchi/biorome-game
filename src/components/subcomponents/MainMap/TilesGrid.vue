@@ -31,12 +31,13 @@ function recallAssembly(tile) {
 function plantIsRipe(tile) {
   return tile.plant && (tile.plant.growthStage === 'Mature' || tile.plant.growthStage === 'Overripe')
 }
-function hasCollector(tile) {
-  return tile.assembly &&
-      tile.assembly.modules.some(m => m.name && m.name.includes('Collector'))
-}
+
 function canHarvestPlant(tile) {
-  return plantIsRipe(tile) && hasCollector(tile)
+  if (!plantIsRipe(tile) || !tile.assembly) return false
+  const productType = tile.plant?.type
+  const reqs = harvestRequirements[productType]
+  if (!reqs) return false // No rules defined
+  return assemblyMeetsRequirements(tile.assembly, reqs)
 }
 // Return list of modules required for harvesting a plant that are missing
 function missingPlantHarvestModules(tile) {
@@ -52,15 +53,24 @@ function missingPlantHarvestModules(tile) {
   return missing
 }
 function harvestPlant(tile) {
-  if (!canHarvestPlant(tile)) return
-  const existing = market.harvestedProducts.find(p => p.type === tile.plant.type)
+  const productType = tile.plant?.type
+  const reqs = harvestRequirements[productType]
+  if (!canHarvestPlant(tile)) {
+    // Show modal with missing modules
+    missingModules.value = getMissingModules(tile.assembly, reqs)
+    missingProductType.value = productType
+    showMissingModal.value = true
+    return
+  }
+  const existing = market.harvestedProducts.find(p => p.type === productType)
   if (existing) {
     existing.qty += tile.plant.yield
   } else {
     market.harvestedProducts.push({
-      type: tile.plant.type,
+      type: productType,
       icon: tile.plant.icon,
-      qty: tile.plant.yield
+      qty: tile.plant.yield,
+      shelfLife: tile.plant.shelfLife || 3, // fallback
     })
   }
   tile.plant = null
@@ -73,13 +83,23 @@ function getAnimalProduct(animal) {
   return animals.products.find(p => p.key === animal.product)
 }
 function canHarvestProduct(tile) {
-  return tile.assembly &&
-      tile.assembly.modules.some(m => m.name && m.name.includes('Collector'))
+  if (!tile.animal || !tile.assembly) return false
+  const product = getAnimalProduct(tile.animal)
+  if (!product) return false
+  const reqs = harvestRequirements[product.key]
+  if (!reqs) return false
+  return assemblyMeetsRequirements(tile.assembly, reqs)
 }
 function harvestAnimalProduct(tile) {
-  if (!canHarvestProduct(tile)) return
   const product = getAnimalProduct(tile.animal)
-  if (!product) return
+  const reqs = harvestRequirements[product?.key]
+  if (!canHarvestProduct(tile)) {
+    // Show modal with missing modules
+    missingModules.value = getMissingModules(tile.assembly, reqs)
+    missingProductType.value = product?.key
+    showMissingModal.value = true
+    return
+  }
   let existing = market.harvestedProducts.find(p => p.type === product.key)
   if (existing) {
     existing.qty += 1
@@ -88,12 +108,30 @@ function harvestAnimalProduct(tile) {
       type: product.key,
       icon: product.icon,
       qty: 1,
+      shelfLife: product.shelfLife || 3,
     })
   }
 }
+
+// Harvest Animal (butchering)
+function canHarvestAnimal(tile) {
+  if (!tile.animal || !tile.assembly) return false
+  const animalType = tile.animal.type
+  const reqs = harvestRequirements[animalType]
+  if (!reqs) return false
+  return assemblyMeetsRequirements(tile.assembly, reqs)
+}
+
 function harvestAnimal(tile) {
   const animalType = tile.animal.type
-  const animalIcon = tile.animal.icon
+  const reqs = harvestRequirements[animalType]
+  if (!canHarvestAnimal(tile)) {
+    // Show modal with missing modules
+    missingModules.value = getMissingModules(tile.assembly, reqs)
+    missingProductType.value = animalType
+    showMissingModal.value = true
+    return
+  }
   tile.animal = null
   let existing = market.harvestedProducts.find(p => p.type === animalType)
   if (existing) {
@@ -101,8 +139,9 @@ function harvestAnimal(tile) {
   } else {
     market.harvestedProducts.push({
       type: animalType,
-      icon: animalIcon,
+      icon: tile.animal.icon,
       qty: 1,
+      shelfLife: 3,
     })
   }
   closeModal()
@@ -129,7 +168,7 @@ const canMoveAnimal = computed(() =>
     selectedTile.value &&
     selectedTile.value.animal &&
     selectedTile.value.assembly &&
-    selectedTile.value.assembly.modules.some(m => m.name && m.name.toLowerCase().includes('robotic arm'))
+    selectedTile.value.assembly.modules.some(m => m.type === 'arm')
 )
 function openMoveAnimalModal(tile) {
   animalToMove.value = tile.animal
@@ -258,10 +297,11 @@ function confirmMoveAnimal() {
           <button
               class="animal-harvest-btn"
               @click="harvestAnimal(selectedTile)"
+              :disabled="!canHarvestAnimal(selectedTile)"
           >Harvest Animal</button>
         </div>
         <div v-if="!canHarvestProduct(selectedTile)" class="harvest-msg">
-          Requires Collector assembly in this tile
+          Missing required modules: <em>Check details</em>
         </div>
       </div>
       <div v-else style="margin-top: 0.7em;">
@@ -308,6 +348,25 @@ function confirmMoveAnimal() {
         <button @click="confirmMoveAnimal">Move</button>
         <button @click="closeMoveAnimalModal">Cancel</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Missing Modules Modal -->
+  <div v-if="showMissingModal" class="tile-modal-backdrop" @click.self="() => showMissingModal.value = false">
+    <div class="tile-modal">
+      <h4>
+        Can't harvest {{ missingProductType }}
+      </h4>
+      <div style="margin-bottom:1em;">
+        <div>Missing modules in this assembly:</div>
+        <ul>
+          <li v-for="m in missingModules" :key="m">{{ m }}</li>
+        </ul>
+        <div style="margin-top: 0.7em;">
+          Update this assembly in the Assembly Area, or deploy a new one with the correct modules.
+        </div>
+      </div>
+      <button @click="() => showMissingModal.value = false" class="close-btn">OK</button>
     </div>
   </div>
 </template>

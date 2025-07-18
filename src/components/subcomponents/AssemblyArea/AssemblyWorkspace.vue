@@ -26,7 +26,14 @@ function returnToPool(index) {
   const mod = modules.availableModules.find(m => m.name === removed.name)
   if (mod) mod.count = (mod.count || 0) + 1
 }
-//TODO => Enforce compatibility rules and required modules, via attachesTo, maxSlots and requires fields in the modulesStore.
+function returnAllToPool() {
+  while (modules.currentAssembly.length > 0) {
+    const removed = modules.currentAssembly.pop()
+    const mod = modules.availableModules.find(m => m.name === removed.name)
+    if (mod) mod.count = (mod.count || 0) + 1
+  }
+}
+
 </script>
 
 <template>
@@ -45,6 +52,14 @@ function returnToPool(index) {
       </li>
       <li v-if="!modules.currentAssembly.length" class="empty-msg">No modules added yet.</li>
     </ul>
+    <button
+        class="return-all-btn"
+        :disabled="!modules.currentAssembly.length"
+        @click="returnAllToPool"
+    >
+      Return all modules to pool
+    </button>
+    <hr/>
     <button
         class="save-btn"
         :disabled="!modules.currentAssembly.length"
@@ -108,5 +123,26 @@ function returnToPool(index) {
 }
 .save-btn:not(:disabled):hover {
   background: #ffb300;
+}
+
+.return-all-btn {
+  background: #e0f7fa;
+  color: #0097a7;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 500;
+  padding: 0.45em 1.3em;
+  margin-top: 0.3em;
+  margin-left: 0.9em;
+  cursor: pointer;
+}
+.return-all-btn:disabled {
+  background: #eee;
+  color: #aaa;
+  cursor: not-allowed;
+}
+.return-all-btn:not(:disabled):hover {
+  background: #b2ebf2;
 }
 </style>

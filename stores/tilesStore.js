@@ -20,6 +20,100 @@ export const tilesStore = defineStore('tiles', () => {
         )
     )
 
+    const harvestRequirements = {
+        // Plants (examples)
+        'Corn': [
+            { type: 'transport' },
+            { name: 'Battery Pack' },
+            { name: 'GPS Module' },
+            { type: 'arm', subtype: 'medium' },
+            { name: 'Camera Module (RGB)' },
+            { name: 'Gripper' },
+            { name: 'Suction Tool' },
+            { type: 'cart' }
+        ],
+        'Tomato': [
+            { type: 'transport' },
+            { type: 'battery' },
+            { name: 'camera' },
+            { type: 'arm', subtype: 'medium' },
+            { name: 'Gripper' }
+        ],
+        'Lettuce': [
+            { type: 'transport' },
+            { name: 'Battery Pack' },
+            { name: 'Camera Module (RGB)' },
+            { type: 'arm', subtype: 'small' },
+            { name: 'Gripper' }
+        ],
+        'Pumpkin': [
+            { type: 'transport' },
+            { name: 'Battery Pack' },
+            { type: 'arm', subtype: 'medium' },
+            { name: 'Cutter/Saw' },
+            { type: 'cart' }
+        ],
+        'Carrot': [
+            { type: 'transport' },
+            { name: 'Battery Pack' },
+            { type: 'arm', subtype: 'small' },
+            { name: 'Digger' }
+        ],
+        'Grass': [
+            { type: 'transport' },
+            { name: 'Battery Pack' },
+            { name: 'Rotating Blades' }
+        ],
+        'Coffee': [
+            { type: 'transport' },
+            { name: 'Battery Pack' },
+            { type: 'arm', subtype: 'small' },
+            { name: 'Gripper' }
+        ],
 
-    return { tiles }
+        // Animal products (examples)
+        'Egg': [
+            { type: 'transport' },
+            { name: 'Battery Pack' },
+            { name: 'Camera Module (RGB)' },
+            { type: 'arm', subtype: 'small' },
+            { name: 'Suction Tool' },
+            { type: 'cart' },
+            { name: 'Mycelium Box' }
+        ],
+        'Milk': [
+            { type: 'transport' },
+            { name: 'Battery Pack' },
+            { name: 'Camera Module (RGB)' },
+            { type: 'arm', subtype: 'medium' },
+            { name: 'Gripper' }
+        ],
+        'Wool': [
+            { type: 'transport' },
+            { name: 'Battery Pack' },
+            { type: 'arm', subtype: 'small' },
+            { name: 'Brush Tool' }
+        ],
+
+        // Animal harvesting (for butchering, e.g. Chicken, Cow, Sheep, etc.)
+        'Chicken': [
+            { type: 'transport' },
+            { name: 'Battery Pack' },
+            { type: 'arm', subtype: 'small' },
+            { name: 'Cutter/Saw' }
+        ],
+        'Cow': [
+            { type: 'transport' },
+            { name: 'Battery Pack' },
+            { type: 'arm', subtype: 'heavy' },
+            { name: 'Cutter/Saw' }
+        ],
+        'Sheep': [
+            { type: 'transport' },
+            { name: 'Battery Pack' },
+            { type: 'arm', subtype: 'medium' },
+            { name: 'Cutter/Saw' }
+        ],
+    }
+    return { tiles, harvestRequirements }
 })
