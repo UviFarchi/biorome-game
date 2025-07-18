@@ -46,11 +46,41 @@ function sellModule(moduleName) {
   showToast(`Sold ${mod.name} for 💰${refund}`)
 }
 
+// --- Assembly compatibility helpers ---
+function remainingSlots(type) {
+  const hosts = modules.currentAssembly.filter(m => m.type === type)
+  if (!hosts.length) return 0
+  const capacity = hosts.reduce((sum, h) => sum + (h.maxSlots || 0), 0)
+  const used = modules.currentAssembly.filter(m => m.attachesTo.includes(type)).length
+  return capacity - used
+}
+
+function canAttach(mod) {
+  if (!mod.attachesTo || mod.attachesTo.length === 0) return true
+  return mod.attachesTo.some(attType => {
+    const hosts = modules.currentAssembly.filter(m => m.type === attType)
+    if (!hosts.length) return false
+    const hasSlot = hosts.some(h => (h.slots || []).includes(mod.type))
+    if (!hasSlot) return false
+    return remainingSlots(attType) > 0
+  })
+}
+
+function attachTooltip(mod) {
+  if (!mod.attachesTo || mod.attachesTo.length === 0) return ''
+  const hostNames = mod.attachesTo.map(t => t.charAt(0).toUpperCase() + t.slice(1)).join(', ')
+  return `Attach to: ${hostNames}`
+}
+
 
 function addModuleToAssembly(moduleName) {
   const mod = modules.availableModules.find(m => m.name === moduleName)
   if (!mod || (mod.count || 0) <= 0) {
     showToast('You do not have any in stock.')
+    return
+  }
+  if (!canAttach(mod)) {
+    showToast('No compatible slot available.')
     return
   }
   modules.currentAssembly.push({...mod})
@@ -93,6 +123,8 @@ function showToast(msg) {
               <div class="button-group">
                 <button
                     v-if="mod.count > 0"
+                    :disabled="!canAttach(mod)"
+                    :title="!canAttach(mod) ? attachTooltip(mod) : ''"
                     @click="addModuleToAssembly(mod.name)"
                     class="add-btn"
                 >
