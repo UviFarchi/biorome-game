@@ -125,6 +125,7 @@ function showToast(msg) {
                     v-if="mod.count > 0"
                     :disabled="!canAttach(mod)"
                     :title="!canAttach(mod) ? attachTooltip(mod) : ''"
+
                     @click="addModuleToAssembly(mod.name)"
                     class="add-btn"
                 >
