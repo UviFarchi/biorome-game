@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
+console.log('marketStore loaded!', Math.random())
 
-export const marketStore = defineStore('villagers', {
+export const marketStore = defineStore('market', {
   state: () => ({
     // Master list of villagers (add more as you wish)
     villagers: [
@@ -48,10 +49,10 @@ export const marketStore = defineStore('villagers', {
       {
         id: 'req-4',
         villagerId: '1',
-        productType: 'Tomato',
-        quantity: 3,
-        dueDate: 3,
-        pricePerUnit: 3,
+        productType: 'Cow',
+        quantity: 1,
+        dueDate:1,
+        pricePerUnit: 200,
         accepted: true,
         fulfilled: false
       }

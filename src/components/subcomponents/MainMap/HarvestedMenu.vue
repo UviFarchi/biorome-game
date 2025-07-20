@@ -13,6 +13,7 @@ defineProps({
 import { marketStore } from '/stores/marketStore.js'
 const market = marketStore()
 const harvested = computed(() => market.harvestedProducts)
+console.log("MarketArea harvestedProducts", market.harvestedProducts);
 </script>
 
 <template>
@@ -23,13 +24,13 @@ const harvested = computed(() => market.harvestedProducts)
 
     <div class="harvestedArea">
       <strong>Harvested Products:</strong>
-      <template v-if="harvested.length">
+      <div v-if="harvested.length">
         <div class="harvestedList">
           <span v-for="prod in harvested" :key="prod.type" class="harvestedItem">
             {{ prod.icon }} {{ prod.type }} &times;{{ prod.qty }}
           </span>
         </div>
-      </template>
+      </div>
       <span v-else class="empty">No harvests yet.</span>
     </div>
   </div>

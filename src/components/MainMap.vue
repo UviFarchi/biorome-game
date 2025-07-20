@@ -65,8 +65,7 @@ const acceptedOrdersDisplay = computed(() =>
 .center-area {
   flex: 1 1 auto;
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: stretch;
   justify-content: center;
   overflow: hidden;
 }
@@ -83,6 +82,7 @@ const acceptedOrdersDisplay = computed(() =>
   min-width: 170px;
   max-width: 220px;
   display: flex;
+  flex-direction: column;
 }
 
 .left-menu {
@@ -91,5 +91,11 @@ const acceptedOrdersDisplay = computed(() =>
 
 .right-menu {
   margin-left: 1rem;
+}
+
+.left-menu :deep(.verticalMenuArea),
+.right-menu :deep(.verticalMenuArea) {
+  flex: 1 1 auto;
+  height: 100%;
 }
 </style>

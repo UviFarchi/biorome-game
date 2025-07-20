@@ -6,13 +6,32 @@ import { userStore } from '/stores/userStore.js'
 import { gameStateStore } from '/stores/gameStateStore.js'
 import { plantsStore } from '/stores/plantsStore.js'
 import { animalsStore } from '/stores/animalsStore.js'
+import { ref, nextTick } from 'vue'
 
+const goldChange = ref(null)
+const goldAnimPos = ref({ x: 0, y: 0 })
 const market = marketStore()
 const user = userStore()
 const game = gameStateStore()
 const plants = plantsStore()
 const animals = animalsStore()
 
+
+function animateGoldChange(amount, event) {
+  goldChange.value = `+${amount}`
+  if (event && event.target) {
+    const btnRect = event.target.getBoundingClientRect()
+    goldAnimPos.value = {
+      x: btnRect.left + btnRect.width / 2,
+      y: btnRect.top
+    }
+  } else {
+    goldAnimPos.value = { x: 100, y: 100 } // fallback
+  }
+  setTimeout(() => {
+    goldChange.value = null
+  }, 5000)
+}
 function formatDate(dayOffset) {
   const start = new Date(game.startDate)
   const d = new Date(start)
@@ -65,13 +84,22 @@ function priceForProduct(type, villager) {
   return Math.max(1, Math.round(base + supplyDemandAdj + base * moodAdj + variance))
 }
 
+const marketableProducts = [
+
+  ...plants.plantTypes
+      .filter(p => !['Grass'].includes(p.type)) // blacklist approach
+      .map(p => p.type),
+  ...animals.products
+      .filter(p => !['Manure'].includes(p.key)) // adjust as needed
+      .map(p => p.key),
+  ...animals.animalTypes
+      .filter(a => !['Bee'].includes(a.type)) // adjust for animal sales
+      .map(a => a.type),
+]
 function generateDailyRequest() {
   const villager = market.villagers[Math.floor(Math.random() * market.villagers.length)]
-  const products = [
-    ...plants.plantTypes.map(p => p.type),
-    ...animals.products.map(p => p.key)
-  ]
-  const productType = products[Math.floor(Math.random() * products.length)]
+  if (marketableProducts.length === 0) return // nothing marketable
+  const productType = marketableProducts[Math.floor(Math.random() * marketableProducts.length)]
   const quantity = Math.ceil(Math.random() * 5)
   const dueDate = game.day + 1 + Math.ceil(Math.random() * 3)
   const pricePerUnit = priceForProduct(productType, villager)
@@ -87,19 +115,8 @@ function generateDailyRequest() {
   })
 }
 
-function processShelfLife() {
-  for (let i = market.harvestedProducts.length - 1; i >= 0; i--) {
-    const item = market.harvestedProducts[i]
-    if (item.remainingLife === undefined) {
-      item.remainingLife = getShelfLife(item.type)
-    } else {
-      item.remainingLife -= 1
-    }
-    if (item.remainingLife <= 0) {
-      market.harvestedProducts.splice(i, 1)
-    }
-  }
-}
+
+
 
 const inventoryDisplay = computed(() =>
   market.harvestedProducts.map(p => ({
@@ -120,7 +137,8 @@ function acceptRequest(req) {
 }
 
 function canFulfill(order) {
-  if (order.dueDate !== game.day + 1) return false
+  if (order.dueDate < game.day + 1) return false // Order expired
+  if (order.dueDate > game.day + 1) return false // Not yet due
   const item = market.harvestedProducts.find(p => p.type === order.productType)
   return item && item.qty >= order.quantity
 }
@@ -161,19 +179,30 @@ let firstRun = true
 watch(
   () => game.day,
   () => {
-    processShelfLife()
     checkExpired()
     if (!firstRun) generateDailyRequest()
     firstRun = false
   },
   { immediate: true }
 )
+
+console.log("MarketArea inventoryDisplay", inventoryDisplay.value);
 </script>
 
 <template>
   <div class="market-area-main">
     <h1>Market Area</h1>
-
+    <span class="gold-counter">Gold: {{user.gold}}</span>
+    <span
+        v-if="goldChange"
+        class="gold-float"
+        :style="{
+    left: goldAnimPos.x + 'px',
+    top: goldAnimPos.y + 'px'
+  }"
+    >
+  {{ goldChange }}💰
+</span>
     <section class="section">
       <h2>Villager Requests</h2>
       <table class="orders-table" v-if="requestsDisplay.length">
@@ -220,7 +249,9 @@ watch(
             <td>{{ order.dueDateString }}</td>
             <td>{{ order.pricePerUnit }}</td>
             <td>
-              <button :disabled="!canFulfill(order)" @click="fulfillOrder(order)">Fulfill</button>
+              <button :disabled="!canFulfill(order)" @click="e => { fulfillOrder(order); animateGoldChange(order.quantity * order.pricePerUnit, e) }">
+                Fulfill
+              </button>
             </td>
           </tr>
         </tbody>
@@ -304,4 +335,31 @@ watch(
   font-style: italic;
   color: #666;
 }
+
+.gold-counter {
+  display: inline-block;
+  background: #fffde7;
+  border: 2px solid #ffd600;
+  border-radius: 9px;
+  padding: 0.4em 1.1em;
+  font-size: 1.13em;
+  margin: 0.4em 0 1.3em 0;
+}
+
+.gold-float {
+  position: fixed;
+  z-index: 2000;
+  font-size: 1.45em;
+  color: #ffd600;
+  font-weight: bold;
+  pointer-events: none;
+  animation: goldFloat 5s cubic-bezier(.34,1.56,.64,1) forwards;
+  text-shadow: 0 1px 4px #2224;
+}
+
+@keyframes goldFloat {
+  from { opacity: 1; transform: translateY(0);}
+  to { opacity: 0; transform: translateY(-60px) scale(1.25);}
+}
+
 </style>

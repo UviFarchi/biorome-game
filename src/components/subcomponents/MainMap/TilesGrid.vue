@@ -1,12 +1,15 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { tilesStore } from '/stores/tilesStore.js'
-import { modulesStore } from '/stores/modulesStore.js'
-import { marketStore } from '/stores/marketStore.js'
-import { animalsStore } from '/stores/animalsStore.js'
+import {ref, computed} from 'vue'
+import {tilesStore} from '/stores/tilesStore.js'
+import {modulesStore} from '/stores/modulesStore.js'
+import {marketStore} from '/stores/marketStore.js'
+import {animalsStore} from '/stores/animalsStore.js'
+import {gameStateStore} from "../../../../stores/gameStateStore.js";
+import eventBus from "@/eventBus.js"
 
-// Store refs
 const tilesStoreInstance = tilesStore()
+const gameState = gameStateStore()
+const day = gameState.day;
 const tiles = tilesStoreInstance.tiles
 const harvestRequirements = tilesStoreInstance.harvestRequirements;
 const flatTiles = computed(() => tiles.flat())
@@ -15,7 +18,119 @@ const modules = modulesStore()
 const market = marketStore()
 const animals = animalsStore()
 
+// Collar assembly requirements (by module name)
+const requiredCollarModules = [
+  "Animal Collar",
+  "Battery Pack",
+  "Audio Alarm",
+  "Mild Shocker",
+  "GPS Module"
+]
+const showNoCollarAssemblyModal = ref(false)
 
+// --- Collar restriction selection modal logic ---
+const collarRestrictionMode = ref(false)
+const restrictedTiles = ref([])
+const collarAssemblyAssigned = ref(null) // The assembly we're using for this collar (if any)
+const collarRestrictionAnimal = ref(null) // The animal being restricted (if any)
+
+function getAvailableCollarAssembly() {
+  return (modules.activeAssemblies ?? []).find(a => {
+    if (a.deployed) return false
+    const moduleNames = (a.modules || []).map(m => m.name)
+    return requiredCollarModules.every(req => moduleNames.includes(req))
+  })
+}
+
+// Start collar restriction selection mode for an animal
+function startCollarRestriction(animal) {
+  // If animal already has a collar, allow reprogramming with its current assembly
+  if (animal.collar && animal.collar.assemblyId) {
+    collarRestrictionMode.value = true
+    restrictedTiles.value = animal.collar.restrictedTiles?.map(t => ({...t})) || []
+    collarAssemblyAssigned.value = modules.activeAssemblies.find(a => a.id === animal.collar.assemblyId)
+    collarRestrictionAnimal.value = animal
+    return
+  }
+  // Otherwise, check for available collar assembly to assign
+  const assembly = getAvailableCollarAssembly()
+  if (!assembly) {
+    showNoCollarAssemblyModal.value = true
+    return
+  }
+  collarRestrictionMode.value = true
+  restrictedTiles.value = []
+  collarAssemblyAssigned.value = assembly
+  collarRestrictionAnimal.value = animal
+}
+
+function toggleTileRestriction(row, col) {
+  const idx = restrictedTiles.value.findIndex(t => t.row === row && t.col === col)
+  if (idx >= 0) {
+    restrictedTiles.value.splice(idx, 1)
+  } else if (restrictedTiles.value.length < 3) {
+    restrictedTiles.value.push({row, col})
+  }
+}
+
+// Save restrictions (assign assembly if needed, mark it as deployed, assign to animal)
+function saveTileRestrictions() {
+  const animal = collarRestrictionAnimal.value
+  const assembly = collarAssemblyAssigned.value
+  if (!animal) return
+
+  if (!animal.collar || !animal.collar.assemblyId) {
+    animal.collar = {
+      restrictedTiles: restrictedTiles.value.map(t => ({...t})),
+      assemblyId: assembly.id
+    }
+    assembly.deployed = true
+    // Place the assembly on the animal's current tile
+    const tile = findTileWithAnimal(animal)
+    if (tile) {
+      tile.assemblies = tile.assemblies || []
+      tile.assemblies.push(assembly)
+    }
+  } else {
+    animal.collar.restrictedTiles = restrictedTiles.value.map(t => ({...t}))
+  }
+  collarRestrictionMode.value = false
+  collarAssemblyAssigned.value = null
+  collarRestrictionAnimal.value = null
+  restrictedTiles.value = []
+}
+
+function findTileWithAnimal(animal) {
+  for (let row of tiles) {
+    for (let tile of row) {
+      if (tile.animal && tile.animal === animal) return tile
+    }
+  }
+  return null
+}
+
+// Cancel selection/reset state
+function cancelCollarRestriction() {
+  collarRestrictionMode.value = false
+  collarAssemblyAssigned.value = null
+  collarRestrictionAnimal.value = null
+  restrictedTiles.value = []
+}
+
+// Remove collar and return assembly to pool
+function returnCollarAssembly(animal) {
+  if (!animal.collar || !animal.collar.assemblyId) return
+  // Remove from tile.assemblies
+  const tile = findTileWithAnimal(animal)
+  if (tile && tile.assemblies) {
+    const idx = tile.assemblies.findIndex(a => a.id === animal.collar.assemblyId)
+    if (idx !== -1) tile.assemblies.splice(idx, 1)
+  }
+  // Return to pool
+  const idxActive = modules.activeAssemblies.findIndex(a => a.id === animal.collar.assemblyId)
+  if (idxActive !== -1) modules.activeAssemblies[idxActive].deployed = false
+  animal.collar = null
+}
 
 // --- HARVEST REQUIREMENT CHECK HELPERS ---
 function assemblyMeetsRequirements(assembly, requirements) {
@@ -26,11 +141,12 @@ function assemblyMeetsRequirements(assembly, requirements) {
           (!req.subtype || m.subtype === req.subtype) &&
           (!req.name || m.name === req.name)
       )
-  )
+  );
 }
+
 function getMissingModules(assembly, requirements) {
   if (!assembly || !assembly.modules) {
-    return requirements.map(req => req.name || req.type || JSON.stringify(req))
+    return requirements.map(req => req.name || req.type || JSON.stringify(req));
   }
   return requirements
       .filter(req =>
@@ -40,61 +156,54 @@ function getMissingModules(assembly, requirements) {
               (!req.name || m.name === req.name)
           )
       )
-      .map(req => req.name || req.type || JSON.stringify(req))
+      .map(req => req.name || req.type || JSON.stringify(req));
 }
 
 // Modal to show missing modules
 const showMissingModal = ref(false)
 const missingModules = ref([])
 const missingProductType = ref('')
+const lastHarvestAssemblyId = ref(null) // which assembly to use for harvest
 
-// --- UI/LOGIC HELPERS ---
-
-function closeModal() { selectedTile.value = null }
-
-function recallAssembly(tile) {
-  if (tile.assembly) {
-    const assemblyId = tile.assembly.id
-    tile.assembly = null
-    const assembly = modules.activeAssemblies.find(a => a.id === assemblyId)
-    if (assembly) assembly.deployed = false
-    closeModal()
-  }
+function closeModal() {
+  selectedTile.value = null
 }
+
+function recallAssembly(tile, assemblyId) {
+  tile.assemblies = tile.assemblies || []
+  const idx = tile.assemblies.findIndex(a => a.id === assemblyId)
+  if (idx !== -1) {
+    const assembly = tile.assemblies[idx]
+    assembly.deployed = false
+    tile.assemblies.splice(idx, 1)
+  }
+  closeModal()
+}
+
 
 // Plant Harvest Helpers
 function plantIsRipe(tile) {
   return tile.plant && (tile.plant.growthStage === 'Mature' || tile.plant.growthStage === 'Overripe')
 }
 
-function canHarvestPlant(tile) {
-  if (!plantIsRipe(tile) || !tile.assembly) return false
+function canHarvestPlant(tile, assemblyId) {
+  if (!plantIsRipe(tile) || !tile.assemblies || !tile.assemblies.length) return false
   const productType = tile.plant?.type
   const reqs = harvestRequirements[productType]
-  if (!reqs) return false // No rules defined
-  return assemblyMeetsRequirements(tile.assembly, reqs)
+  if (!reqs) return false
+  const assembly = tile.assemblies.find(a => a.id === assemblyId)
+  return assembly && assemblyMeetsRequirements(assembly, reqs)
 }
-// Return list of modules required for harvesting a plant that are missing
-function missingPlantHarvestModules(tile) {
-  const missing = []
-  if (!tile.assembly) {
-    missing.push('Collector module')
-    return missing
-  }
-  const names = tile.assembly.modules.map(m => m.name || '')
-  if (!names.some(n => n.includes('Collector'))) {
-    missing.push('Collector module')
-  }
-  return missing
-}
-function harvestPlant(tile) {
+
+function harvestPlant(tile, assemblyId) {
   const productType = tile.plant?.type
   const reqs = harvestRequirements[productType]
-  if (!canHarvestPlant(tile)) {
-    // Show modal with missing modules
-    missingModules.value = getMissingModules(tile.assembly, reqs)
+  const assembly = tile.assemblies.find(a => a.id === assemblyId)
+  if (!canHarvestPlant(tile, assemblyId)) {
+    missingModules.value = getMissingModules(assembly, reqs || [])
     missingProductType.value = productType
     showMissingModal.value = true
+    lastHarvestAssemblyId.value = assemblyId
     return
   }
   const existing = market.harvestedProducts.find(p => p.type === productType)
@@ -105,7 +214,7 @@ function harvestPlant(tile) {
       type: productType,
       icon: tile.plant.icon,
       qty: tile.plant.yield,
-      shelfLife: tile.plant.shelfLife || 3, // fallback
+      shelfLife: tile.plant.shelfLife || 3,
     })
   }
   tile.plant = null
@@ -117,22 +226,29 @@ function getAnimalProduct(animal) {
   if (!animal) return null
   return animals.products.find(p => p.key === animal.product)
 }
-function canHarvestProduct(tile) {
-  if (!tile.animal || !tile.assembly) return false
+
+function canHarvestProduct(tile, assemblyId) {
+  if (!tile.animal || !tile.assemblies) return false
   const product = getAnimalProduct(tile.animal)
   if (!product) return false
   const reqs = harvestRequirements[product.key]
   if (!reqs) return false
-  return assemblyMeetsRequirements(tile.assembly, reqs)
+  const today = day
+  if (typeof tile.animal.nextHarvest === "undefined") tile.animal.nextHarvest = today
+  const assembly = tile.assemblies.find(a => a.id === assemblyId)
+  return assembly && assemblyMeetsRequirements(assembly, reqs) && today >= tile.animal.nextHarvest
 }
-function harvestAnimalProduct(tile) {
+
+function harvestAnimalProduct(tile, assemblyId) {
   const product = getAnimalProduct(tile.animal)
   const reqs = harvestRequirements[product?.key]
-  if (!canHarvestProduct(tile)) {
-    // Show modal with missing modules
-    missingModules.value = getMissingModules(tile.assembly, reqs)
+  const today = gameState.day
+  const assembly = tile.assemblies.find(a => a.id === assemblyId)
+  if (!canHarvestProduct(tile, assemblyId)) {
+    missingModules.value = getMissingModules(assembly, reqs || [])
     missingProductType.value = product?.key
     showMissingModal.value = true
+    lastHarvestAssemblyId.value = assemblyId
     return
   }
   let existing = market.harvestedProducts.find(p => p.type === product.key)
@@ -146,28 +262,35 @@ function harvestAnimalProduct(tile) {
       shelfLife: product.shelfLife || 3,
     })
   }
+  let freq = tile.animal.outputFrequency
+  if (typeof freq === 'undefined') {
+    const animalType = animals.animalTypes.find(a => a.type === tile.animal.type)
+    freq = animalType?.outputFrequency || 1
+  }
+  tile.animal.nextHarvest = today + freq
 }
 
 // Harvest Animal (butchering)
-function canHarvestAnimal(tile) {
-  if (!tile.animal || !tile.assembly) return false
+function canHarvestAnimal(tile, assemblyId) {
+  if (!tile.animal || !tile.assemblies) return false
   const animalType = tile.animal.type
   const reqs = harvestRequirements[animalType]
   if (!reqs) return false
-  return assemblyMeetsRequirements(tile.assembly, reqs)
+  const assembly = tile.assemblies.find(a => a.id === assemblyId)
+  return assembly && assemblyMeetsRequirements(assembly, reqs)
 }
 
-function harvestAnimal(tile) {
+function harvestAnimal(tile, assemblyId) {
   const animalType = tile.animal.type
   const reqs = harvestRequirements[animalType]
-  if (!canHarvestAnimal(tile)) {
-    // Show modal with missing modules
-    missingModules.value = getMissingModules(tile.assembly, reqs)
+  const assembly = tile.assemblies.find(a => a.id === assemblyId)
+  if (!canHarvestAnimal(tile, assemblyId)) {
+    missingModules.value = getMissingModules(assembly, reqs || [])
     missingProductType.value = animalType
     showMissingModal.value = true
+    lastHarvestAssemblyId.value = assemblyId
     return
   }
-  tile.animal = null
   let existing = market.harvestedProducts.find(p => p.type === animalType)
   if (existing) {
     existing.qty += 1
@@ -179,6 +302,7 @@ function harvestAnimal(tile) {
       shelfLife: 3,
     })
   }
+  tile.animal = null
   closeModal()
 }
 
@@ -188,32 +312,61 @@ const animalToMove = ref(null)
 const originTile = ref(null)
 const moveDestRow = ref(null)
 const moveDestCol = ref(null)
+const showMoverSelectionModal = ref(false)
+const moverAssemblies = ref([])  // Assemblies that can move the animal
+const selectedMoverId = ref(null)
+
 const validAnimalDestTiles = computed(() => {
-  const out = []
-  for (let row = 0; row < tiles.length; row++) {
-    for (let col = 0; col < tiles[0].length; col++) {
-      if (!tiles[row][col].animal) {
-        out.push({row, col})
+  if (!originTile.value) return []
+  const restriction = originTile.value.animal?.collar?.restrictedTiles
+  if (!restriction || restriction.length === 0) {
+    const out = []
+    for (let row = 0; row < tiles.length; row++) {
+      for (let col = 0; col < tiles[0].length; col++) {
+        if (!tiles[row][col].animal) {
+          out.push({row, col})
+        }
       }
     }
+    return out
   }
-  return out
+  return restriction.filter(({row, col}) => !tiles[row][col].animal)
 })
-const canMoveAnimal = computed(() =>
-    selectedTile.value &&
-    selectedTile.value.animal &&
-    selectedTile.value.assembly &&
-    selectedTile.value.assembly.modules.some(m => m.type === 'arm')
-)
+
+const canMoveAnimal = computed(() => {
+  if (!selectedTile.value || !selectedTile.value.animal || !selectedTile.value.assemblies) return false
+  return selectedTile.value.assemblies.some(a => a.deployed && a.modules.some(m => m.type === 'arm'))
+})
+
 function openMoveAnimalModal(tile) {
   animalToMove.value = tile.animal
   originTile.value = tile
-  showMoveAnimalModal.value = true
+  moverAssemblies.value = (tile.assemblies || []).filter(
+      a => a.deployed && a.modules.some(m => m.type === 'arm')
+  )
+  if (moverAssemblies.value.length === 0) {
+    alert("No suitable assembly with a Robotic Arm in this tile.")
+    return
+  }
+  if (moverAssemblies.value.length === 1) {
+    selectedMoverId.value = moverAssemblies.value[0].id
+    showMoveAnimalModal.value = true
+  } else {
+    selectedMoverId.value = null
+    showMoverSelectionModal.value = true
+  }
   if (validAnimalDestTiles.value.length) {
     moveDestRow.value = validAnimalDestTiles.value[0].row + 1
     moveDestCol.value = validAnimalDestTiles.value[0].col + 1
   }
 }
+
+function confirmMoverSelection() {
+  if (!selectedMoverId.value) return
+  showMoverSelectionModal.value = false
+  showMoveAnimalModal.value = true
+}
+
 function closeMoveAnimalModal() {
   showMoveAnimalModal.value = false
   animalToMove.value = null
@@ -221,6 +374,7 @@ function closeMoveAnimalModal() {
   moveDestRow.value = null
   moveDestCol.value = null
 }
+
 function confirmMoveAnimal() {
   const row = Number(moveDestRow.value) - 1
   const col = Number(moveDestCol.value) - 1
@@ -229,12 +383,118 @@ function confirmMoveAnimal() {
     alert("Destination tile already has an animal.")
     return
   }
-  destTile.animal = animalToMove.value
-  originTile.value.animal = null
-  closeMoveAnimalModal()
-}
-</script>
+  destTile.animal = {...animalToMove.value}
+  destTile.assemblies = destTile.assemblies || []
 
+  // Move collar assembly, if any
+  if (animalToMove.value.collar && animalToMove.value.collar.assemblyId) {
+    const idx = originTile.value.assemblies.findIndex(
+        a => a.id === animalToMove.value.collar.assemblyId
+    )
+    if (idx !== -1) {
+      const [collarAsm] = originTile.value.assemblies.splice(idx, 1)
+      destTile.assemblies.push(collarAsm)
+    }
+  }
+
+  // Move the selected mover assembly
+  if (selectedMoverId.value) {
+    const idx = originTile.value.assemblies.findIndex(
+        a => a.id === selectedMoverId.value
+    )
+    if (idx !== -1) {
+      const [movingAsm] = originTile.value.assemblies.splice(idx, 1)
+      destTile.assemblies.push(movingAsm)
+    }
+  }
+
+  originTile.value.animal = null
+  showMoveAnimalModal.value = false
+  animalToMove.value = null
+  originTile.value = null
+  moveDestRow.value = null
+  moveDestCol.value = null
+  selectedMoverId.value = null
+}
+
+const showAssemblySelectModal = ref(false)
+const assemblySelectPurpose = ref(null) // 'plant', 'animalProduct', 'animal'
+const assemblySelectTile = ref(null)
+const assemblySelectAssemblies = ref([])
+const assemblySelectCallback = ref(null)
+
+function openHarvestPlantModal(tile) {
+  const suitable = (tile.assemblies || []).filter(a =>
+      assemblyMeetsRequirements(a, harvestRequirements[tile.plant?.type] || [])
+  )
+  if (suitable.length === 1) {
+    harvestPlant(tile, suitable[0].id)
+    return
+  }
+  if (suitable.length === 0) return // button will be disabled anyway
+
+  showAssemblySelectModal.value = true
+  assemblySelectPurpose.value = 'plant'
+  assemblySelectTile.value = tile
+  assemblySelectAssemblies.value = suitable
+  assemblySelectCallback.value = id => harvestPlant(tile, id)
+}
+
+function openHarvestAnimalProductModal(tile) {
+  const key = getAnimalProduct(tile.animal)?.key
+  const suitable = (tile.assemblies || []).filter(a =>
+      assemblyMeetsRequirements(a, harvestRequirements[key] || [])
+  )
+  if (suitable.length === 1) {
+    harvestAnimalProduct(tile, suitable[0].id)
+    return
+  }
+  if (suitable.length === 0) return
+
+  showAssemblySelectModal.value = true
+  assemblySelectPurpose.value = 'animalProduct'
+  assemblySelectTile.value = tile
+  assemblySelectAssemblies.value = suitable
+  assemblySelectCallback.value = id => harvestAnimalProduct(tile, id)
+}
+
+function openHarvestAnimalModal(tile) {
+  const suitable = (tile.assemblies || []).filter(a =>
+      assemblyMeetsRequirements(a, harvestRequirements[tile.animal?.type] || [])
+  )
+  if (suitable.length === 1) {
+    harvestAnimal(tile, suitable[0].id)
+    return
+  }
+  if (suitable.length === 0) return
+
+  showAssemblySelectModal.value = true
+  assemblySelectPurpose.value = 'animal'
+  assemblySelectTile.value = tile
+  assemblySelectAssemblies.value = suitable
+  assemblySelectCallback.value = id => harvestAnimal(tile, id)
+}
+
+function handleAssemblySelect(id) {
+  if (assemblySelectCallback.value) {
+    assemblySelectCallback.value(id)
+  }
+  showAssemblySelectModal.value = false
+  assemblySelectPurpose.value = null
+  assemblySelectTile.value = null
+  assemblySelectAssemblies.value = []
+  assemblySelectCallback.value = null
+}
+
+function closeAssemblySelectModal() {
+  showAssemblySelectModal.value = false
+  assemblySelectPurpose.value = null
+  assemblySelectTile.value = null
+  assemblySelectAssemblies.value = []
+  assemblySelectCallback.value = null
+}
+
+</script>
 
 <template>
   <div class="fieldsGrid">
@@ -254,7 +514,11 @@ function confirmMoveAnimal() {
       <div class="tileContents">
         <span v-if="tile.plant" class="tilePlant">{{ tile.plant.icon }}</span>
         <span v-if="tile.animal" class="tileAnimal">{{ tile.animal.icon }}</span>
-        <span v-if="tile.assembly" class="tileAssembly">{{ tile.assembly.icon || '🤖' }}</span>
+        <span
+            v-for="a in tile.assemblies"
+            :key="a.id"
+            class="tileAssembly"
+        >{{ a.icon || '🤖' }}</span>
       </div>
       <div class="tileStats">
         <span class="stat health" :style="{color: tile.soil.health < 60 ? '#d32f2f' : '#388e3c'}">
@@ -284,21 +548,51 @@ function confirmMoveAnimal() {
         <strong>Plant:</strong>
         <span class="tilePlant">{{ selectedTile.plant.icon }}</span>
         {{ selectedTile.plant.type }} ({{ selectedTile.plant.growthStage }})
+
+
         <button
-            v-if="canHarvestPlant(selectedTile)"
-            @click="harvestPlant(selectedTile)"
             class="harvest-btn"
-        >Harvest</button>
-        <span v-else class="harvest-msg">
-          <span v-if="!plantIsRipe(selectedTile)">(Plant is not ripe for harvest)</span>
-          <span v-else-if="!hasCollector(selectedTile)">
-            (Missing: {{ missingPlantHarvestModules(selectedTile).join(', ') }})
-          </span>
-        </span>
+            :disabled="
+        !(
+          (selectedTile.plant.growthStage === 'Mature' || selectedTile.plant.growthStage === 'Overripe') &&
+          selectedTile.assemblies.some(a => assemblyMeetsRequirements(a, harvestRequirements[selectedTile.plant?.type] || []))
+        )
+      "
+            @click="openHarvestPlantModal(selectedTile)"
+        >
+          Harvest
+        </button>
+        <span
+            v-if="selectedTile.assemblies.length === 0"
+            class="harvest-msg"
+        >(No assemblies deployed)</span
+        >
+        <span
+            v-else-if="!selectedTile.assemblies.some(a => assemblyMeetsRequirements(a, harvestRequirements[selectedTile.plant?.type] || []))"
+            class="harvest-msg"
+        >
+      (Missing required modules:
+      {{
+            selectedTile.assemblies.length
+                ? selectedTile.assemblies
+                    .map(a =>
+                        getMissingModules(a, harvestRequirements[selectedTile.plant?.type] || []).join(', ')
+                    )
+                    .join(' / ')
+                : 'No assembly'
+          }})
+    </span>
+        <span
+            v-if="selectedTile.plant.growthStage !== 'Mature' && selectedTile.plant.growthStage !== 'Overripe'"
+            class="harvest-msg"
+        >(Not ready for harvest)</span
+        >
+
       </div>
       <div v-else style="margin-top: 0.7em;">
         <strong>No plant</strong>
       </div>
+
 
       <!-- Animal Section -->
       <div v-if="selectedTile.animal" style="margin-top: 0.7em;">
@@ -306,58 +600,128 @@ function confirmMoveAnimal() {
         <span class="tileAnimal">{{ selectedTile.animal.icon }}</span>
         {{ selectedTile.animal.type }} (Mood: {{ selectedTile.animal.mood ?? '-' }})
         <span v-if="selectedTile.animal.collar" style="font-size:0.97em;">
-          — <em>Collar: Restricted to {{ selectedTile.animal.collar.restrictedTiles.length }} tiles</em>
+    — <em>Collar: Restricted to {{ selectedTile.animal.collar.restrictedTiles.length }} tiles</em>
+  </span>
+
+        <!-- Collar restriction picker (leave as is, omitted for brevity) -->
+
+        <!-- Only show animal actions if not in restriction picker -->
+        <div v-else>
+          <!-- Move Animal row (leave as is) -->
+          <div class="animal-actions-row" style="display: flex; gap: 0.7em; margin-top: 0.6em;">
+            <!-- ... Move and Collar Restriction buttons ... -->
+          </div>
+
+          <!-- Animal Product Harvest Button -->
+          <div class="animal-actions-row" style="display: flex; gap: 0.7em; margin-top: 0.6em;">
+            <div v-if="getAnimalProduct(selectedTile.animal)">
+              <button
+                  class="animal-product-btn"
+                  :disabled="
+      !selectedTile.assemblies.some(a => assemblyMeetsRequirements(a, harvestRequirements[getAnimalProduct(selectedTile.animal)?.key] || [])) ||
+      (selectedTile.animal && selectedTile.animal.nextHarvest > gameState.day)
+    "
+                  @click="openHarvestAnimalProductModal(selectedTile)"
+              >
+                Harvest {{ getAnimalProduct(selectedTile.animal)?.label || selectedTile.animal.product }}
+                <span>{{ getAnimalProduct(selectedTile.animal)?.icon || '' }}</span>
+              </button>
+
+              <span v-if="selectedTile.assemblies.length === 0" class="harvest-msg">(No assemblies deployed)</span>
+              <span
+                  v-else-if="!selectedTile.assemblies.some(a => assemblyMeetsRequirements(a, harvestRequirements[getAnimalProduct(selectedTile.animal)?.key] || []))"
+                  class="harvest-msg">
+          (Missing required modules: {{
+                  selectedTile.assemblies.length
+                      ? selectedTile.assemblies.map(a => getMissingModules(a, harvestRequirements[getAnimalProduct(selectedTile.animal)?.key] || []).join(', ')).join(' / ')
+                      : 'No assembly'
+                }})
         </span>
-        <!-- Move Animal row -->
-        <div class="animal-actions-row" style="display: flex; gap: 0.7em; margin-top: 0.6em;">
-          <button
-              class="move-animal-btn"
-              :disabled="!canMoveAnimal"
-              @click="canMoveAnimal ? openMoveAnimalModal(selectedTile) : null"
-          >Move Animal</button>
-          <span v-if="!canMoveAnimal" class="move-animal-msg">
-            Requires an assembly with a Robotic Arm in this tile
-          </span>
-        </div>
-        <!-- Harvest Product & Animal -->
-        <div class="animal-actions-row" style="display: flex; gap: 0.7em; margin-top: 0.6em;">
-          <button
-              class="animal-product-btn"
-              @click="harvestAnimalProduct(selectedTile)"
-              :disabled="!canHarvestProduct(selectedTile)"
-          >
-            Harvest {{ getAnimalProduct(selectedTile.animal)?.label || selectedTile.animal.product }}
-            <span>{{ getAnimalProduct(selectedTile.animal)?.icon || '' }}</span>
-          </button>
-          <button
-              class="animal-harvest-btn"
-              @click="harvestAnimal(selectedTile)"
-              :disabled="!canHarvestAnimal(selectedTile)"
-          >Harvest Animal</button>
-        </div>
-        <div v-if="!canHarvestProduct(selectedTile)" class="harvest-msg">
-          Missing required modules: <em>Check details</em>
+            </div>
+          </div>
+
+          <!-- Harvest Animal Button -->
+          <div class="animal-actions-row" style="display: flex; gap: 0.7em; margin-top: 0.2em;">
+            <button
+                class="animal-harvest-btn"
+                :disabled="!selectedTile.assemblies.some(a => assemblyMeetsRequirements(a, harvestRequirements[selectedTile.animal?.type] || []))"
+                @click="openHarvestAnimalModal(selectedTile)"
+            >
+              Harvest Animal
+            </button>
+            <span v-if="selectedTile.assemblies.length === 0" class="harvest-msg">(No assemblies deployed)</span>
+            <span
+                v-else-if="!selectedTile.assemblies.some(a => assemblyMeetsRequirements(a, harvestRequirements[selectedTile.animal?.type] || []))"
+                class="harvest-msg">
+        (Missing required modules: {{
+                selectedTile.assemblies.length
+                    ? selectedTile.assemblies.map(a => getMissingModules(a, harvestRequirements[selectedTile.animal?.type] || []).join(', ')).join(' / ')
+                    : 'No assembly'
+              }})
+      </span>
+            <div
+                v-if="selectedTile.animal && getAnimalProduct(selectedTile.animal) && selectedTile.animal.nextHarvest > gameState.day"
+                class="harvest-msg">
+              Next {{ getAnimalProduct(selectedTile.animal)?.label || selectedTile.animal.product }} ready in
+              {{ selectedTile.animal.nextHarvest - gameState.day }} day(s)
+            </div>
+          </div>
         </div>
       </div>
       <div v-else style="margin-top: 0.7em;">
         <strong>No animal</strong>
       </div>
 
-      <!-- Assembly Section -->
-      <div v-if="selectedTile.assembly">
-        <strong>Assembly:</strong>
-        <span class="tileAssembly">{{ selectedTile.assembly.icon || '🤖' }}</span>
-        Modules:
-        <span v-for="mod in selectedTile.assembly.modules" :key="mod.name">{{ mod.name }} </span>
-        <button @click="recallAssembly(selectedTile)">Recall</button>
+
+      <div v-else style="margin-top: 0.7em;">
+        <strong>No animal</strong>
+      </div>
+
+      <!-- Assemblies Section -->
+      <div v-if="selectedTile.assemblies && selectedTile.assemblies.length">
+        <strong>Assemblies:</strong>
+        <div v-for="a in selectedTile.assemblies" :key="a.id" class="assembly-block">
+          <span class="tileAssembly">{{ a.icon || '🤖' }}</span>
+          <span>{{ a.name || 'Assembly' }}</span>
+          Modules:
+          <span v-for="mod in a.modules" :key="mod.name">{{ mod.name }}</span>
+          <button @click="recallAssembly(selectedTile, a.id)">Recall</button>
+        </div>
       </div>
       <div v-else style="margin-top: 0.7em;">
-        <strong>No assembly</strong>
+        <strong>No assemblies</strong>
+      </div>
+
+      <div v-else style="margin-top: 0.7em;">
+        <strong>No assemblies</strong>
       </div>
       <button @click="closeModal" class="close-btn">Close</button>
     </div>
   </div>
 
+  <!-- Assembly Selection Modal for Move -->
+  <div v-if="showMoverSelectionModal" class="tile-modal-backdrop" @click.self="showMoverSelectionModal = false">
+    <div class="tile-modal">
+      <h4>Select Assembly to Move Animal</h4>
+      <div>
+        Choose which assembly should move the animal (must have a Robotic Arm):
+      </div>
+      <ul>
+        <li v-for="asm in moverAssemblies" :key="asm.id">
+          <label>
+            <input type="radio" v-model="selectedMoverId" :value="asm.id"/>
+            {{ asm.name || 'Assembly' }}
+            — Modules:
+            <span v-for="m in asm.modules" :key="m.name">{{ m.name }}</span>
+          </label>
+        </li>
+      </ul>
+      <div class="modal-actions">
+        <button :disabled="!selectedMoverId" @click="confirmMoverSelection">OK</button>
+        <button @click="() => { showMoverSelectionModal = false; selectedMoverId = null }">Cancel</button>
+      </div>
+    </div>
+  </div>
   <!-- Move Animal Modal -->
   <div v-if="showMoveAnimalModal" class="tile-modal-backdrop" @click.self="closeMoveAnimalModal">
     <div class="tile-modal">
@@ -369,14 +733,16 @@ function confirmMoveAnimal() {
               v-for="tile in validAnimalDestTiles"
               :key="tile.row + '-' + tile.col"
               :value="tile.row + 1"
-          >Row {{ tile.row + 1 }}</option>
+          >Row {{ tile.row + 1 }}
+          </option>
         </select>
         <select v-model="moveDestCol">
           <option
               v-for="tile in validAnimalDestTiles"
               :key="tile.row + '-' + tile.col"
               :value="tile.col + 1"
-          >Col {{ tile.col + 1 }}</option>
+          >Col {{ tile.col + 1 }}
+          </option>
         </select>
       </label>
       <div class="modal-actions">
@@ -404,8 +770,28 @@ function confirmMoveAnimal() {
       <button @click="() => showMissingModal.value = false" class="close-btn">OK</button>
     </div>
   </div>
-</template>
 
+  <div v-if="showAssemblySelectModal" class="tile-modal-backdrop" @click.self="closeAssemblySelectModal">
+    <div class="tile-modal">
+      <h4>
+        Choose Assembly to
+        <span v-if="assemblySelectPurpose === 'plant'">Harvest Plant</span>
+        <span v-else-if="assemblySelectPurpose === 'animalProduct'">Harvest Animal Product</span>
+        <span v-else-if="assemblySelectPurpose === 'animal'">Harvest Animal</span>
+      </h4>
+      <ul>
+        <li v-for="a in assemblySelectAssemblies" :key="a.id">
+          <button @click="handleAssemblySelect(a.id)">
+            {{ a.name || 'Assembly' }}
+            <span v-if="a.modules.length">— Modules: {{ a.modules.map(m => m.name).join(', ') }}</span>
+          </button>
+        </li>
+      </ul>
+      <button class="close-btn" @click="closeAssemblySelectModal">Cancel</button>
+    </div>
+  </div>
+
+</template>
 
 <style scoped>
 .fieldsGrid {
@@ -486,6 +872,16 @@ function confirmMoveAnimal() {
   position: relative;
 }
 
+.assembly-block {
+  background: #fafafa;
+  margin: 0.5em 0 0.5em 0;
+  padding: 0.6em 0.9em;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  box-shadow: 0 1px 4px #0001;
+  font-size: 1em;
+}
+
 .close-btn {
   margin-top: 1.4em;
   background: #b2dfdb;
@@ -505,6 +901,26 @@ function confirmMoveAnimal() {
 .fieldTile.active {
   box-shadow: 0 0 8px 3px #ffd60099;
   border-color: #ffd600;
+}
+
+.fieldTile.restricted {
+  box-shadow: 0 0 0 3px #00bcd4, 0 0 8px 3px #ffd60099;
+  border-color: #00bcd4;
+}
+
+.collar-restrict-btn {
+  background: #ffd600;
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.99em;
+  padding: 0.45em 1.4em;
+  cursor: pointer;
+}
+
+.collar-restrict-btn:hover {
+  background: #ffb300;
 }
 
 .move-animal-row {
@@ -543,6 +959,7 @@ function confirmMoveAnimal() {
   font-size: 0.97em;
   font-style: italic;
 }
+
 .harvest-msg {
   margin-left: 0.7em;
   color: #c62828;
@@ -565,5 +982,13 @@ function confirmMoveAnimal() {
 .harvest-btn:hover {
   background: #ffb300;
 }
+
+.harvest-btn:disabled {
+  background: #ddd !important;
+  color: #888 !important;
+  cursor: not-allowed !important;
+  border: 1px solid #bbb;
+}
+
 
 </style>

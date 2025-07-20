@@ -31,8 +31,8 @@ onBeforeUnmount(() => {
     <main>
       <StartingScreen v-if="currentScreen === 'start'"/>
       <MainMap v-if="currentScreen === 'main'"  />
-      <AssemblyArea v-if="currentScreen === 'assembly'"/>
-      <MarketArea v-if="currentScreen === 'market'"/>
+      <AssemblyArea v-if="currentScreen === 'assembly'" />
+      <MarketArea v-if="currentScreen === 'market'" :key="currentScreen"/>
     </main>
   </template>
 

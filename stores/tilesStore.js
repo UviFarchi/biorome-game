@@ -15,7 +15,8 @@ export const tilesStore = defineStore('tiles', () => {
                     recoveryRate: 5
                 },
                 plant: null,
-                animal: null
+                animal: null,
+                assemblies: []
             }))
         )
     )
@@ -27,7 +28,7 @@ export const tilesStore = defineStore('tiles', () => {
             { name: 'Battery Pack' },
             { name: 'GPS Module' },
             { type: 'arm', subtype: 'medium' },
-            { name: 'Camera Module (RGB)' },
+            { type: 'camera', subtype: 'rgb' },
             { name: 'Gripper' },
             { name: 'Suction Tool' },
             { type: 'cart' }
@@ -35,14 +36,14 @@ export const tilesStore = defineStore('tiles', () => {
         'Tomato': [
             { type: 'transport' },
             { type: 'battery' },
-            { name: 'camera' },
+            { type: 'camera' },
             { type: 'arm', subtype: 'medium' },
             { name: 'Gripper' }
         ],
         'Lettuce': [
             { type: 'transport' },
             { name: 'Battery Pack' },
-            { name: 'Camera Module (RGB)' },
+            { type: 'camera', subtype: 'rgb' },
             { type: 'arm', subtype: 'small' },
             { name: 'Gripper' }
         ],
@@ -75,7 +76,7 @@ export const tilesStore = defineStore('tiles', () => {
         'Egg': [
             { type: 'transport' },
             { name: 'Battery Pack' },
-            { name: 'Camera Module (RGB)' },
+            { type: 'camera', subtype: 'rgb' },
             { type: 'arm', subtype: 'small' },
             { name: 'Suction Tool' },
             { type: 'cart' },
@@ -84,7 +85,7 @@ export const tilesStore = defineStore('tiles', () => {
         'Milk': [
             { type: 'transport' },
             { name: 'Battery Pack' },
-            { name: 'Camera Module (RGB)' },
+            { type: 'camera', subtype: 'rgb' },
             { type: 'arm', subtype: 'medium' },
             { name: 'Gripper' }
         ],

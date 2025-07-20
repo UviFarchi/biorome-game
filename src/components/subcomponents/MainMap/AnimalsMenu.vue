@@ -1,40 +1,15 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { animalsStore } from '/stores/animalsStore.js'
-import { tilesStore } from '/stores/tilesStore.js'
-import { modulesStore } from '/stores/modulesStore.js'
-import { userStore } from '/stores/userStore.js'
+import {ref, computed} from 'vue'
+import {animalsStore} from '/stores/animalsStore.js'
+import {tilesStore} from '/stores/tilesStore.js'
+import {modulesStore} from '/stores/modulesStore.js'
+import {userStore} from '/stores/userStore.js'
 import eventBus from "@/eventBus.js"
 
 const animals = animalsStore()
 const tiles = tilesStore()
-const modules = modulesStore()
+const moduleﬀs = modulesStore()
 const user = userStore()
-
-// Collar assembly requirements
-const requiredCollarModules = [
-  "Animal Collar",
-  "Battery Pack",
-  "Audio Alarm",
-  "Mild Shocker",
-  "GPS Module"
-]
-
-const availableCollarAssemblies = computed(() => {
-  return (modules.activeAssemblies ?? []).filter(a => {
-    if (a.deployed) return false
-    const moduleNames = (a.modules || []).map(m => m.name)
-    return requiredCollarModules.every(req => moduleNames.includes(req))
-  })
-})
-
-// For requirements modal: try to show closest assembly (or empty if none)
-const firstAssemblyMissing = computed(() => {
-  const a = (modules.activeAssemblies ?? []).find(a => !a.deployed)
-  if (!a) return requiredCollarModules
-  const moduleNames = (a.modules || []).map(m => m.name)
-  return requiredCollarModules.filter(req => !moduleNames.includes(req))
-})
 
 const showDeployModal = ref(false)
 const showRequirementsModal = ref(false)
@@ -54,7 +29,7 @@ const availableTiles = computed(() => {
   for (let row = 0; row < fieldRows; row++) {
     for (let col = 0; col < fieldCols; col++) {
       const tile = tiles.tiles[row][col]
-      if (!tile.animal) result.push({ row, col })
+      if (!tile.animal) result.push({row, col})
     }
   }
   return result
@@ -65,14 +40,12 @@ function toggleTileRestriction(row, col) {
   if (idx !== -1) {
     restrictedTiles.value.splice(idx, 1)
   } else if (restrictedTiles.value.length < 3) {
-    restrictedTiles.value.push({ row, col })
+    restrictedTiles.value.push({row, col})
   }
 }
 
 function openDeployModal(animal) {
   deployingAnimal.value = animal
-  useCollar.value = false
-  restrictedTiles.value = []
   if (availableTiles.value.length > 0) {
     selectedRow.value = availableTiles.value[0].row + 1
     selectedCol.value = availableTiles.value[0].col + 1
@@ -87,8 +60,6 @@ function closeDeployModal() {
   deployingAnimal.value = null
   selectedRow.value = null
   selectedCol.value = null
-  useCollar.value = false
-  restrictedTiles.value = []
 }
 
 function confirmDeploy() {
@@ -101,22 +72,10 @@ function confirmDeploy() {
       alert("Not enough gold!")
       return
     }
-    // If using collar, assign first available assembly (if exists)
-    if (useCollar.value) {
-      const collar = availableCollarAssemblies.value[0]
-      if (!collar) {
-        alert("No collar assembly available!")
-        return
-      }
-      collar.deployed = true
-      tile.assembly = collar
-    }
+
     tile.animal = {
       ...deployingAnimal.value,
       mood: 100,
-      collar: useCollar.value
-          ? { restrictedTiles: [...restrictedTiles.value] }
-          : null
     }
     user.gold -= deployingAnimal.value.cost
     closeDeployModal()
@@ -175,52 +134,6 @@ function closeRequirementsModal() {
             </option>
           </select>
         </label>
-        <div class="collarSection">
-          <label>
-            <input type="checkbox" v-model="useCollar" />
-            Use collar?
-          </label>
-          <div v-if="useCollar">
-            <div v-if="availableCollarAssemblies.length > 0" style="color: #388e3c;">
-              Collar assembly ready (will be assigned automatically).
-            </div>
-            <div v-else>
-              <div style="color:#e53935; margin-bottom:0.5em;">
-                No available collar assemblies.
-              </div>
-              <div>Required modules:</div>
-              {{requiredCollarModules}}
-              <button class="deployBtn" style="margin-top:0.5em;" @click="goToAssemblyArea">
-                Go to Assembly Area to Build
-              </button>
-            </div>
-            <div>
-              <div style="margin-top: 0.8em;">Select up to 3 tiles (restriction):</div>
-              <div class="tileSelectGrid">
-                <button
-                    v-for="cell in fieldRows * fieldCols"
-                    :key="cell"
-                    :class="[
-            'tileBtn',
-            restrictedTiles.some(t =>
-              t.row === Math.floor((cell - 1) / fieldCols) &&
-              t.col === (cell - 1) % fieldCols
-            ) ? 'selected' : ''
-          ]"
-                    @click.prevent="
-            toggleTileRestriction(
-              Math.floor((cell - 1) / fieldCols),
-              (cell - 1) % fieldCols
-            )
-          "
-                >
-                  {{ Math.floor((cell - 1) / fieldCols) + 1 }},{{ ((cell - 1) % fieldCols) + 1 }}
-                </button>
-              </div>
-              <div class="hint">(Tiles must be contiguous, otherwise the animal won't be able to move among them.)</div>
-            </div>
-          </div>
-        </div>
 
         <div class="modal-actions">
           <button @click="confirmDeploy">OK</button>
@@ -228,20 +141,7 @@ function closeRequirementsModal() {
         </div>
       </div>
     </div>
-    <!-- Requirements Modal -->
-    <div v-if="showRequirementsModal" class="modal-overlay">
-      <div class="modal">
-        <h4>No collar assembly available</h4>
-        <div>Required modules:</div>
-        <ul>
-          <li v-for="mod in firstAssemblyMissing" :key="mod">{{ mod }}</li>
-        </ul>
-        <div class="modal-actions">
-          <button @click="goToAssemblyArea">Go to Assembly Area</button>
-          <button @click="closeRequirementsModal">Cancel</button>
-        </div>
-      </div>
-    </div>
+
   </div>
 </template>
 
@@ -298,8 +198,17 @@ function closeRequirementsModal() {
 }
 
 .deployBtn:hover {
-  background: #00bcd4;
-  color: #fff;
+  background: #ddd !important;
+  color: #888 !important;
+  cursor: not-allowed !important;
+  border: 1px solid #bbb;
+}
+
+.deployBtn:disabled {
+  background: #ddd !important;
+  color: #888 !important;
+  cursor: not-allowed !important;
+  border: 1px solid #bbb;
 }
 
 .modal-overlay {
@@ -331,30 +240,6 @@ function closeRequirementsModal() {
   justify-content: flex-end;
   gap: 1em;
   margin-top: 0.7em;
-}
-
-.collarSection {
-  margin: 1em 0 0.6em 0;
-  background: #e0f2f1;
-  padding: 0.5em 1em;
-  border-radius: 8px;
-}
-
-.tileSelectGrid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.2em;
-  margin-top: 0.3em;
-}
-
-.tileBtn {
-  background: #e1f5fe;
-  border: 1px solid #00bcd4;
-  border-radius: 5px;
-  padding: 0.4em 0.7em;
-  font-size: 0.96em;
-  margin: 2px;
-  cursor: pointer;
 }
 
 

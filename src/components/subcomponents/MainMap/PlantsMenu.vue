@@ -17,11 +17,11 @@ const showAssemblyChoiceModal = ref(false)
 const deployingPlant = ref(null)
 const selectedRow = ref(null)
 const selectedCol = ref(null)
-const selectedPlantingType = ref('Seed') // default to Seed
+const selectedPlantingType = ref('Seed')
 const missingRequirements = ref([])
 const selectedAssemblyToDeploy = ref(null)
 
-// Helper: Check assembly for SEED
+// Check assembly for SEED
 function assemblyCanPlantSeed(assembly) {
   if (!assembly) return false
   const types = (assembly.modules || []).map(m => m.type)
@@ -33,7 +33,8 @@ function assemblyCanPlantSeed(assembly) {
       subtypes.includes('borer')
   )
 }
-// Helper: Check assembly for SEEDLING
+
+// Check assembly for SEEDLING
 function assemblyCanPlantSeedling(assembly) {
   if (!assembly) return false
   const types = (assembly.modules || []).map(m => m.type)
@@ -60,13 +61,13 @@ const availableTiles = computed(() => {
   for (let row = 0; row < tiles.tiles.length; row++) {
     for (let col = 0; col < tiles.tiles[0].length; col++) {
       const tile = tiles.tiles[row][col]
-      if (!tile.plant && tile.assembly && tile.assembly.deployed) {
-        if (
-            (selectedPlantingType.value === 'Seed' && assemblyCanPlantSeed(tile.assembly)) ||
-            (selectedPlantingType.value === 'Seedling' && assemblyCanPlantSeedling(tile.assembly))
-        ) {
-          result.push({ row, col })
-        }
+      if (!tile.plant && tile.assemblies && tile.assemblies.length > 0) {
+        const found = tile.assemblies.some(a =>
+            a.deployed &&
+            ((selectedPlantingType.value === 'Seed' && assemblyCanPlantSeed(a)) ||
+                (selectedPlantingType.value === 'Seedling' && assemblyCanPlantSeedling(a)))
+        )
+        if (found) result.push({ row, col })
       }
     }
   }
@@ -96,18 +97,18 @@ function openDeployModal(plant, plantingType) {
   deployingPlant.value = plant
   selectedPlantingType.value = plantingType
 
-  // 1. Any suitable deployed assembly?
+  // Any suitable deployed assembly?
   let deployedMatch = false
   for (let row = 0; row < tiles.tiles.length; row++) {
     for (let col = 0; col < tiles.tiles[0].length; col++) {
       const tile = tiles.tiles[row][col]
-      if (!tile.plant && tile.assembly && tile.assembly.deployed) {
-        if (
-            (plantingType === 'Seed' && assemblyCanPlantSeed(tile.assembly)) ||
-            (plantingType === 'Seedling' && assemblyCanPlantSeedling(tile.assembly))
-        ) {
-          deployedMatch = true
-        }
+      if (!tile.plant && tile.assemblies && tile.assemblies.length > 0) {
+        const found = tile.assemblies.some(a =>
+            a.deployed &&
+            ((plantingType === 'Seed' && assemblyCanPlantSeed(a)) ||
+                (plantingType === 'Seedling' && assemblyCanPlantSeedling(a)))
+        )
+        if (found) deployedMatch = true
       }
     }
   }
@@ -118,7 +119,7 @@ function openDeployModal(plant, plantingType) {
     return
   }
 
-  // 2. No deployed, but suitable assembly in pool? (not deployed)
+  // No deployed, but suitable assembly in pool? (not deployed)
   if (availableAssembliesForPlanting.value.length > 0) {
     // If only one, just deploy it
     if (availableAssembliesForPlanting.value.length === 1) {
@@ -129,7 +130,7 @@ function openDeployModal(plant, plantingType) {
     return
   }
 
-  // 3. No matching assembly at all, show requirements and Assembly Area link
+  // No matching assembly at all, show requirements and Assembly Area link
   let anyInPool = modules.activeAssemblies.length > 0
   if (anyInPool) {
     missingRequirements.value = getMissingRequirements(modules.activeAssemblies[0], plantingType)
@@ -145,14 +146,15 @@ function openDeployModal(plant, plantingType) {
   showRequirementsModal.value = true
 }
 
-// Actually deploy the chosen assembly to the first available tile (empty + no assembly)
+// Actually deploy the chosen assembly to the first available tile (empty + no plant)
 function deployAssemblyToTile(assembly) {
   let placed = false
   for (let row = 0; row < tiles.tiles.length; row++) {
     for (let col = 0; col < tiles.tiles[0].length; col++) {
       const tile = tiles.tiles[row][col]
-      if (!tile.plant && !tile.assembly) {
-        tile.assembly = assembly
+      if (!tile.plant) {
+        tile.assemblies = tile.assemblies || []
+        tile.assemblies.push(assembly)
         assembly.deployed = true
         placed = true
         break
@@ -191,16 +193,23 @@ function goToAssemblyArea() {
   eventBus.emit('nav', 'assembly')
 }
 
+// Find a suitable deployed assembly for planting on a tile
+function getDeployedPlantingAssemblies(tile, plantingType) {
+  return (tile.assemblies || []).filter(a =>
+      a.deployed &&
+      ((plantingType === 'Seed' && assemblyCanPlantSeed(a)) ||
+          (plantingType === 'Seedling' && assemblyCanPlantSeedling(a)))
+  )
+}
+
 // Confirm planting on selected tile
 function confirmDeploy() {
   if (!deployingPlant.value) return
   const row = Number(selectedRow.value) - 1
   const col = Number(selectedCol.value) - 1
   const tile = tiles.tiles[row][col]
-  let suitable =
-      (selectedPlantingType.value === 'Seed' && assemblyCanPlantSeed(tile.assembly)) ||
-      (selectedPlantingType.value === 'Seedling' && assemblyCanPlantSeedling(tile.assembly))
-  if (!tile.plant && tile.assembly && suitable) {
+  const usableAssemblies = getDeployedPlantingAssemblies(tile, selectedPlantingType.value)
+  if (!tile.plant && usableAssemblies.length > 0) {
     const cost =
         selectedPlantingType.value === 'Seed'
             ? deployingPlant.value.seedCost
@@ -217,8 +226,7 @@ function confirmDeploy() {
     user.gold -= cost
     closeDeployModal()
   } else {
-    // Should not reach here
-    alert('Invalid tile selected.')
+    alert('Invalid tile selected or no suitable assembly.')
   }
 }
 </script>
@@ -317,7 +325,6 @@ function confirmDeploy() {
         </div>
       </div>
     </div>
-
   </div>
 </template>
 

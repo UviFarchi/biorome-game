@@ -1,7 +1,7 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { modulesStore } from '/stores/modulesStore.js'
-import { tilesStore } from '/stores/tilesStore.js' // <-- Add this import
+import {ref, computed} from 'vue'
+import {modulesStore} from '/stores/modulesStore.js'
+import {tilesStore} from '/stores/tilesStore.js' // <-- Add this import
 import eventBus from "@/eventBus.js";
 
 const modules = modulesStore()
@@ -46,16 +46,11 @@ function confirmDeploy() {
           row >= 0 && row < tiles.tiles.length &&
           col >= 0 && col < tiles.tiles[0].length
       ) {
-        // --- Recall existing assembly if present
         const targetTile = tiles.tiles[row][col]
-        if (targetTile.assembly) {
-          const recalled = modules.activeAssemblies.find(a => a.id === targetTile.assembly.id)
-          if (recalled) recalled.deployed = false
-          targetTile.assembly = null
-        }
-        // --- Deploy the new assembly
-        targetTile.assembly = assembly
+        targetTile.assemblies = targetTile.assemblies || []
+        targetTile.assemblies.push(assembly)
         assembly.deployed = true
+        assembly.deployments--
       }
     }
   }
@@ -77,14 +72,25 @@ function confirmDeploy() {
           :key="assembly.id"
           class="assemblyCard"
       >
+        <div class="assemblyName">
+          {{ assembly.name || 'Assembly' }}
+        </div>
         <ul class="modulesList">
           <li v-for="mod in assembly.modules" :key="mod.name">
             {{ mod.name }}
           </li>
         </ul>
-        <button class="deployBtn" @click="openDeployModal(assembly.id)">
+        <button
+            class="deployBtn"
+            @click="openDeployModal(assembly.id)"
+            :disabled="assembly.deployments === 0"
+        >
           Deploy
         </button>
+        <span class="hint" style="display:block; color:#388e3c; font-size:0.93em; margin-top:0.2em;">
+  Deployments left: {{ assembly.deployments }}
+</span>
+
       </div>
       <div v-if="availableAssemblies.length === 0" class="empty">
         No assemblies available yet.
@@ -133,10 +139,12 @@ function confirmDeploy() {
   cursor: pointer;
   font-size: 1.02em;
 }
+
 .assemblyAreaButton:hover {
   background: #00bcd4;
   color: #fff;
 }
+
 .assembliesScroll {
   display: flex;
   flex-direction: row;
@@ -146,6 +154,7 @@ function confirmDeploy() {
   scrollbar-width: thin;
   scrollbar-color: #aaa #fafaff;
 }
+
 .assemblyCard {
   flex: 0 0 150px;
   background: #f2f2f2;
@@ -159,10 +168,12 @@ function confirmDeploy() {
   justify-content: center;
   align-items: flex-start;
 }
+
 .modulesList {
   margin: 0;
   padding-left: 1.2em;
 }
+
 .deployBtn {
   margin-top: 0.5em;
   padding: 0.2em 1em;
@@ -173,24 +184,34 @@ function confirmDeploy() {
   font-weight: bold;
   cursor: pointer;
 }
+
 .deployBtn:hover {
   background: #00bcd4;
   color: #fff;
 }
+.deployBtn:disabled {
+  background: #ddd !important;
+  color: #888 !important;
+  cursor: not-allowed !important;
+  border: 1px solid #bbb;
+}
+
 .empty {
   color: #888;
   font-style: italic;
   align-self: center;
 }
+
 .modal-overlay {
   position: fixed;
   z-index: 1000;
   inset: 0;
-  background: rgba(0,0,0,0.35);
+  background: rgba(0, 0, 0, 0.35);
   display: flex;
   justify-content: center;
   align-items: center;
 }
+
 .modal {
   background: #fff;
   padding: 2em 1.5em;
@@ -204,10 +225,19 @@ function confirmDeploy() {
   flex-direction: column;
   gap: 1em;
 }
+
 .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 1em;
   margin-top: 0.7em;
+}
+
+.assemblyName {
+  font-weight: bold;
+  font-size: 1.06em;
+  margin-bottom: 0.25em;
+  color: #00796b;
+  letter-spacing: 0.01em;
 }
 </style>

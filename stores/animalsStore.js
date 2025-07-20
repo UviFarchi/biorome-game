@@ -21,7 +21,7 @@ export const animalsStore = defineStore('animalTypes', () => {
         product: 'Milk',
         outputFrequency: 1,
         basePrice: 1,
-        shelfLife: 1
+        shelfLife: 2
     }, {
         type: 'Goat',
         icon: '🐐',
