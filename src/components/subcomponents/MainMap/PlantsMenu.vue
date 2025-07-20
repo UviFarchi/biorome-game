@@ -327,13 +327,8 @@ function confirmDeploy() {
   border-radius: 10px;
   background: #e0f7fa;
   padding: 1rem 0.5rem;
-  margin: 0 0 0 1rem;
-  min-width: 170px;
-  max-width: 220px;
-  height: 60vh;
   display: flex;
   flex-direction: column;
-  flex: 0 0 auto;
 }
 .verticalMenuScroll {
   display: flex;
