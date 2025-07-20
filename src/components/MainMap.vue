@@ -38,11 +38,17 @@ const acceptedOrdersDisplay = computed(() =>
 <template>
   <div class="main-map-wrapper">
     <StatusBar />
-    <AssembliesMenu title="Available Assemblies" />
+    <div class="assemblies-menu-area">
+      <AssembliesMenu title="Available Assemblies" />
+    </div>
     <div class="center-area">
-      <AnimalsMenu />
+      <div class="left-menu">
+        <AnimalsMenu />
+      </div>
       <TilesGrid />
-      <PlantsMenu />
+      <div class="right-menu">
+        <PlantsMenu />
+      </div>
     </div>
     <HarvestedMenu :items="acceptedOrdersDisplay" />
   </div>
@@ -59,8 +65,37 @@ const acceptedOrdersDisplay = computed(() =>
 .center-area {
   flex: 1 1 auto;
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: stretch;
   justify-content: center;
   overflow: hidden;
-}</style>
+}
+
+.assemblies-menu-area {
+  flex: 0 0 auto;
+  margin: 0.5rem 0;
+}
+
+.left-menu,
+.right-menu {
+  flex: 0 0 auto;
+  height: 100%;
+  min-width: 170px;
+  max-width: 220px;
+  display: flex;
+  flex-direction: column;
+}
+
+.left-menu {
+  margin-right: 1rem;
+}
+
+.right-menu {
+  margin-left: 1rem;
+}
+
+.left-menu :deep(.verticalMenuArea),
+.right-menu :deep(.verticalMenuArea) {
+  flex: 1 1 auto;
+  height: 100%;
+}
+</style>
