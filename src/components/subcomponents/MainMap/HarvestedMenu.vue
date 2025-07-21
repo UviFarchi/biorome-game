@@ -1,26 +1,17 @@
 <script setup>
 import eventBus from "@/eventBus.js";
 import {computed, ref} from "vue";
-defineProps({
-  items: {
-    type: Array,
-    required: true
-  }
-})
+
 
 
 
 import { marketStore } from '/stores/marketStore.js'
 const market = marketStore()
 const harvested = computed(() => market.harvestedProducts)
-console.log("MarketArea harvestedProducts", market.harvestedProducts);
 </script>
 
 <template>
-  <div class="bottomMenuArea" >
-    <button class="MarketAreaButton" @click="eventBus.emit('nav', 'market')">
-      Go to Market Area
-    </button>
+
 
     <div class="harvestedArea">
       <strong>Harvested Products:</strong>
@@ -33,22 +24,12 @@ console.log("MarketArea harvestedProducts", market.harvestedProducts);
       </div>
       <span v-else class="empty">No harvests yet.</span>
     </div>
-  </div>
+
 </template>
 
 
 <style scoped>
-.bottomMenuArea {
-  border-top: 2px solid #b2dfdb;
-  background: #e0f7fa;
-  padding: 0.5rem 0;
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  min-height: 88px;
-  z-index: 100;
-}
+
 
 
 .empty {
@@ -62,6 +43,9 @@ console.log("MarketArea harvestedProducts", market.harvestedProducts);
   font-size: 1.04em;
   background: #f3fbe9;
   border-bottom: 1px solid #b2dfdb;
+  border-top: 2px solid #b2dfdb;
+  background: #e0f7fa;
+  padding: 0.5rem 0;
 }
 .harvestedList {
   display: flex;

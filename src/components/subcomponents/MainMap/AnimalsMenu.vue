@@ -2,21 +2,17 @@
 import {ref, computed} from 'vue'
 import {animalsStore} from '/stores/animalsStore.js'
 import {tilesStore} from '/stores/tilesStore.js'
-import {modulesStore} from '/stores/modulesStore.js'
 import {userStore} from '/stores/userStore.js'
-import eventBus from "@/eventBus.js"
+import {gameStateStore} from "../../../../stores/gameStateStore.js";
 
 const animals = animalsStore()
 const tiles = tilesStore()
-const moduleﬀs = modulesStore()
 const user = userStore()
-
+const gameState = gameStateStore();
 const showDeployModal = ref(false)
-const showRequirementsModal = ref(false)
 const deployingAnimal = ref(null)
 const selectedRow = ref(null)
 const selectedCol = ref(null)
-const useCollar = ref(false)
 const restrictedTiles = ref([])
 
 const fieldRows = tiles.tiles.length
@@ -76,6 +72,7 @@ function confirmDeploy() {
     tile.animal = {
       ...deployingAnimal.value,
       mood: 100,
+      dateDeployed: gameState.day
     }
     user.gold -= deployingAnimal.value.cost
     closeDeployModal()
@@ -83,25 +80,10 @@ function confirmDeploy() {
     alert("Tile already has an animal.")
   }
 }
-
-
-// Handle requirements modal—user wants to build a collar
-function goToAssemblyArea() {
-  closeDeployModal()
-  showRequirementsModal.value = false
-  setTimeout(() => {
-    eventBus.emit('nav', 'assembly')
-  }, 100)
-}
-
-function closeRequirementsModal() {
-  showRequirementsModal.value = false
-}
 </script>
 
 <template>
   <div class="verticalMenuArea">
-    <h3>Available Animals</h3>
     <div class="verticalMenuScroll">
       <div
           v-for="animal in animals.animalTypes"
@@ -198,10 +180,8 @@ function closeRequirementsModal() {
 }
 
 .deployBtn:hover {
-  background: #ddd !important;
-  color: #888 !important;
-  cursor: not-allowed !important;
-  border: 1px solid #bbb;
+  background: #00bcd4;
+  color: #fff;
 }
 
 .deployBtn:disabled {
@@ -242,11 +222,4 @@ function closeRequirementsModal() {
   margin-top: 0.7em;
 }
 
-
-
-.hint {
-  font-size: 0.93em;
-  color: #888;
-  margin-top: 0.3em;
-}
 </style>

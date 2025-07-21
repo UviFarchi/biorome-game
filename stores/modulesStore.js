@@ -926,7 +926,7 @@ export const modulesStore = defineStore('modules', () => {
         modules: resolveModules(["Animal Collar", "Battery Pack", "Audio Alarm", "Mild Shocker", "GPS Module"]),
         name: "Test B",
         deployed: false,
-        deployments: 1,
+        moves: 1,
         actions: 1
     },
         {
@@ -934,7 +934,7 @@ export const modulesStore = defineStore('modules', () => {
             modules: resolveModules(["UGV Transport (small)", "Battery Pack", "GPS Module", "Seeder", "Robotic Arm (medium)", "Hole-Borer", "Camera_rgb", "Gripper"]),
             name: "Tomato Planter/harvester",
             deployed: false,
-            deployments: 1,
+            moves: 1,
             actions: 1
         }, // Assembly to move a cow (heavy arm + gripper + transport + battery + collar)
         {
@@ -942,7 +942,7 @@ export const modulesStore = defineStore('modules', () => {
             modules: resolveModules(["UGV Transport (large)", "Battery Pack", "Robotic Arm (heavy)", "Gripper", "Collar"]),
             name: "Cow Mover",
             deployed: false,
-            deployments: 1,
+            moves: 1,
             actions: 1
         }, // Assembly to harvest milk from a cow (matches Milk requirements)
         {
@@ -950,7 +950,7 @@ export const modulesStore = defineStore('modules', () => {
             modules: resolveModules(["UGV Transport (large)", "Battery Pack", "Camera_rgb", "Robotic Arm (medium)", "Gripper"]),
             name: "Cow Milker",
             deployed: false,
-            deployments: 1,
+            moves: 1,
             actions: 1
         }, // Assembly to harvest the cow (butchering)
         {
@@ -958,7 +958,7 @@ export const modulesStore = defineStore('modules', () => {
             modules: resolveModules(["UGV Transport (large)", "Battery Pack", "Robotic Arm (heavy)", "Cutter/Saw"]),
             name: "Cow Harvester",
             deployed: false,
-            deployments: 1,
+            moves: 1,
             actions: 1
         }])
 

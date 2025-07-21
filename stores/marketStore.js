@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia'
-console.log('marketStore loaded!', Math.random())
 
 export const marketStore = defineStore('market', {
   state: () => ({

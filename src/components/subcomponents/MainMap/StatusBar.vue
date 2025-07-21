@@ -95,6 +95,12 @@ const gold = computed(() => user.gold)
     <div id="gold" title="Gold: Earned from orders, spend to add plants/animals" class="statusBarCell">
       💰{{ gold }}
     </div>
+    <button class="assemblyAreaButton" @click="eventBus.emit('nav', 'assembly')">
+      Go to Assembly Area
+    </button>
+    <button class="MarketAreaButton" @click="eventBus.emit('nav', 'market')">
+      Go to Market Area
+    </button>
   </div>
 </template>
 

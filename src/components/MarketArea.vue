@@ -186,7 +186,6 @@ watch(
   { immediate: true }
 )
 
-console.log("MarketArea inventoryDisplay", inventoryDisplay.value);
 </script>
 
 <template>

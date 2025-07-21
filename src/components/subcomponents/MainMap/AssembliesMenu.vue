@@ -1,8 +1,7 @@
 <script setup>
-import {ref, computed} from 'vue'
-import {modulesStore} from '/stores/modulesStore.js'
-import {tilesStore} from '/stores/tilesStore.js' // <-- Add this import
-import eventBus from "@/eventBus.js";
+import { ref, computed } from 'vue'
+import { modulesStore } from '/stores/modulesStore.js'
+import { tilesStore } from '/stores/tilesStore.js'
 
 const modules = modulesStore()
 const tiles = tilesStore()
@@ -16,10 +15,14 @@ const deployingAssemblyId = ref(null)
 const selectedRow = ref(1)
 const selectedCol = ref(1)
 
+const currentAssembly = computed(() =>
+    modules.activeAssemblies.find(a => a.id === deployingAssemblyId.value)
+)
+
 const fieldRows = 6
 const fieldCols = 6
-const rowOptions = computed(() => Array.from({length: fieldRows}, (_, i) => i + 1))
-const colOptions = computed(() => Array.from({length: fieldCols}, (_, i) => i + 1))
+const rowOptions = computed(() => Array.from({ length: fieldRows }, (_, i) => i + 1))
+const colOptions = computed(() => Array.from({ length: fieldCols }, (_, i) => i + 1))
 
 function openDeployModal(id) {
   deployingAssemblyId.value = id
@@ -27,14 +30,12 @@ function openDeployModal(id) {
   selectedCol.value = colOptions.value[0]
   showDeployModal.value = true
 }
-
 function closeDeployModal() {
   showDeployModal.value = false
   deployingAssemblyId.value = null
   selectedRow.value = null
   selectedCol.value = null
 }
-
 function confirmDeploy() {
   if (deployingAssemblyId.value != null) {
     const idx = modules.activeAssemblies.findIndex(a => a.id === deployingAssemblyId.value)
@@ -50,47 +51,37 @@ function confirmDeploy() {
         targetTile.assemblies = targetTile.assemblies || []
         targetTile.assemblies.push(assembly)
         assembly.deployed = true
-        assembly.deployments--
+        assembly.moves--
       }
     }
   }
   closeDeployModal()
 }
-
-
 </script>
 
 <template>
-  <div class="topMenuArea">
-    <button class="assemblyAreaButton" @click="eventBus.emit('nav', 'assembly')">
-      Go to Assembly Area
-    </button>
-    <h3>Available Assemblies</h3>
+  <div>
     <div class="assembliesScroll">
       <div
           v-for="assembly in availableAssemblies"
           :key="assembly.id"
           class="assemblyCard"
+          :class="{ 'out-of-moves': assembly.moves === 0 }"
       >
-        <div class="assemblyName">
-          {{ assembly.name || 'Assembly' }}
+        <div class="cardHeader">
+          <span
+              class="assemblyName"
+              :title="assembly.name"
+          >
+            {{ assembly.name || 'Assembly' }}
+          </span>
+          <button
+              class="deployBtn"
+              @click="openDeployModal(assembly.id)"
+          >
+            Deploy
+          </button>
         </div>
-        <ul class="modulesList">
-          <li v-for="mod in assembly.modules" :key="mod.name">
-            {{ mod.name }}
-          </li>
-        </ul>
-        <button
-            class="deployBtn"
-            @click="openDeployModal(assembly.id)"
-            :disabled="assembly.deployments === 0"
-        >
-          Deploy
-        </button>
-        <span class="hint" style="display:block; color:#388e3c; font-size:0.93em; margin-top:0.2em;">
-  Deployments left: {{ assembly.deployments }}
-</span>
-
       </div>
       <div v-if="availableAssemblies.length === 0" class="empty">
         No assemblies available yet.
@@ -98,27 +89,46 @@ function confirmDeploy() {
     </div>
 
     <!-- Deploy Modal -->
-    <div v-if="showDeployModal" class="modal-overlay">
+    <div v-if="showDeployModal" class="modal-overlay" @click.self="closeDeployModal">
       <div class="modal">
         <h4>Deploy Assembly</h4>
-        <label>
-          Row:
-          <select v-model="selectedRow">
-            <option v-for="row in rowOptions" :value="row" :key="row">
-              {{ row }}
-            </option>
-          </select>
-        </label>
-        <label>
-          Column:
-          <select v-model="selectedCol">
-            <option v-for="col in colOptions" :value="col" :key="col">
-              {{ col }}
-            </option>
-          </select>
-        </label>
+        <div v-if="currentAssembly">
+          <div class="modal-assembly-name">{{ currentAssembly.name }}</div>
+          <div class="modal-section">
+            <span class="mod-label">Modules:</span>
+            <span
+                v-for="mod in currentAssembly.modules"
+                :key="mod.name"
+                class="moduleName"
+            >{{ mod.name }}</span>
+          </div>
+          <div class="modal-section">
+            <span>Actions left: <b>{{ currentAssembly.actions }}</b></span>
+            <span style="margin-left: 1.2em;">Moves left: <b>{{ currentAssembly.moves }}</b></span>
+          </div>
+          <div v-if="currentAssembly.moves === 0" class="deploy-warning">
+            No moves left for this assembly today.
+          </div>
+        </div>
+        <div class="modal-section">
+          <label>
+            Row:
+            <select v-model="selectedRow">
+              <option v-for="row in rowOptions" :value="row" :key="row">{{ row }}</option>
+            </select>
+          </label>
+          <label>
+            Column:
+            <select v-model="selectedCol">
+              <option v-for="col in colOptions" :value="col" :key="col">{{ col }}</option>
+            </select>
+          </label>
+        </div>
         <div class="modal-actions">
-          <button @click="confirmDeploy">Confirm</button>
+          <button
+              @click="confirmDeploy"
+              :disabled="!currentAssembly || currentAssembly.moves === 0"
+          >Confirm</button>
           <button @click="closeDeployModal">Cancel</button>
         </div>
       </div>
@@ -128,63 +138,64 @@ function confirmDeploy() {
 
 <style scoped>
 
-.assemblyAreaButton {
-  margin-bottom: 0.5em;
-  font-weight: bold;
-  padding: 0.3em 1.3em;
-  border-radius: 8px;
-  border: none;
-  background: #80deea;
-  color: #2c2c2c;
-  cursor: pointer;
-  font-size: 1.02em;
-}
-
-.assemblyAreaButton:hover {
-  background: #00bcd4;
-  color: #fff;
-}
 
 .assembliesScroll {
   display: flex;
   flex-direction: row;
-  gap: 1.2em;
+  gap: 0.8em;
   overflow-x: auto;
-  padding-bottom: 0.5em;
-  scrollbar-width: thin;
-  scrollbar-color: #aaa #fafaff;
+  overflow-y: hidden;
+  width: 100%;
+  height: 100%;
+  padding-bottom: 0.2em;
 }
-
 .assemblyCard {
-  flex: 0 0 150px;
-  background: #f2f2f2;
+  background: #f9fbe7;
   border-radius: 8px;
-  min-height: 80px;
-  margin: 0.2rem 0;
-  padding: 0.6rem 0.8rem;
-  box-shadow: 0 1px 4px #0002;
+  padding: 0.5em 1em;
+  min-width: 185px;
+  max-width: 185px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
+  align-items: stretch;
+  margin-bottom: 0;
+  position: relative;
 }
+.assemblyCard.out-of-moves {
+  background: #eee;
 
-.modulesList {
-  margin: 0;
-  padding-left: 1.2em;
+  pointer-events: auto;
 }
-
+.cardHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6em;
+  width: 100%;
+  user-select: none;
+}
+.assemblyName {
+  font-weight: bold;
+  text-align: center;
+  overflow-wrap: anywhere;
+  max-height: 3.5em;
+  line-height: 1.13em;
+  font-size: 1.08em;
+  margin-bottom: 0.15em;
+}
 .deployBtn {
-  margin-top: 0.5em;
-  padding: 0.2em 1em;
+  margin-top: 0.2em;
+  padding: 0.21em 1em;
   border-radius: 7px;
   background: #b2dfdb;
   border: none;
   color: #333;
   font-weight: bold;
   cursor: pointer;
+  font-size: 1em;
+  position: absolute;
+  bottom: 5px;
 }
-
 .deployBtn:hover {
   background: #00bcd4;
   color: #fff;
@@ -195,13 +206,11 @@ function confirmDeploy() {
   cursor: not-allowed !important;
   border: 1px solid #bbb;
 }
-
 .empty {
   color: #888;
   font-style: italic;
   align-self: center;
 }
-
 .modal-overlay {
   position: fixed;
   z-index: 1000;
@@ -211,33 +220,56 @@ function confirmDeploy() {
   justify-content: center;
   align-items: center;
 }
-
 .modal {
   background: #fff;
-  padding: 2em 1.5em;
+  padding: 2em 1.5em 1.5em 1.5em;
   border-radius: 12px;
   box-shadow: 0 4px 24px #0002;
-  min-width: 250px;
-  max-width: 90vw;
-  max-height: 90vh;
+  min-width: 270px;
+  max-width: 92vw;
+  max-height: 92vh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 1em;
+  gap: 1.15em;
 }
-
+.modal-assembly-name {
+  font-weight: bold;
+  font-size: 1.13em;
+  color: #00796b;
+  margin-bottom: 0.23em;
+}
+.modal-section {
+  margin-bottom: 0.7em;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.7em;
+}
+.mod-label {
+  color: #00796b;
+  font-weight: 500;
+  margin-right: 0.55em;
+}
+.moduleName {
+  font-size: 0.98em;
+  background: #e0f7fa;
+  border-radius: 5px;
+  padding: 0.13em 0.7em;
+  color: #333;
+  margin-right: 0.32em;
+  margin-bottom: 0.18em;
+}
+.deploy-warning {
+  color: #d32f2f;
+  font-size: 0.95em;
+  font-style: italic;
+  margin-top: 0.23em;
+}
 .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 1em;
   margin-top: 0.7em;
-}
-
-.assemblyName {
-  font-weight: bold;
-  font-size: 1.06em;
-  margin-bottom: 0.25em;
-  color: #00796b;
-  letter-spacing: 0.01em;
 }
 </style>

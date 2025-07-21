@@ -11,10 +11,10 @@ function saveAssembly() {
   const id = uuidv4()
   modules.activeAssemblies.push({
     id,
-    name: name.value || 'Custom Assembly',
+    name: name.value || 'Unnamed Assembly',
     modules: modules.currentAssembly.map(m => ({ ...m })),
     deployed: false,
-    deployments: 1,
+    moves: 1,
     actions: 1
   })
   // Clear the workspace for next assembly

@@ -37,65 +37,55 @@ const acceptedOrdersDisplay = computed(() =>
 </script>
 <template>
   <div class="main-map-wrapper">
-    <StatusBar />
-    <div class="assemblies-menu-area">
-      <AssembliesMenu title="Available Assemblies" />
-    </div>
-    <div class="center-area">
-      <div class="left-menu">
-        <AnimalsMenu />
-      </div>
-      <TilesGrid />
-      <div class="right-menu">
-        <PlantsMenu />
-      </div>
-    </div>
-    <HarvestedMenu :items="acceptedOrdersDisplay" />
+    <StatusBar class="status-bar"/>
+    <AssembliesMenu class="top-menu"/>
+    <AnimalsMenu class="left-menu"/>
+    <TilesGrid class="center-grid"/>
+    <PlantsMenu class="right-menu"/>
+    <HarvestedMenu class="bottom-menu"/>
   </div>
 </template>
 
 <style scoped>
 .main-map-wrapper {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+  display: grid;
+  grid-template-rows: 5% 15% 65% 15%;   /* Status, top-menu, center, bottom-menu */
+  grid-template-columns: 15% 70% 15%;   /* Left, center, right */
+  height: 100vh;
+  width: 100vw;
   overflow: hidden;
+  grid-template-areas:
+    "status-bar  status-bar   status-bar"
+    "left-menu   top-menu     right-menu"
+    "left-menu   center-grid  right-menu"
+    "left-menu   bottom-menu  right-menu";
 }
 
-.center-area {
-  flex: 1 1 auto;
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-  overflow: hidden;
+.status-bar   { grid-area: status-bar;   z-index: 10; }
+.left-menu    { grid-area: left-menu;    min-width: 110px; }
+.top-menu     { grid-area: top-menu;     z-index: 5; }
+.right-menu   { grid-area: right-menu;   min-width: 110px; }
+.bottom-menu  {
+  grid-area: bottom-menu;
+   align-self: stretch;
+   justify-self: stretch;
 }
+.center-grid  { grid-area: center-grid;  z-index: 1; }
 
-.assemblies-menu-area {
-  flex: 0 0 auto;
-  margin: 0.5rem 0;
+.left-menu, .right-menu, .top-menu, .bottom-menu, .center-grid {
+  overflow: auto;
+  max-height: 100%;
 }
-
-.left-menu,
-.right-menu {
-  flex: 0 0 auto;
+.top-menu {
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-height: 100%;
+  height: 100%;     /* Make sure it fills the grid row */
+  width: 100%;
+}
+.status-bar {
   height: 100%;
-  min-width: 170px;
-  max-width: 220px;
-  display: flex;
-  flex-direction: column;
-}
-
-.left-menu {
-  margin-right: 1rem;
-}
-
-.right-menu {
-  margin-left: 1rem;
-}
-
-.left-menu :deep(.verticalMenuArea),
-.right-menu :deep(.verticalMenuArea) {
-  flex: 1 1 auto;
-  height: 100%;
+  width: 100%;
 }
 </style>
+

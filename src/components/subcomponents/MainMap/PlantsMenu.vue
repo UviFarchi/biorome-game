@@ -233,7 +233,6 @@ function confirmDeploy() {
 
 <template>
   <div class="verticalMenuArea">
-    <h3>Available Plants</h3>
     <div class="verticalMenuScroll">
       <div
           v-for="plant in plants.plantTypes"
