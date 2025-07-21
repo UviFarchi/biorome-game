@@ -14,6 +14,22 @@ const openOffers = computed(() =>
 )
 const latestNotifications = computed(() => market.notifications.slice(-5).reverse())
 
+function addNotification(msg) {
+  market.notifications.push(msg)
+  if (market.notifications.length > 10) market.notifications.shift()
+}
+
+function removeFromInventory(type, qty) {
+  const item = market.harvestedProducts.find(p => p.type === type)
+  if (!item || item.qty < qty) return false
+  item.qty -= qty
+  if (item.qty <= 0) {
+    const idx = market.harvestedProducts.findIndex(p => p.type === type)
+    market.harvestedProducts.splice(idx, 1)
+  }
+  return true
+}
+
 function canFulfill(contract) {
   const item = market.harvestedProducts.find(p => p.type === contract.productType)
   return item && item.qty >= contract.quantity && contract.status === 'pending'
@@ -24,12 +40,38 @@ function canSell(offer) {
   return item && item.qty >= offer.quantity && offer.status === 'open'
 }
 
+function fulfillContract(id) {
+  const contract = market.contracts.find(c => c.id === id)
+  if (!contract || contract.status !== 'pending') return
+  if (!removeFromInventory(contract.productType, contract.quantity)) {
+    addNotification('Not enough inventory to fulfill contract.')
+    return
+  }
+  contract.status = 'completed'
+  const earned = contract.quantity * contract.pricePerUnit
+  user.gold += earned
+  addNotification(`Fulfilled contract ${id} for ${earned} gold.`)
+}
+
+function sellToOpenMarket(id) {
+  const offer = market.openMarketOffers.find(o => o.id === id)
+  if (!offer || offer.status !== 'open') return
+  if (!removeFromInventory(offer.productType, offer.quantity)) {
+    addNotification('Not enough inventory to sell on offer.')
+    return
+  }
+  offer.status = 'sold'
+  const earned = offer.quantity * offer.pricePerUnit
+  user.gold += earned
+  addNotification(`Sold ${offer.quantity} ${offer.productType} for ${earned} gold.`)
+}
+
 function deliver(id) {
-  market.fulfillContract(id)
+  fulfillContract(id)
 }
 
 function sell(id) {
-  market.sellToOpenMarket(id)
+  sellToOpenMarket(id)
 }
 </script>
 
