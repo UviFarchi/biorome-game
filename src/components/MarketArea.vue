@@ -1,297 +1,125 @@
 <script setup>
-import { computed, ref, reactive } from 'vue'
+import { computed } from 'vue'
 import { marketStore } from '/stores/marketStore.js'
 import { userStore } from '/stores/userStore.js'
-import { gameStateStore } from '/stores/gameStateStore.js'
-import eventBus from '@/eventBus.js'
 
 const market = marketStore()
 const user = userStore()
-const game = gameStateStore()
 
-const startDate = ref(new Date(game.startDate))
-const dayNum = computed(() => (game.day ?? 0) + 1)
+const activeContracts = computed(() =>
+  market.contracts.filter(c => c.status === 'pending').sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+)
+const openOffers = computed(() =>
+  market.openMarketOffers.filter(o => o.status === 'open').sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate))
+)
+const latestNotifications = computed(() => market.notifications.slice(-5).reverse())
 
-const displayDate = computed(() => {
-  const d = new Date(startDate.value)
-  d.setDate(d.getDate() + (dayNum.value - 1))
-  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
-})
-
-const offerContracts = computed(() => market.contracts.filter(c => c.status === 'offer'))
-const activeContracts = computed(() => market.contracts.filter(c => c.status === 'active'))
-const historyContracts = computed(() => market.contracts.filter(c => c.status === 'fulfilled' || c.status === 'failed'))
-
-const sellAmounts = reactive({})
-
-function generateRandomContract() {
-  const types = Object.keys(market.openMarket.prices)
-  if (types.length === 0) return
-  const id = `contract-${Date.now()}-${Math.floor(Math.random() * 1000)}`
-  const productType = types[Math.floor(Math.random() * types.length)]
-  const priceBase = market.openMarket.prices[productType].buy
-  const pricePerUnit = priceBase + Math.ceil(Math.random() * 2)
-  const penalty = priceBase * 2
-  if (Math.random() < 0.5) {
-    const quantity = Math.ceil(Math.random() * 50) + 10
-    const due = new Date()
-    due.setDate(due.getDate() + 30 + Math.ceil(Math.random() * 30))
-    market.contracts.push({
-      id,
-      productType,
-      quantity,
-      contractType: 'one-time',
-      dueDate: due.toISOString().slice(0, 10),
-      pricePerUnit,
-      penalty,
-      status: 'offer',
-      deliveries: []
-    })
-  } else {
-    const quantity = Math.ceil(Math.random() * 3) + 1
-    const startDay = Math.ceil(Math.random() * 10)
-    const endDay = startDay + 30
-    const interval = 3
-    const deliveries = []
-    for (let d = startDay; d <= endDay; d += interval) {
-      deliveries.push({ day: d, fulfilled: false, qtyDelivered: 0 })
-    }
-    market.contracts.push({
-      id,
-      productType,
-      quantity,
-      contractType: 'recurring',
-      startDay,
-      endDay,
-      interval,
-      pricePerUnit,
-      penalty,
-      status: 'offer',
-      deliveries
-    })
-  }
+function addNotification(msg) {
+  market.notifications.push(msg)
+  if (market.notifications.length > 10) market.notifications.shift()
 }
 
-function updateOpenMarketPrices() {
-  Object.keys(market.openMarket.prices).forEach(type => {
-    const price = market.openMarket.prices[type]
-    const delta = Math.floor(Math.random() * 3) - 1
-    const buy = Math.max(1, price.buy + delta)
-    const sell = Math.max(1, buy - 2)
-    market.openMarket.prices[type] = { buy, sell }
-  })
-  market.openMarket.lastUpdated = new Date().toISOString().slice(0, 10)
-}
-
-function sellProduct(type, qty) {
+function removeFromInventory(type, qty) {
   const item = market.harvestedProducts.find(p => p.type === type)
-  if (!item || item.qty < qty) return
-  const price = market.openMarket.prices[type]?.sell || 1
+  if (!item || item.qty < qty) return false
   item.qty -= qty
   if (item.qty <= 0) {
-    market.harvestedProducts = market.harvestedProducts.filter(p => p.qty > 0)
+    const idx = market.harvestedProducts.findIndex(p => p.type === type)
+    market.harvestedProducts.splice(idx, 1)
   }
-  user.gold += qty * price
+  return true
 }
 
-function fulfillContract(id, qty, day = 0) {
-  const contract = market.contracts.find(c => c.id === id)
-  if (!contract || contract.status !== 'active') return
+function canFulfill(contract) {
   const item = market.harvestedProducts.find(p => p.type === contract.productType)
-  if (!item || item.qty < qty) return
-  if (contract.contractType === 'one-time') {
-    if (qty < contract.quantity) return
-    item.qty -= qty
-    if (item.qty <= 0) {
-      market.harvestedProducts = market.harvestedProducts.filter(p => p.qty > 0)
-    }
-    user.gold += qty * contract.pricePerUnit
-    contract.status = 'fulfilled'
-  } else {
-    const delivery = contract.deliveries.find(d => d.day === day)
-    if (!delivery || delivery.fulfilled || qty < contract.quantity) return
-    item.qty -= qty
-    if (item.qty <= 0) {
-      market.harvestedProducts = market.harvestedProducts.filter(p => p.qty > 0)
-    }
-    user.gold += qty * contract.pricePerUnit
-    delivery.fulfilled = true
-    delivery.qtyDelivered = qty
-    if (contract.deliveries.every(d => d.fulfilled)) {
-      contract.status = 'fulfilled'
-    }
-  }
+  return item && item.qty >= contract.quantity && contract.status === 'pending'
 }
 
-function applyPenalty(id, amount) {
+function canSell(offer) {
+  const item = market.harvestedProducts.find(p => p.type === offer.productType)
+  return item && item.qty >= offer.quantity && offer.status === 'open'
+}
+
+function fulfillContract(id) {
   const contract = market.contracts.find(c => c.id === id)
-  if (!contract) return
-  user.gold = Math.max(0, user.gold - amount)
-  contract.status = 'failed'
-}
-
-function sell(type) {
-  const qty = Number(sellAmounts[type] || 0)
-  if (!qty) return
-  sellProduct(type, qty)
-  sellAmounts[type] = 0
-}
-
-function acceptContract(id) {
-  const contract = market.contracts.find(c => c.id === id)
-  if (contract && contract.status === 'offer') {
-    contract.status = 'active'
+  if (!contract || contract.status !== 'pending') return
+  if (!removeFromInventory(contract.productType, contract.quantity)) {
+    addNotification('Not enough inventory to fulfill contract.')
+    return
   }
+  contract.status = 'completed'
+  const earned = contract.quantity * contract.pricePerUnit
+  user.gold += earned
+  addNotification(`Fulfilled contract ${id} for ${earned} gold.`)
 }
 
-function fulfillOneTime(contract) {
-  fulfillContract(contract.id, contract.quantity)
+function sellToOpenMarket(id) {
+  const offer = market.openMarketOffers.find(o => o.id === id)
+  if (!offer || offer.status !== 'open') return
+  if (!removeFromInventory(offer.productType, offer.quantity)) {
+    addNotification('Not enough inventory to sell on offer.')
+    return
+  }
+  offer.status = 'sold'
+  const earned = offer.quantity * offer.pricePerUnit
+  user.gold += earned
+  addNotification(`Sold ${offer.quantity} ${offer.productType} for ${earned} gold.`)
 }
 
-function fulfillRecurring(contract, day) {
-  fulfillContract(contract.id, contract.quantity, day)
+function deliver(id) {
+  fulfillContract(id)
 }
 
-function hasInventory(type, qty) {
-  const item = market.harvestedProducts.find(p => p.type === type)
-  return item && item.qty >= qty
+function sell(id) {
+  sellToOpenMarket(id)
 }
-
-function dueDayFromDate(dateStr) {
-  const start = new Date(game.startDate)
-  const due = new Date(dateStr)
-  return Math.floor((due - start) / 86400000) + 1
-}
-
-function formatDay(dayNumber) {
-  const d = new Date(startDate.value)
-  d.setDate(d.getDate() + (dayNumber - 1))
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-}
-
-function nextDay() {
-  game.day += 1
-  applyPenalties()
-}
-
-function applyPenalties() {
-  const current = dayNum.value
-  market.contracts.forEach(c => {
-    if (c.status !== 'active') return
-    if (c.contractType === 'one-time') {
-      const dueDay = dueDayFromDate(c.dueDate)
-      if (current > dueDay) {
-        applyPenalty(c.id, c.penalty)
-      }
-    } else {
-      const missed = c.deliveries.some(d => !d.fulfilled && current > d.day)
-      if (missed) {
-        applyPenalty(c.id, c.penalty)
-      }
-    }
-  })
-}
-
-const latestNews = computed(() => market.marketNews.slice(-3).reverse())
 </script>
 
 <template>
   <div class="market-area">
-    <div class="top-bar">
-      <button class="return-btn" @click="eventBus.emit('nav', 'main')">Return to Map</button>
-      <div class="stats">
-        <span class="gold">💰{{ user.gold }}</span>
-        <span class="date">📅{{ displayDate }}</span>
-        <button class="next-day" @click="nextDay">Next Day</button>
-      </div>
-    </div>
-
+    <h1>Market</h1>
     <section class="contracts">
-      <h2>Contract Offers</h2>
-      <div v-if="offerContracts.length">
-        <div v-for="c in offerContracts" :key="c.id" class="contract-row">
-          <div class="info">
-            <div>{{ c.productType }} x{{ c.quantity }} @ {{ c.pricePerUnit }} each</div>
-            <div v-if="c.contractType === 'one-time'">
-              Due: {{ new Date(c.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) }}
-            </div>
-            <div v-else>
-              Recurring every {{ c.interval }} days from day {{ c.startDay }} to {{ c.endDay }}
-            </div>
-            <div>Penalty: {{ c.penalty }}</div>
-          </div>
-          <button @click="acceptContract(c.id)">Accept</button>
-        </div>
-      </div>
-      <div v-else class="empty">No offers at the moment.</div>
-
       <h2>Active Contracts</h2>
       <div v-if="activeContracts.length">
-        <div v-for="c in activeContracts" :key="c.id" class="contract-active">
-          <div class="summary">
-            <div>{{ c.productType }} x{{ c.quantity }} @ {{ c.pricePerUnit }}</div>
-            <div>Penalty: {{ c.penalty }}</div>
-            <div>Status: {{ c.status }}</div>
-          </div>
-          <div v-if="c.contractType === 'one-time'" class="delivery-line">
-            <span>Due: {{ new Date(c.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) }}</span>
-            <button
-              v-if="dayNum >= dueDayFromDate(c.dueDate) && c.status === 'active'"
-              :disabled="!hasInventory(c.productType, c.quantity)"
-              @click="fulfillOneTime(c)"
-            >Fulfill</button>
-          </div>
-          <div v-else class="delivery-list">
-            <div
-              v-for="d in c.deliveries"
-              :key="d.day"
-              class="delivery-item"
-            >
-              <span>Due: {{ formatDay(d.day) }}</span>
-              <span v-if="d.fulfilled"> - Delivered</span>
-              <span v-else-if="dayNum > d.day"> - Missed</span>
-              <span v-else> - Pending</span>
-              <button
-                v-if="dayNum >= d.day && !d.fulfilled && c.status === 'active'"
-                :disabled="!hasInventory(c.productType, c.quantity)"
-                @click="fulfillRecurring(c, d.day)"
-              >Fulfill</button>
-            </div>
-          </div>
+        <div v-for="c in activeContracts" :key="c.id" class="contract-item">
+          <div>{{ c.productType }} - {{ c.quantity }} @ {{ c.pricePerUnit }}</div>
+          <div>Due: {{ new Date(c.dueDate).toLocaleDateString() }}</div>
+          <div>Status: {{ c.status }}</div>
+          <button @click="deliver(c.id)" :disabled="!canFulfill(c)">Deliver</button>
         </div>
       </div>
-      <div v-else class="empty">No active contracts.</div>
-
-      <details class="history">
-        <summary>Contract History</summary>
-        <div v-if="historyContracts.length">
-          <div v-for="c in historyContracts" :key="c.id" class="history-row">
-            <div>{{ c.productType }} x{{ c.quantity }} @ {{ c.pricePerUnit }}</div>
-            <div>Status: {{ c.status }}</div>
-          </div>
-        </div>
-        <div v-else class="empty">No history yet.</div>
-      </details>
+      <p v-else>No active contracts.</p>
     </section>
 
-    <section class="open-market">
-      <h2>Open Market</h2>
-      <div v-if="market.harvestedProducts.length">
-        <div v-for="p in market.harvestedProducts" :key="p.type" class="market-row">
-          <span>{{ p.type }} (x{{ p.qty }}) - Price: {{ market.openMarket.prices[p.type]?.sell || 1 }}</span>
-          <input type="number" min="1" v-model.number="sellAmounts[p.type]" class="sell-input" />
-          <button @click="sell(p.type)">Sell</button>
+    <section class="offers">
+      <h2>Open Market Offers</h2>
+      <div v-if="openOffers.length">
+        <div v-for="o in openOffers" :key="o.id" class="offer-item">
+          <div>{{ o.productType }} - {{ o.quantity }} @ {{ o.pricePerUnit }}</div>
+          <div>Expires: {{ new Date(o.expiryDate).toLocaleDateString() }}</div>
+          <button @click="sell(o.id)" :disabled="!canSell(o)">Sell</button>
         </div>
       </div>
-      <div v-else class="empty">No products in inventory.</div>
+      <p v-else>No open offers.</p>
     </section>
 
-    <section class="market-news">
-      <h2>Market News</h2>
+    <section class="inventory">
+      <h2>Harvested Products</h2>
       <ul>
-        <li v-for="n in latestNews" :key="n.day">Day {{ n.day }}: {{ n.message }}</li>
+        <li v-for="p in market.harvestedProducts" :key="p.type">
+          {{ p.type }} - {{ p.qty }} (shelf {{ p.shelfLife }})
+        </li>
       </ul>
     </section>
+
+    <section class="notifications">
+      <h2>Notifications</h2>
+      <ul>
+        <li v-for="(n, i) in latestNotifications" :key="i">{{ n }}</li>
+      </ul>
+    </section>
+
+    <div class="gold">Gold: {{ user.gold }}</div>
   </div>
 </template>
 
@@ -299,52 +127,16 @@ const latestNews = computed(() => market.marketNews.slice(-3).reverse())
 .market-area {
   display: flex;
   flex-direction: column;
-  padding: 1rem;
-  gap: 1.2rem;
-}
-.top-bar {
-  display: flex;
   gap: 1rem;
-  align-items: center;
-  background: #e0f7fa;
-  padding: 0.5rem 1rem;
-  border-bottom: 1px solid #b2dfdb;
-}
-.stats {
-  margin-left: auto;
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-.contracts, .open-market, .market-news {
-  background: #f8fdfd;
   padding: 1rem;
-  border: 1px solid #b2dfdb;
-  border-radius: 8px;
 }
-.contract-row, .market-row, .history-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.3rem 0;
-  border-bottom: 1px solid #ddd;
-}
-.contract-row:last-child, .market-row:last-child, .history-row:last-child {
-  border-bottom: none;
-}
-.contract-active {
+.contract-item,
+.offer-item {
   border-bottom: 1px solid #ccc;
   padding: 0.5rem 0;
 }
-.delivery-item {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-.sell-input {
-  width: 60px;
-}
-.empty {
-  font-style: italic;
-  color: #777;
+.gold {
+  margin-top: 1rem;
+  font-weight: bold;
 }
 </style>
