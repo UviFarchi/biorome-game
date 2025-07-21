@@ -5,11 +5,14 @@ import { marketStore } from '/stores/marketStore.js'
 import { userStore } from '/stores/userStore.js'
 import { animalsStore } from '/stores/animalsStore.js'
 import { plantsStore } from '/stores/plantsStore.js'
+import { gameStateStore } from '/stores/gameStateStore.js'
+import eventBus from '@/eventBus.js'
 
 const market = marketStore()
 const user = userStore()
 const animals = animalsStore()
 const plants = plantsStore()
+const game = gameStateStore()
 
 const activeContracts = computed(() =>
   market.contracts.filter(c => c.status === 'pending').sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
@@ -36,6 +39,9 @@ const filteredOpenOffers = computed(() =>
   openOffers.value.filter(o => filterType.value === 'all' || o.productType === filterType.value)
 )
 const latestNotifications = computed(() => market.notifications.slice(-5).reverse())
+const newsForToday = computed(() =>
+  game.newsFeed.filter(n => n.day === game.day)
+)
 
 function addNotification(msg) {
   market.notifications.push(msg)
@@ -55,6 +61,15 @@ function availableProducts() {
     ...plants.plantTypes.map(p => ({ type: p.type, basePrice: p.basePrice })),
     ...animals.products.map(p => ({ type: p.key, basePrice: p.basePrice }))
   ]
+}
+
+function getPriceModifier(productType) {
+  return newsForToday.value.reduce((mult, n) => {
+    if (n.effect && n.effect.affectedTypes && n.effect.affectedTypes.includes(productType)) {
+      return mult * (n.effect.priceModifier || 1)
+    }
+    return mult
+  }, 1)
 }
 
 function generateRandomContract() {
@@ -151,7 +166,8 @@ function fulfillContract(id) {
     addNotification('Not enough inventory to fulfill contract.')
     return
   }
-  const earned = contract.quantity * contract.pricePerUnit
+  const mod = getPriceModifier(contract.productType)
+  const earned = contract.quantity * contract.pricePerUnit * mod
   user.gold += earned
   addNotification(`Fulfilled contract for ${earned} gold.`)
   if (contract.type === 'recurring') {
@@ -177,7 +193,8 @@ function sellToOpenMarket(id) {
     addNotification('Not enough inventory to sell on offer.')
     return
   }
-  const earned = offer.quantity * offer.pricePerUnit
+  const mod = getPriceModifier(offer.productType)
+  const earned = offer.quantity * offer.pricePerUnit * mod
   user.gold += earned
   offer.status = 'sold'
   addNotification(`Sold ${offer.quantity} ${offer.productType} for ${earned} gold.`)
@@ -210,6 +227,13 @@ function canSell(o) {
 
 <template>
   <div class="market-area">
+    <div class="news-ticker" aria-label="News ticker">
+      <div v-if="newsForToday.length" :class="{ animate: newsForToday.length > 1 }" class="ticker-inner">
+        <span v-for="n in newsForToday" :key="n.id" :class="['news-item', n.type]">{{ n.headline }}</span>
+      </div>
+      <div v-else class="ticker-inner">No news today.</div>
+    </div>
+    <button class="return-btn" @click="eventBus.emit('nav', 'main')">Back to Map</button>
     <h1>Market</h1>
     <div class="filter-row">
       <label>Filter:</label>
@@ -328,5 +352,51 @@ function canSell(o) {
 .gold {
   margin-top: 1rem;
   font-weight: bold;
+}
+
+.news-ticker {
+  overflow: hidden;
+  white-space: nowrap;
+  border: 1px solid #ccc;
+  margin-bottom: 0.5rem;
+}
+.ticker-inner {
+  display: inline-block;
+}
+.ticker-inner.animate {
+  animation: scroll 15s linear infinite;
+  padding-left: 100%;
+}
+.news-item {
+  padding: 0 1em;
+  margin-right: 0.5em;
+  display: inline-block;
+}
+.news-item.market {
+  background: #fff176;
+  color: #333;
+}
+.news-item.weather {
+  background: #90caf9;
+  color: #333;
+}
+.return-btn {
+  align-self: flex-end;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  padding: 0.4em 1em;
+  background: #80deea;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.return-btn:hover {
+  background: #26c6da;
+  color: #fff;
+}
+
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
 }
 </style>
