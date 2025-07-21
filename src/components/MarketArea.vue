@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 import { marketStore } from '/stores/marketStore.js'
 import { userStore } from '/stores/userStore.js'
@@ -19,6 +19,21 @@ const offeredContracts = computed(() =>
 )
 const openOffers = computed(() =>
   market.openMarketOffers.filter(o => o.status === 'open').sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate))
+)
+const filterType = ref('all')
+const productTypes = computed(() => Array.from(new Set([
+  ...market.contracts.map(c => c.productType),
+  ...market.openMarketOffers.map(o => o.productType)
+])))
+
+const filteredActiveContracts = computed(() =>
+  activeContracts.value.filter(c => filterType.value === 'all' || c.productType === filterType.value)
+)
+const filteredOfferedContracts = computed(() =>
+  offeredContracts.value.filter(c => filterType.value === 'all' || c.productType === filterType.value)
+)
+const filteredOpenOffers = computed(() =>
+  openOffers.value.filter(o => filterType.value === 'all' || o.productType === filterType.value)
 )
 const latestNotifications = computed(() => market.notifications.slice(-5).reverse())
 
@@ -98,14 +113,22 @@ function removeFromInventory(type, qty) {
   return true
 }
 
+function isContractExpired(contract) {
+  return new Date(contract.dueDate) < new Date()
+}
+
+function isOfferExpired(offer) {
+  return new Date(offer.expiryDate) < new Date()
+}
+
 function canFulfillContract(contract) {
   const item = market.harvestedProducts.find(p => p.type === contract.productType)
-  return item && item.qty >= contract.quantity && contract.status === 'pending'
+  return item && item.qty >= contract.quantity && contract.status === 'pending' && !isContractExpired(contract)
 }
 
 function canSellOffer(offer) {
   const item = market.harvestedProducts.find(p => p.type === offer.productType)
-  return item && item.qty >= offer.quantity && offer.status === 'open'
+  return item && item.qty >= offer.quantity && offer.status === 'open' && !isOfferExpired(offer)
 }
 
 function acceptContract(id) {
@@ -119,6 +142,11 @@ function acceptContract(id) {
 function fulfillContract(id) {
   const contract = market.contracts.find(c => c.id === id && c.status === 'pending')
   if (!contract) return
+  if (isContractExpired(contract)) {
+    contract.status = 'expired'
+    addNotification('Contract has expired and cannot be fulfilled.')
+    return
+  }
   if (!removeFromInventory(contract.productType, contract.quantity)) {
     addNotification('Not enough inventory to fulfill contract.')
     return
@@ -140,6 +168,11 @@ function fulfillContract(id) {
 function sellToOpenMarket(id) {
   const offer = market.openMarketOffers.find(o => o.id === id && o.status === 'open')
   if (!offer) return
+  if (isOfferExpired(offer)) {
+    offer.status = 'expired'
+    addNotification('Offer has expired and cannot be sold.')
+    return
+  }
   if (!removeFromInventory(offer.productType, offer.quantity)) {
     addNotification('Not enough inventory to sell on offer.')
     return
@@ -178,40 +211,53 @@ function canSell(o) {
 <template>
   <div class="market-area">
     <h1>Market</h1>
-    <section class="contracts">
-      <h2>Available Contracts</h2>
-      <div v-if="offeredContracts.length">
-        <div v-for="c in offeredContracts" :key="c.id" class="contract-item">
-          <div>{{ c.productType }} - {{ c.quantity }} @ {{ c.pricePerUnit }}</div>
-          <div>Due: {{ new Date(c.dueDate).toLocaleDateString() }}</div>
-          <button @click="accept(c.id)">Accept</button>
+    <div class="filter-row">
+      <label>Filter:</label>
+      <select v-model="filterType">
+        <option value="all">All</option>
+        <option v-for="t in productTypes" :key="t" :value="t">{{ t }}</option>
+      </select>
+    </div>
+    <div class="lists">
+      <section class="contracts">
+        <h2>Contracts</h2>
+        <div class="sub-list" v-if="filteredOfferedContracts.length">
+          <h3>Offered</h3>
+          <div v-for="c in filteredOfferedContracts" :key="c.id" class="contract-item">
+            <div class="row"><span class="type">{{ c.productType }}</span> x{{ c.quantity }} @ {{ c.pricePerUnit }}</div>
+            <div class="row">Due: {{ new Date(c.dueDate).toLocaleDateString() }}</div>
+            <div class="row">Penalty: {{ c.penalty }}</div>
+            <button @click="accept(c.id)">Accept</button>
+          </div>
         </div>
-      </div>
-      <p v-else>No available contracts.</p>
+        <p v-else>No contract offers.</p>
 
-      <h2>Active Contracts</h2>
-      <div v-if="activeContracts.length">
-        <div v-for="c in activeContracts" :key="c.id" class="contract-item">
-          <div>{{ c.productType }} - {{ c.quantity }} @ {{ c.pricePerUnit }}</div>
-          <div>Due: {{ new Date(c.dueDate).toLocaleDateString() }}</div>
-          <div>Status: {{ c.status }}</div>
-          <button @click="deliver(c.id)" :disabled="!canFulfill(c)">Deliver</button>
+        <div class="sub-list" v-if="filteredActiveContracts.length">
+          <h3>Active</h3>
+          <div v-for="c in filteredActiveContracts" :key="c.id" class="contract-item">
+            <div class="row"><span class="type">{{ c.productType }}</span> x{{ c.quantity }} @ {{ c.pricePerUnit }}</div>
+            <div class="row">Due: {{ new Date(c.dueDate).toLocaleDateString() }}</div>
+            <div class="row">Penalty: {{ c.penalty }}</div>
+            <div class="row">Status: {{ isContractExpired(c) ? 'Expired' : c.status }}</div>
+            <button @click="deliver(c.id)" :disabled="!canFulfill(c)">Deliver</button>
+          </div>
         </div>
-      </div>
-      <p v-else>No active contracts.</p>
-    </section>
+        <p v-else>No active contracts.</p>
+      </section>
 
-    <section class="offers">
-      <h2>Open Market Offers</h2>
-      <div v-if="openOffers.length">
-        <div v-for="o in openOffers" :key="o.id" class="offer-item">
-          <div>{{ o.productType }} - {{ o.quantity }} @ {{ o.pricePerUnit }}</div>
-          <div>Expires: {{ new Date(o.expiryDate).toLocaleDateString() }}</div>
-          <button @click="sell(o.id)" :disabled="!canSell(o)">Sell</button>
+      <section class="offers">
+        <h2>Open Offers</h2>
+        <div class="sub-list" v-if="filteredOpenOffers.length">
+          <div v-for="o in filteredOpenOffers" :key="o.id" class="offer-item">
+            <div class="row"><span class="type">{{ o.productType }}</span> x{{ o.quantity }} @ {{ o.pricePerUnit }}</div>
+            <div class="row">Expires: {{ new Date(o.expiryDate).toLocaleDateString() }}</div>
+            <div class="row">Status: {{ isOfferExpired(o) ? 'Expired' : o.status }}</div>
+            <button @click="sell(o.id)" :disabled="!canSell(o)">Sell</button>
+          </div>
         </div>
-      </div>
-      <p v-else>No open offers.</p>
-    </section>
+        <p v-else>No open offers.</p>
+      </section>
+    </div>
 
     <section class="inventory">
       <h2>Harvested Products</h2>
@@ -240,10 +286,44 @@ function canSell(o) {
   gap: 1rem;
   padding: 1rem;
 }
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.lists {
+  display: flex;
+  gap: 1rem;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+.contracts, .offers {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.sub-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 0.3rem;
+}
 .contract-item,
 .offer-item {
   border-bottom: 1px solid #ccc;
   padding: 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+}
+.type {
+  font-weight: bold;
 }
 .gold {
   margin-top: 1rem;
