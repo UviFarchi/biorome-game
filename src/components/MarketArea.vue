@@ -24,23 +24,132 @@ const historyContracts = computed(() => market.contracts.filter(c => c.status ==
 
 const sellAmounts = reactive({})
 
+function generateRandomContract() {
+  const types = Object.keys(market.openMarket.prices)
+  if (types.length === 0) return
+  const id = `contract-${Date.now()}-${Math.floor(Math.random() * 1000)}`
+  const productType = types[Math.floor(Math.random() * types.length)]
+  const priceBase = market.openMarket.prices[productType].buy
+  const pricePerUnit = priceBase + Math.ceil(Math.random() * 2)
+  const penalty = priceBase * 2
+  if (Math.random() < 0.5) {
+    const quantity = Math.ceil(Math.random() * 50) + 10
+    const due = new Date()
+    due.setDate(due.getDate() + 30 + Math.ceil(Math.random() * 30))
+    market.contracts.push({
+      id,
+      productType,
+      quantity,
+      contractType: 'one-time',
+      dueDate: due.toISOString().slice(0, 10),
+      pricePerUnit,
+      penalty,
+      status: 'offer',
+      deliveries: []
+    })
+  } else {
+    const quantity = Math.ceil(Math.random() * 3) + 1
+    const startDay = Math.ceil(Math.random() * 10)
+    const endDay = startDay + 30
+    const interval = 3
+    const deliveries = []
+    for (let d = startDay; d <= endDay; d += interval) {
+      deliveries.push({ day: d, fulfilled: false, qtyDelivered: 0 })
+    }
+    market.contracts.push({
+      id,
+      productType,
+      quantity,
+      contractType: 'recurring',
+      startDay,
+      endDay,
+      interval,
+      pricePerUnit,
+      penalty,
+      status: 'offer',
+      deliveries
+    })
+  }
+}
+
+function updateOpenMarketPrices() {
+  Object.keys(market.openMarket.prices).forEach(type => {
+    const price = market.openMarket.prices[type]
+    const delta = Math.floor(Math.random() * 3) - 1
+    const buy = Math.max(1, price.buy + delta)
+    const sell = Math.max(1, buy - 2)
+    market.openMarket.prices[type] = { buy, sell }
+  })
+  market.openMarket.lastUpdated = new Date().toISOString().slice(0, 10)
+}
+
+function sellProduct(type, qty) {
+  const item = market.harvestedProducts.find(p => p.type === type)
+  if (!item || item.qty < qty) return
+  const price = market.openMarket.prices[type]?.sell || 1
+  item.qty -= qty
+  if (item.qty <= 0) {
+    market.harvestedProducts = market.harvestedProducts.filter(p => p.qty > 0)
+  }
+  user.gold += qty * price
+}
+
+function fulfillContract(id, qty, day = 0) {
+  const contract = market.contracts.find(c => c.id === id)
+  if (!contract || contract.status !== 'active') return
+  const item = market.harvestedProducts.find(p => p.type === contract.productType)
+  if (!item || item.qty < qty) return
+  if (contract.contractType === 'one-time') {
+    if (qty < contract.quantity) return
+    item.qty -= qty
+    if (item.qty <= 0) {
+      market.harvestedProducts = market.harvestedProducts.filter(p => p.qty > 0)
+    }
+    user.gold += qty * contract.pricePerUnit
+    contract.status = 'fulfilled'
+  } else {
+    const delivery = contract.deliveries.find(d => d.day === day)
+    if (!delivery || delivery.fulfilled || qty < contract.quantity) return
+    item.qty -= qty
+    if (item.qty <= 0) {
+      market.harvestedProducts = market.harvestedProducts.filter(p => p.qty > 0)
+    }
+    user.gold += qty * contract.pricePerUnit
+    delivery.fulfilled = true
+    delivery.qtyDelivered = qty
+    if (contract.deliveries.every(d => d.fulfilled)) {
+      contract.status = 'fulfilled'
+    }
+  }
+}
+
+function applyPenalty(id, amount) {
+  const contract = market.contracts.find(c => c.id === id)
+  if (!contract) return
+  user.gold = Math.max(0, user.gold - amount)
+  contract.status = 'failed'
+}
+
 function sell(type) {
   const qty = Number(sellAmounts[type] || 0)
   if (!qty) return
-  market.sellProduct(type, qty)
+  sellProduct(type, qty)
   sellAmounts[type] = 0
 }
 
 function acceptContract(id) {
-  market.acceptContract(id)
+  const contract = market.contracts.find(c => c.id === id)
+  if (contract && contract.status === 'offer') {
+    contract.status = 'active'
+  }
 }
 
 function fulfillOneTime(contract) {
-  market.fulfillContract(contract.id, contract.quantity)
+  fulfillContract(contract.id, contract.quantity)
 }
 
 function fulfillRecurring(contract, day) {
-  market.fulfillContract(contract.id, contract.quantity, day)
+  fulfillContract(contract.id, contract.quantity, day)
 }
 
 function hasInventory(type, qty) {
@@ -72,12 +181,12 @@ function applyPenalties() {
     if (c.contractType === 'one-time') {
       const dueDay = dueDayFromDate(c.dueDate)
       if (current > dueDay) {
-        market.applyPenalty(c.id, c.penalty)
+        applyPenalty(c.id, c.penalty)
       }
     } else {
       const missed = c.deliveries.some(d => !d.fulfilled && current > d.day)
       if (missed) {
-        market.applyPenalty(c.id, c.penalty)
+        applyPenalty(c.id, c.penalty)
       }
     }
   })
