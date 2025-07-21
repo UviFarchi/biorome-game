@@ -1,13 +1,21 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
+import { v4 as uuidv4 } from 'uuid'
 import { marketStore } from '/stores/marketStore.js'
 import { userStore } from '/stores/userStore.js'
+import { animalsStore } from '/stores/animalsStore.js'
+import { plantsStore } from '/stores/plantsStore.js'
 
 const market = marketStore()
 const user = userStore()
+const animals = animalsStore()
+const plants = plantsStore()
 
 const activeContracts = computed(() =>
   market.contracts.filter(c => c.status === 'pending').sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+)
+const offeredContracts = computed(() =>
+  market.contracts.filter(c => c.status === 'offered').sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
 )
 const openOffers = computed(() =>
   market.openMarketOffers.filter(o => o.status === 'open').sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate))
@@ -17,6 +25,66 @@ const latestNotifications = computed(() => market.notifications.slice(-5).revers
 function addNotification(msg) {
   market.notifications.push(msg)
   if (market.notifications.length > 10) market.notifications.shift()
+}
+
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+function randomItem(arr) {
+  return arr[Math.floor(Math.random() * arr.length)]
+}
+
+function availableProducts() {
+  return [
+    ...plants.plantTypes.map(p => ({ type: p.type, basePrice: p.basePrice })),
+    ...animals.products.map(p => ({ type: p.key, basePrice: p.basePrice }))
+  ]
+}
+
+function generateRandomContract() {
+  const prod = randomItem(availableProducts())
+  const quantity = randomInt(5, 20)
+  const pricePerUnit = Math.round(prod.basePrice * randomInt(100, 300) / 100)
+  const interval = randomInt(3, 7)
+  const due = new Date()
+  due.setDate(due.getDate() + interval)
+  const recurring = Math.random() < 0.3
+  market.contracts.push({
+    id: uuidv4(),
+    productType: prod.type,
+    quantity,
+    dueDate: due.toISOString().slice(0, 10),
+    pricePerUnit,
+    status: 'offered',
+    type: recurring ? 'recurring' : 'one-off',
+    interval,
+    penalty: Math.round(pricePerUnit * quantity * 0.2)
+  })
+  addNotification(`New contract offer for ${quantity} ${prod.type}`)
+}
+
+function generateRandomOffer() {
+  const prod = randomItem(availableProducts())
+  const quantity = randomInt(1, 15)
+  const pricePerUnit = Math.round(prod.basePrice * randomInt(80, 120) / 100)
+  const expiresIn = randomInt(1, 4)
+  const exp = new Date()
+  exp.setDate(exp.getDate() + expiresIn)
+  market.openMarketOffers.push({
+    id: uuidv4(),
+    productType: prod.type,
+    quantity,
+    pricePerUnit,
+    expiryDate: exp.toISOString().slice(0, 10),
+    status: 'open'
+  })
+  addNotification(`New open market offer for ${quantity} ${prod.type}`)
+}
+
+function generateDailyOffers(numContracts = 1, numOffers = 1) {
+  for (let i = 0; i < numContracts; i++) generateRandomContract()
+  for (let i = 0; i < numOffers; i++) generateRandomOffer()
 }
 
 function removeFromInventory(type, qty) {
@@ -30,41 +98,61 @@ function removeFromInventory(type, qty) {
   return true
 }
 
-function canFulfill(contract) {
+function canFulfillContract(contract) {
   const item = market.harvestedProducts.find(p => p.type === contract.productType)
   return item && item.qty >= contract.quantity && contract.status === 'pending'
 }
 
-function canSell(offer) {
+function canSellOffer(offer) {
   const item = market.harvestedProducts.find(p => p.type === offer.productType)
   return item && item.qty >= offer.quantity && offer.status === 'open'
 }
 
+function acceptContract(id) {
+  const contract = market.contracts.find(c => c.id === id && c.status === 'offered')
+  if (contract) {
+    contract.status = 'pending'
+    addNotification(`Accepted contract for ${contract.quantity} ${contract.productType}`)
+  }
+}
+
 function fulfillContract(id) {
-  const contract = market.contracts.find(c => c.id === id)
-  if (!contract || contract.status !== 'pending') return
+  const contract = market.contracts.find(c => c.id === id && c.status === 'pending')
+  if (!contract) return
   if (!removeFromInventory(contract.productType, contract.quantity)) {
     addNotification('Not enough inventory to fulfill contract.')
     return
   }
-  contract.status = 'completed'
   const earned = contract.quantity * contract.pricePerUnit
   user.gold += earned
-  addNotification(`Fulfilled contract ${id} for ${earned} gold.`)
+  addNotification(`Fulfilled contract for ${earned} gold.`)
+  if (contract.type === 'recurring') {
+    const next = new Date(contract.dueDate)
+    next.setDate(next.getDate() + contract.interval)
+    contract.dueDate = next.toISOString().slice(0, 10)
+    contract.quantity = randomInt(Math.max(1, contract.quantity - 5), contract.quantity + 5)
+    contract.status = 'pending'
+  } else {
+    contract.status = 'completed'
+  }
 }
 
 function sellToOpenMarket(id) {
-  const offer = market.openMarketOffers.find(o => o.id === id)
-  if (!offer || offer.status !== 'open') return
+  const offer = market.openMarketOffers.find(o => o.id === id && o.status === 'open')
+  if (!offer) return
   if (!removeFromInventory(offer.productType, offer.quantity)) {
     addNotification('Not enough inventory to sell on offer.')
     return
   }
-  offer.status = 'sold'
   const earned = offer.quantity * offer.pricePerUnit
   user.gold += earned
+  offer.status = 'sold'
   addNotification(`Sold ${offer.quantity} ${offer.productType} for ${earned} gold.`)
 }
+
+onMounted(() => {
+  generateDailyOffers()
+})
 
 function deliver(id) {
   fulfillContract(id)
@@ -73,12 +161,34 @@ function deliver(id) {
 function sell(id) {
   sellToOpenMarket(id)
 }
+
+function accept(id) {
+  acceptContract(id)
+}
+
+function canFulfill(c) {
+  return canFulfillContract(c)
+}
+
+function canSell(o) {
+  return canSellOffer(o)
+}
 </script>
 
 <template>
   <div class="market-area">
     <h1>Market</h1>
     <section class="contracts">
+      <h2>Available Contracts</h2>
+      <div v-if="offeredContracts.length">
+        <div v-for="c in offeredContracts" :key="c.id" class="contract-item">
+          <div>{{ c.productType }} - {{ c.quantity }} @ {{ c.pricePerUnit }}</div>
+          <div>Due: {{ new Date(c.dueDate).toLocaleDateString() }}</div>
+          <button @click="accept(c.id)">Accept</button>
+        </div>
+      </div>
+      <p v-else>No available contracts.</p>
+
       <h2>Active Contracts</h2>
       <div v-if="activeContracts.length">
         <div v-for="c in activeContracts" :key="c.id" class="contract-item">
