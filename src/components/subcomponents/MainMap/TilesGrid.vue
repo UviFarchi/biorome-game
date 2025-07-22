@@ -927,11 +927,11 @@ function closeAssemblySelectModal() {
 <style scoped>
 .fieldsGrid {
   display: grid;
-  grid-template-columns: repeat(6, 50px);
+  grid-template-columns: repeat(6, 1fr);
   grid-template-rows: repeat(6, 50px);
   gap: 8px;
   margin: 2em auto;
-  max-width: 340px;
+  width: 100%;
   background: #c8e6c9;
   padding: 1em;
   border-radius: 15px;
