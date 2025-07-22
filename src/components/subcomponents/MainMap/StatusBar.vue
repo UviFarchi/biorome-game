@@ -7,6 +7,7 @@ const user = userStore()
 const game = gameStateStore()
 import eventBus from "@/eventBus.js";
 
+
 // Real date for day 1
 const startDate = ref(new Date(game.startDate))
 

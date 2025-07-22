@@ -930,10 +930,8 @@ function closeAssemblySelectModal() {
   grid-template-columns: repeat(6, 1fr);
   grid-template-rows: repeat(6, 50px);
   gap: 8px;
-  margin: 2em auto;
   width: 100%;
   background: #c8e6c9;
-  padding: 1em;
   border-radius: 15px;
   box-shadow: 0 2px 10px #0001;
   float: left;
@@ -953,6 +951,7 @@ function closeAssemblySelectModal() {
   cursor: pointer;
   transition: box-shadow 0.2s;
   box-shadow: 0 0 0 #0000;
+  flex:1;
 }
 
 .tileContents {

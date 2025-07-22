@@ -1,5 +1,5 @@
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import {defineStore} from 'pinia'
+import {ref} from 'vue'
 
 export const gameStateStore = defineStore('gameState', () => {
 
@@ -33,6 +33,10 @@ export const gameStateStore = defineStore('gameState', () => {
             effect: { affectedTypes: ['Wool'], priceModifier: 0.8 }
         }
     ])
+    const electricity = ref(0);
+    const water = ref(0);
+    const waste = ref(0)
+
 
     return {
         startDate,
