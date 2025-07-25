@@ -325,7 +325,7 @@ const originTile = ref(null)
 const moveDestRow = ref(null)
 const moveDestCol = ref(null)
 const showMoverSelectionModal = ref(false)
-const moverAssemblies = ref([])  // Assemblies that can move the animal
+const moverAssemblies = ref([])
 const selectedMoverId = ref(null)
 
 const validAnimalDestTiles = computed(() => {
@@ -928,13 +928,15 @@ function closeAssemblySelectModal() {
 .fieldsGrid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: repeat(6, 50px);
+  grid-template-rows: repeat(6, 1fr);
   gap: 8px;
-  width: 100%;
+  width: 90%;
+  height: 90%;
   background: #c8e6c9;
   border-radius: 15px;
   box-shadow: 0 2px 10px #0001;
   float: left;
+  padding: 2.5% 5%;
 }
 
 .fieldTile {
@@ -943,6 +945,7 @@ function closeAssemblySelectModal() {
   border: 2px solid #aed581;
   min-width: 50px;
   min-height: 50px;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -951,7 +954,6 @@ function closeAssemblySelectModal() {
   cursor: pointer;
   transition: box-shadow 0.2s;
   box-shadow: 0 0 0 #0000;
-  flex:1;
 }
 
 .tileContents {

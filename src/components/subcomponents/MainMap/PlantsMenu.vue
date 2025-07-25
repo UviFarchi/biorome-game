@@ -21,32 +21,24 @@ const selectedPlantingType = ref('Seed')
 const missingRequirements = ref([])
 const selectedAssemblyToDeploy = ref(null)
 
-// Check assembly for SEED
+function assemblyMeetsPlantingRequirements(assembly, plantingType) {
+  if (!assembly) return false
+  const requirements = tiles.plantingRequirements[plantingType] || []
+  const types = (assembly.modules || []).map(m => m.type)
+  const subtypes = (assembly.modules || []).map(m => m.subtype)
+  return requirements.every(req =>
+      types.includes(req.type) && (!req.subtype || subtypes.includes(req.subtype))
+  )
+}
+
+// You can now replace the original two with these simple wrappers for clarity:
 function assemblyCanPlantSeed(assembly) {
-  if (!assembly) return false
-  const types = (assembly.modules || []).map(m => m.type)
-  const subtypes = (assembly.modules || []).map(m => m.subtype)
-  return (
-      types.includes('transport') &&
-      types.includes('arm') &&
-      subtypes.includes('seeder') &&
-      subtypes.includes('borer')
-  )
+  return assemblyMeetsPlantingRequirements(assembly, 'Seed')
 }
 
-// Check assembly for SEEDLING
 function assemblyCanPlantSeedling(assembly) {
-  if (!assembly) return false
-  const types = (assembly.modules || []).map(m => m.type)
-  const subtypes = (assembly.modules || []).map(m => m.subtype)
-  return (
-      types.includes('transport') &&
-      types.includes('arm') &&
-      types.includes('cart') &&
-      subtypes.includes('gripper')
-  )
+  return assemblyMeetsPlantingRequirements(assembly, 'Seedling')
 }
-
 // Suitable assemblies (NOT DEPLOYED) in the pool
 const availableAssembliesForPlanting = computed(() =>
     modules.activeAssemblies.filter(a => !a.deployed && (
@@ -74,22 +66,24 @@ const availableTiles = computed(() => {
   return result
 })
 
-// List missing requirements for modal
 function getMissingRequirements(assembly, plantingType) {
-  const reqs = []
-  if (!assembly) return reqs
+  if (!assembly) return []
+  const required = tiles.plantingRequirements[plantingType] || []
   const types = (assembly.modules || []).map(m => m.type)
   const subtypes = (assembly.modules || []).map(m => m.subtype)
-  if (!types.includes('transport')) reqs.push('Transport module')
-  if (!types.includes('arm')) reqs.push('Robotic arm')
-  if (plantingType === 'Seed') {
-    if (!subtypes.includes('seeder')) reqs.push('Seeder tool')
-    if (!subtypes.includes('borer')) reqs.push('Hole-borer tool')
-  } else if (plantingType === 'Seedling') {
-    if (!types.includes('cart')) reqs.push('Cart')
-    if (!subtypes.includes('gripper')) reqs.push('Gripper tool')
+
+  const missing = []
+  for (const req of required) {
+    if (!types.includes(req.type)) {
+      missing.push(`${req.type[0].toUpperCase() + req.type.slice(1)} module`)
+    } else if (req.subtype && !subtypes.includes(req.subtype)) {
+      missing.push(
+          req.subtype[0].toUpperCase() + req.subtype.slice(1) +
+          (req.type ? ` ${req.type}` : '')
+      )
+    }
   }
-  return reqs
+  return missing
 }
 
 // Handle "Deploy" button click on a plant/type
@@ -104,9 +98,7 @@ function openDeployModal(plant, plantingType) {
       const tile = tiles.tiles[row][col]
       if (!tile.plant && tile.assemblies && tile.assemblies.length > 0) {
         const found = tile.assemblies.some(a =>
-            a.deployed &&
-            ((plantingType === 'Seed' && assemblyCanPlantSeed(a)) ||
-                (plantingType === 'Seedling' && assemblyCanPlantSeedling(a)))
+          a.deployed && assemblyMeetsPlantingRequirements(a, plantingType)
         )
         if (found) deployedMatch = true
       }
@@ -135,16 +127,14 @@ function openDeployModal(plant, plantingType) {
   if (anyInPool) {
     missingRequirements.value = getMissingRequirements(modules.activeAssemblies[0], plantingType)
   } else {
-    missingRequirements.value = [
-      'Transport module',
-      'Robotic arm',
-      ...(plantingType === 'Seed'
-          ? ['Seeder tool', 'Hole-borer tool']
-          : ['Cart', 'Gripper tool'])
-    ]
+    // Assume each requirement in tiles.plantingRequirements[plantingType] has a 'name' property for display
+    missingRequirements.value = (tiles.plantingRequirements[plantingType] || []).map(req =>
+      req.name || req.type // fallback to type if name missing
+    )
   }
   showRequirementsModal.value = true
 }
+
 
 // Actually deploy the chosen assembly to the first available tile (empty + no plant)
 function deployAssemblyToTile(assembly) {

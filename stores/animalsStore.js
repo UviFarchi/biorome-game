@@ -182,7 +182,7 @@ export const animalsStore = defineStore('animalTypes', () => {
             product: '',
             outputFrequency: 0,
             wastePerTurn: 1,
-            effect: { type: 'defense', strength: 2, radius: 2 }
+            effect: { type: 'defense', strength: 2 }
         }
     ])
 
