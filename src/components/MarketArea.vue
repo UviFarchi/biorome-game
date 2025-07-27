@@ -2,17 +2,16 @@
 import { computed, onMounted, ref } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 import { marketStore } from '/stores/marketStore.js'
-import { userStore } from '/stores/userStore.js'
 import { animalsStore } from '/stores/animalsStore.js'
 import { plantsStore } from '/stores/plantsStore.js'
 import { gameStateStore } from '/stores/gameStateStore.js'
 import eventBus from '@/eventBus.js'
 
 const market = marketStore()
-const user = userStore()
+
 const animals = animalsStore()
 const plants = plantsStore()
-const game = gameStateStore()
+const gameState = gameStateStore()
 
 const activeContracts = computed(() =>
   market.contracts.filter(c => c.status === 'pending').sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
@@ -40,7 +39,7 @@ const filteredOpenOffers = computed(() =>
 )
 const latestNotifications = computed(() => market.notifications.slice(-5).reverse())
 const newsForToday = computed(() =>
-  game.newsFeed.filter(n => n.day === game.day)
+  gameState.newsFeed.filter(n => n.day === gameState.day)
 )
 
 function addNotification(msg) {
@@ -168,7 +167,7 @@ function fulfillContract(id) {
   }
   const mod = getPriceModifier(contract.productType)
   const earned = contract.quantity * contract.pricePerUnit * mod
-  user.gold += earned
+  gameState.gold += earned
   addNotification(`Fulfilled contract for ${earned} gold.`)
   if (contract.type === 'recurring') {
     const next = new Date(contract.dueDate)
@@ -195,7 +194,7 @@ function sellToOpenMarket(id) {
   }
   const mod = getPriceModifier(offer.productType)
   const earned = offer.quantity * offer.pricePerUnit * mod
-  user.gold += earned
+  gameState.gold += earned
   offer.status = 'sold'
   addNotification(`Sold ${offer.quantity} ${offer.productType} for ${earned} gold.`)
 }
@@ -299,7 +298,7 @@ function canSell(o) {
       </ul>
     </section>
 
-    <div class="gold">Gold: {{ user.gold }}</div>
+    <div class="gold">Gold: {{ gameState.gold }}</div>
   </div>
 </template>
 

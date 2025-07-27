@@ -1,8 +1,9 @@
-import {defineStore} from 'pinia'
-import {ref} from 'vue'
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
 
 export const modulesStore = defineStore('modules', () => {
-    const availableModules = ref([// TRANSPORT & MOBILE BASES
+    const availableModules = ref([
+        // TRANSPORT & MOBILE BASES
         {
             name: "UGV Transport (small)",
             type: "transport",
@@ -11,11 +12,10 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["battery"],
             slots: ["arm", "sensor", "camera", "cart", "tank", "sprayer", "seeder", "gps", "battery"],
             maxSlots: 6,
-
             count: 0,
-            cost: 200,
-
-        }, {
+            cost: 200
+        },
+        {
             name: "UGV Transport (large)",
             type: "transport",
             subtype: "ground",
@@ -23,11 +23,10 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["battery"],
             slots: ["arm", "sensor", "camera", "cart", "tank", "sprayer", "seeder", "gps", "battery"],
             maxSlots: 8,
-
             count: 0,
-            cost: 320,
-
-        }, {
+            cost: 320
+        },
+        {
             name: "Drone Transport (quadcopter)",
             type: "transport",
             subtype: "flying",
@@ -35,11 +34,10 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["battery"],
             slots: ["sensor", "camera", "sprayer", "tank", "battery", "gps"],
             maxSlots: 4,
-
             count: 0,
-            cost: 250,
-
-        }, {
+            cost: 250
+        },
+        {
             name: "Drone Transport (fixed wing)",
             type: "transport",
             subtype: "flying",
@@ -47,11 +45,10 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["battery"],
             slots: ["sensor", "camera", "sprayer", "tank", "battery", "gps"],
             maxSlots: 6,
-
             count: 0,
-            cost: 350,
-
-        }, {
+            cost: 350
+        },
+        {
             name: "Rail Transport Module",
             type: "transport",
             subtype: "rail",
@@ -59,23 +56,22 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["battery"],
             slots: ["cart", "sensor", "camera", "battery"],
             maxSlots: 4,
-
             count: 0,
-            cost: 150,
-
-        }, {
+            cost: 150
+        },
+        {
             name: "Pole",
             type: "pole",
             subtype: null,
             attachesTo: [],
             requires: ["battery"],
-            slots: ["sensor", "camera", "Communications"],
+            slots: ["sensor", "camera", "communications"],
             maxSlots: 3,
-
             count: 0,
             cost: 40,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "Shelf/Rack",
             type: "shelf",
             subtype: null,
@@ -83,10 +79,9 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["battery"],
             slots: ["arm", "sensor"],
             maxSlots: 2,
-
             count: 0,
             cost: 35,
-            actionsPerTurn: "unlimited"
+          
         },
 
         // ROBOTIC ARMS
@@ -98,11 +93,11 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["transport"],
             slots: ["tool", "sensor"],
             maxSlots: 1,
-
             count: 0,
             cost: 70,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "Robotic Arm (medium)",
             type: "arm",
             subtype: "medium",
@@ -110,11 +105,11 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["transport"],
             slots: ["tool", "sensor"],
             maxSlots: 2,
-
             count: 0,
             cost: 100,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "Robotic Arm (heavy)",
             type: "arm",
             subtype: "heavy",
@@ -122,10 +117,9 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["transport"],
             slots: ["tool"],
             maxSlots: 1,
-
             count: 0,
             cost: 160,
-            actionsPerTurn: "unlimited"
+          
         },
 
         // TOOLS & ATTACHMENTS
@@ -137,11 +131,10 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["arm"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
-            cost: 40,
-
-        }, {
+            cost: 40
+        },
+        {
             name: "Gripper",
             type: "tool",
             subtype: "gripper",
@@ -149,11 +142,10 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["arm"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
-            cost: 30,
-
-        }, {
+            cost: 30
+        },
+        {
             name: "Cutter/Saw",
             type: "tool",
             subtype: "cutter",
@@ -161,11 +153,10 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["arm"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
-            cost: 35,
-
-        }, {
+            cost: 35
+        },
+        {
             name: "Suction Tool",
             type: "tool",
             subtype: "suction",
@@ -173,11 +164,10 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["arm"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
-            cost: 25,
-
-        }, {
+            cost: 25
+        },
+        {
             name: "Seeder",
             type: "tool",
             subtype: "seeder",
@@ -185,11 +175,10 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["transport"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
-            cost: 45,
-
-        }, {
+            cost: 45
+        },
+        {
             name: "Digger",
             type: "tool",
             subtype: "digger",
@@ -197,11 +186,10 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["arm"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
-            cost: 50,
-
-        }, {
+            cost: 50
+        },
+        {
             name: "Brush Tool",
             type: "tool",
             subtype: "brush",
@@ -209,11 +197,10 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["arm"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
-            cost: 30,
-
-        }, {
+            cost: 30
+        },
+        {
             name: "Rotating Blades",
             type: "tool",
             subtype: "rotatingblades",
@@ -223,9 +210,9 @@ export const modulesStore = defineStore('modules', () => {
             maxSlots: 0,
             powerDraw: 1.5,
             count: 0,
-            cost: 45,
-
-        }, {
+            cost: 45
+        },
+        {
             name: "Pitchfork",
             type: "tool",
             subtype: "pitchfork",
@@ -233,10 +220,30 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["arm"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
-            cost: 28,
-
+            cost: 28
+        },
+        {
+            name: "Flattener Module",
+            type: "tool",
+            subtype: "flattener",
+            attachesTo: ["arm", "transport"],
+            requires: ["arm"],
+            slots: [],
+            maxSlots: 0,
+            count: 0,
+            cost: 60
+        },
+        {
+            name: "Grader Module",
+            type: "tool",
+            subtype: "grader",
+            attachesTo: ["arm", "transport"],
+            requires: ["arm"],
+            slots: [],
+            maxSlots: 0,
+            count: 0,
+            cost: 70
         },
 
         // FIELD MODULES (CARRY/SPRAY/STORAGE)
@@ -249,9 +256,9 @@ export const modulesStore = defineStore('modules', () => {
             slots: [],
             maxSlots: 0,
             count: 0,
-            cost: 60,
-
-        }, {
+            cost: 60
+        },
+        {
             name: "Tank",
             type: "tank",
             subtype: null,
@@ -260,9 +267,9 @@ export const modulesStore = defineStore('modules', () => {
             slots: [],
             maxSlots: 0,
             count: 0,
-            cost: 70,
-
-        }, {
+            cost: 70
+        },
+        {
             name: "Sprayer",
             type: "sprayer",
             subtype: null,
@@ -270,11 +277,10 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["tank", "transport"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
-            cost: 40,
-
-        }, {
+            cost: 40
+        },
+        {
             name: "Fertilizer Spreader",
             type: "spreader",
             subtype: null,
@@ -282,11 +288,10 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["transport"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
-            cost: 45,
-
-        }, {
+            cost: 45
+        },
+        {
             name: "Seed Box",
             type: "seedbox",
             subtype: null,
@@ -294,10 +299,8 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["transport"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
-            cost: 20,
-
+            cost: 20
         },
 
         // SENSORS & MONITORING
@@ -312,8 +315,9 @@ export const modulesStore = defineStore('modules', () => {
             powerDraw: 0.5,
             count: 0,
             cost: 30,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "Sensor Module (air)",
             type: "sensor",
             subtype: "air",
@@ -324,8 +328,9 @@ export const modulesStore = defineStore('modules', () => {
             powerDraw: 0.5,
             count: 0,
             cost: 30,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "Sensor Module (leaf)",
             type: "sensor",
             subtype: "leaf",
@@ -336,8 +341,9 @@ export const modulesStore = defineStore('modules', () => {
             powerDraw: 0.5,
             count: 0,
             cost: 35,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "pH Sensor",
             type: "sensor",
             subtype: "ph",
@@ -348,8 +354,9 @@ export const modulesStore = defineStore('modules', () => {
             powerDraw: 0.5,
             count: 0,
             cost: 30,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "EC Sensor",
             type: "sensor",
             subtype: "ec",
@@ -360,8 +367,9 @@ export const modulesStore = defineStore('modules', () => {
             powerDraw: 0.5,
             count: 0,
             cost: 35,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "NPK Sensor",
             type: "sensor",
             subtype: "npk",
@@ -372,8 +380,9 @@ export const modulesStore = defineStore('modules', () => {
             powerDraw: 0.5,
             count: 0,
             cost: 35,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "Weather Station",
             type: "weather",
             subtype: null,
@@ -381,10 +390,9 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["battery"],
             slots: ["sensor"],
             maxSlots: 2,
-
             count: 0,
             cost: 60,
-            actionsPerTurn: "unlimited"
+          
         },
 
         // CAMERAS & IMAGING
@@ -396,11 +404,11 @@ export const modulesStore = defineStore('modules', () => {
             requires: [],
             slots: [],
             maxSlots: 0,
-
             count: 0,
             cost: 50,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "Camera_multispectral",
             type: "camera",
             subtype: "ms",
@@ -408,11 +416,11 @@ export const modulesStore = defineStore('modules', () => {
             requires: [],
             slots: [],
             maxSlots: 0,
-
             count: 0,
             cost: 70,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "Camera_ir",
             type: "camera",
             subtype: "ir",
@@ -420,13 +428,12 @@ export const modulesStore = defineStore('modules', () => {
             requires: [],
             slots: [],
             maxSlots: 0,
-
             count: 0,
             cost: 65,
-            actionsPerTurn: "unlimited"
+          
         },
 
-        // GPS / Communications / PROCESSING
+        // GPS / COMMUNICATIONS / PROCESSING
         {
             name: "GPS Module",
             type: "gps",
@@ -435,23 +442,23 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["transport"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
             cost: 20,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "Communications Repeater",
-            type: "Communications",
+            type: "communications",
             subtype: null,
             attachesTo: ["transport", "pole"],
             requires: ["battery"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
             cost: 40,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "Onboard Computer",
             type: "computer",
             subtype: null,
@@ -459,11 +466,11 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["battery"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
             cost: 120,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "Solar Panel",
             type: "solar",
             subtype: null,
@@ -471,11 +478,11 @@ export const modulesStore = defineStore('modules', () => {
             requires: [],
             slots: [],
             maxSlots: 0,
-
             count: 0,
             cost: 50,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "Battery Pack",
             type: "battery",
             subtype: null,
@@ -483,10 +490,9 @@ export const modulesStore = defineStore('modules', () => {
             requires: [],
             slots: [],
             maxSlots: 0,
-
             count: 0,
             cost: 60,
-            actionsPerTurn: "unlimited"
+          
         },
 
         // SUPPLY / WASTE
@@ -498,11 +504,10 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["cart"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
-            cost: 18,
-
-        }, {
+            cost: 18
+        },
+        {
             name: "Wagon Module",
             type: "wagon",
             subtype: null,
@@ -510,11 +515,10 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["rail"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
-            cost: 80,
-
-        }, {
+            cost: 80
+        },
+        {
             name: "Waste Module",
             type: "waste",
             subtype: null,
@@ -522,13 +526,11 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["cart"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
-            cost: 15,
-
+            cost: 15
         },
 
-        // SPECIALS (can be left out for MVP, but here's for completeness)
+        // SPECIALS
         {
             name: "LED Lamp",
             type: "lamp",
@@ -537,11 +539,11 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["battery"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
             cost: 35,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "Heating Module",
             type: "heating",
             subtype: null,
@@ -549,11 +551,11 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["battery"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
             cost: 60,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "Audio Alarm",
             type: "alarm",
             subtype: "audio",
@@ -561,11 +563,11 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["battery"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
             cost: 2,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "Mild Shocker",
             type: "alarm",
             subtype: "electric",
@@ -573,12 +575,10 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["battery"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
             cost: 2,
-            actionsPerTurn: "unlimited"
+          
         },
-
         {
             name: "Valve module",
             type: "valve",
@@ -589,9 +589,9 @@ export const modulesStore = defineStore('modules', () => {
             maxSlots: 0,
             powerDraw: 0.5,
             count: 0,
-            cost: 35,
-
-        }, {
+            cost: 35
+        },
+        {
             name: "Pump module",
             type: "pump",
             subtype: null,
@@ -599,23 +599,21 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["tank"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
-            cost: 60,
-
-        }, {
+            cost: 60
+        },
+        {
             name: "Barrel module",
-            type: "raincapture",
+            type: "barrel",
             subtype: null,
             attachesTo: [],
             requires: [],
             slots: [],
             maxSlots: 0,
-
             count: 0,
-            cost: 55,
-
-        }, {
+            cost: 55
+        },
+        {
             name: "Perimeter fence module",
             type: "fence",
             subtype: null,
@@ -623,11 +621,11 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["pole"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
             cost: 80,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "Animal Collar",
             type: "collar",
             subtype: null,
@@ -635,11 +633,11 @@ export const modulesStore = defineStore('modules', () => {
             requires: [],
             slots: [],
             maxSlots: 0,
-
             count: 0,
             cost: 1,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "Internal space module",
             type: "internalspace",
             subtype: null,
@@ -647,11 +645,11 @@ export const modulesStore = defineStore('modules', () => {
             requires: [],
             slots: [],
             maxSlots: 4,
-
             count: 0,
             cost: 90,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "Static actuator",
             type: "actuator",
             subtype: "static",
@@ -659,11 +657,10 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["internalspace"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
-            cost: 50,
-
-        }, {
+            cost: 50
+        },
+        {
             name: "Sensor Module (temp)",
             type: "sensor",
             subtype: "temp",
@@ -674,8 +671,9 @@ export const modulesStore = defineStore('modules', () => {
             powerDraw: 0.3,
             count: 0,
             cost: 25,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "Gas sensor module",
             type: "sensor",
             subtype: "gas",
@@ -686,8 +684,9 @@ export const modulesStore = defineStore('modules', () => {
             powerDraw: 0.3,
             count: 0,
             cost: 30,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "Pressing module",
             type: "press",
             subtype: null,
@@ -695,11 +694,10 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["internalspace"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
-            cost: 70,
-
-        }, {
+            cost: 70
+        },
+        {
             name: "Generator module",
             type: "generator",
             subtype: null,
@@ -707,11 +705,11 @@ export const modulesStore = defineStore('modules', () => {
             requires: ["internalspace"],
             slots: [],
             maxSlots: 0,
-
             count: 0,
             cost: 120,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "Robotic Shelf",
             type: "shelf",
             subtype: "robotic",
@@ -719,11 +717,11 @@ export const modulesStore = defineStore('modules', () => {
             requires: [],
             slots: ["arm", "sensor", "press"],
             maxSlots: 4,
-
             count: 0,
             cost: 90,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "Spore spreading module",
             type: "spreader",
             subtype: "spore",
@@ -731,11 +729,10 @@ export const modulesStore = defineStore('modules', () => {
             requires: [],
             slots: [],
             maxSlots: 0,
-
             count: 0,
-            cost: 30,
-
-        }, {
+            cost: 30
+        },
+        {
             name: "Heater/Humidifier module",
             type: "humidifier",
             subtype: null,
@@ -743,11 +740,11 @@ export const modulesStore = defineStore('modules', () => {
             requires: [],
             slots: [],
             maxSlots: 0,
-
             count: 0,
             cost: 40,
-            actionsPerTurn: "unlimited"
-        }, {
+          
+        },
+        {
             name: "Rotary plate module",
             type: "rotary",
             subtype: null,
@@ -757,9 +754,9 @@ export const modulesStore = defineStore('modules', () => {
             maxSlots: 0,
             powerDraw: 0.7,
             count: 0,
-            cost: 60,
-
-        }, {
+            cost: 60
+        },
+        {
             name: "Weighing module",
             type: "sensor",
             subtype: "weighing",
@@ -769,9 +766,9 @@ export const modulesStore = defineStore('modules', () => {
             maxSlots: 0,
             powerDraw: 0.2,
             count: 0,
-            cost: 25,
-
-        }, {
+            cost: 25
+        },
+        {
             name: "LIDAR module",
             type: "sensor",
             subtype: "lidar",
@@ -779,188 +776,368 @@ export const modulesStore = defineStore('modules', () => {
             requires: [],
             slots: [],
             maxSlots: 0,
-
             count: 0,
-            cost: 100,
+            cost: 100
+        }
+    ])
 
-        }])
 
-    const findModule = name => availableModules.value.find(m => m.name === name)
-    const resolveModules = names => names
-        .map(n => findModule(n))
-        .filter(Boolean)
-        .map(m => ({...m}))
 
-    const premadeAssemblies =
-        [
-            {
-                usage: "Animal Geofencing Collar",
-                modules: resolveModules(["Animal Collar", "Battery Pack", "Audio Alarm", "Mild Shocker", "GPS Module"])
-            }, // === Produce Cultivation (Field Zone) ===
-            {
-                usage: "Field Planter",
-                modules: resolveModules(["UGV Transport (small)", "Battery Pack", "GPS Module", "Seeder", "Robotic Arm (medium)", "Hole-Borer", "Camera_rgb"])
-            }, {
+    const premadeAssemblies = [
+        {
+            usage: "Animal Geofencing Collar",
+            modules: [
+                { type: "collar" },
+                { type: "battery" },
+                { type: "alarm", subtype: "audio" },
+                { type: "alarm", subtype: "electric" },
+                { type: "gps" }
+            ]
+        },
+        // === Produce Cultivation (Field Zone) ===
+        {
+            usage: "Field Planter",
+            modules: [
+                { type: "transport", subtype: "ground" },
+                { type: "battery" },
+                { type: "gps" },
+                { type: "tool", subtype: "seeder" },
+                { type: "arm", subtype: "medium" },
+                { type: "tool", subtype: "borer" },
+                { type: "camera", subtype: "rgb" }
+            ]
+        },
+        {
             usage: "Field Planter (seedlings)",
-            modules: resolveModules(["UGV Transport (small)", "Battery Pack", "GPS Module", "Cart", "Robotic Arm (medium)", "Gripper", "Camera_rgb"])
-        }, {
+            modules: [
+                { type: "transport", subtype: "ground" },
+                { type: "battery" },
+                { type: "gps" },
+                { type: "cart" },
+                { type: "arm", subtype: "medium" },
+                { type: "tool", subtype: "gripper" },
+                { type: "camera", subtype: "rgb" }
+            ]
+        },
+        {
             usage: "Weeding Assembly (Cutter)",
-            modules: resolveModules(["UGV Transport (small)", "Battery Pack", "Camera_rgb", "Cutter/Saw"])
-        }, {
+            modules: [
+                { type: "transport", subtype: "ground" },
+                { type: "battery" },
+                { type: "camera", subtype: "rgb" },
+                { type: "tool", subtype: "cutter" }
+            ]
+        },
+        {
             usage: "Weeding Assembly (Sprayer)",
-            modules: resolveModules(["UGV Transport (small)", "Battery Pack", "Camera_rgb", "Tank", "Sprayer"])
-        }, {
+            modules: [
+                { type: "transport", subtype: "ground" },
+                { type: "battery" },
+                { type: "camera", subtype: "rgb" },
+                { type: "tank" },
+                { type: "sprayer" }
+            ]
+        },
+        {
             usage: "Irrigation Assembly (Spot)",
-            modules: resolveModules(["UGV Transport (small)", "Battery Pack", "Tank", "Sprayer", "Camera_rgb"])
-        }, // Fixed field irrigation not an assembly, but could be a:
-            {
-                usage: "Field Irrigation Station", modules: resolveModules(["Pole", "Tank", "Valve module",   // Note: Add to modules list if you want!
-                    "Pump module"     // Note: Add to modules list if you want!
-                ])
-            }, {
+            modules: [
+                { type: "transport", subtype: "ground" },
+                { type: "battery" },
+                { type: "tank" },
+                { type: "sprayer" },
+                { type: "camera", subtype: "rgb" }
+            ]
+        },
+        {
+            usage: "Field Irrigation Station",
+            modules: [
+                { type: "pole" },
+                { type: "tank" },
+                { type: "valve" },
+                { type: "pump" }
+            ]
+        },
+        {
             usage: "Harvesting Assembly",
-            modules: resolveModules(["UGV Transport (small)", "Battery Pack", "GPS Module", "Robotic Arm (medium)", "Camera_rgb", "Gripper", "Suction Tool", "Cart"])
-        }, // Sorting/grading is just extra modules on harvester:
-            {
-                usage: "Harvest Grader",
-                modules: resolveModules(["UGV Transport (small)", "Battery Pack", "GPS Module", "Robotic Arm (medium)", "Camera_rgb", "Weighing module",   // Add to modules list if desired
-                    "Cart"])
-            },
-
-            // === Land Modification ===
-            {
-                usage: "Path Construction",
-                modules: resolveModules(["UGV Transport (large)", "Battery Pack", "GPS Module", "Digger", "Flattener module",   // Add if needed
-                    "Grader module"       // Add if needed
-                ])
-            },
-
-            // === Rainwater Management ===
-            {
-                usage: "Rain Capture Station", modules: resolveModules(["Barrel", // Add if needed
-                    "Valve module",        // Add if needed
-                    "Pump module"          // Add if needed
-                ])
-            },
-
-            // === Habitat Management ===
-            {
-                usage: "Sensor Deployment UGV",
-                modules: resolveModules(["UGV Transport (small)", "Battery Pack", "Camera_rgb", "Sensor Module (soil)", "GPS Module"])
-            }, {
+            modules: [
+                { type: "transport", subtype: "ground" },
+                { type: "battery" },
+                { type: "gps" },
+                { type: "arm", subtype: "medium" },
+                { type: "camera", subtype: "rgb" },
+                { type: "tool", subtype: "gripper" },
+                { type: "tool", subtype: "suction" },
+                { type: "cart" }
+            ]
+        },
+        {
+            usage: "Harvest Grader",
+            modules: [
+                { type: "transport", subtype: "ground" },
+                { type: "battery" },
+                { type: "gps" },
+                { type: "arm", subtype: "medium" },
+                { type: "camera", subtype: "rgb" },
+                { type: "sensor", subtype: "weighing" },
+                { type: "cart" }
+            ]
+        },
+        // === Land Modification ===
+        {
+            usage: "Path Construction",
+            modules: [
+                { type: "transport", subtype: "ground" },
+                { type: "battery" },
+                { type: "gps" },
+                { type: "tool", subtype: "digger" },
+                { type: "tool", subtype: "flattener" },
+                { type: "tool", subtype: "grader" }
+            ]
+        },
+        // === Rainwater Management ===
+        {
+            usage: "Rain Capture Station",
+            modules: [
+                { type: "barrel" },
+                { type: "valve" },
+                { type: "pump" }
+            ]
+        },
+        // === Habitat Management ===
+        {
+            usage: "Sensor Deployment UGV",
+            modules: [
+                { type: "transport", subtype: "ground" },
+                { type: "battery" },
+                { type: "camera", subtype: "rgb" },
+                { type: "sensor", subtype: "soil" },
+                { type: "gps" }
+            ]
+        },
+        {
             usage: "Sensor Deployment Drone",
-            modules: resolveModules(["Drone Transport (quadcopter)", "Battery Pack", "Camera_rgb", "Sensor Module (air)", "GPS Module"])
-        }, {
+            modules: [
+                { type: "transport", subtype: "flying" },
+                { type: "battery" },
+                { type: "camera", subtype: "rgb" },
+                { type: "sensor", subtype: "air" },
+                { type: "gps" }
+            ]
+        },
+        {
             usage: "Fixed Sensor Pole",
-            modules: resolveModules(["Pole", "Battery Pack", "Sensor Module (soil)", "Sensor Module (air)", "Camera_rgb"])
-        }, {
+            modules: [
+                { type: "pole" },
+                { type: "battery" },
+                { type: "sensor", subtype: "soil" },
+                { type: "sensor", subtype: "air" },
+                { type: "camera", subtype: "rgb" }
+            ]
+        },
+        {
             usage: "Sheep Monitor/Fence",
-            modules: resolveModules(["Pole", "Battery Pack", "Camera_rgb", "Communications Repeater"])
+            modules: [
+                { type: "pole" },
+                { type: "battery" },
+                { type: "camera", subtype: "rgb" },
+                { type: "communications" }
+            ]
         },
-
-            {
-                usage: "Poultry/Egg Collector",
-                modules: resolveModules(["UGV Transport (small)", "Battery Pack", "Camera_rgb", "Robotic Arm (small)", "Suction Tool", "Cart", "Mycelium Box"])
-            },
-
-            // === Bioreactor & Mycelium ===
-            {
-                usage: "Bioreactor Assembly", modules: resolveModules(["Internal space module", // Add to list if you want
-                    "Static actuator",       // Add to list if you want
-                    "Heating Module", "Sensor Module (temp)", "pH Sensor", "Gas sensor module",     // Add to list if you want
-                    "Tank", "Pressing module",       // Add to list if you want
-                    "Generator module"       // Add to list if you want
-                ])
-            }, {
-            usage: "Mycelium Bricks Production", modules: resolveModules(["Internal space module",   // Add to list if you want
-                "Robotic Shelf", "Spore spreading module",  // Add to list if you want
-                "Heater/Humidifier module",// Add to list if you want
-                "Sensor Module (air)", "Pressing module"          // Add to list if you want
-            ])
+        {
+            usage: "Poultry/Egg Collector",
+            modules: [
+                { type: "transport", subtype: "ground" },
+                { type: "battery" },
+                { type: "camera", subtype: "rgb" },
+                { type: "arm", subtype: "small" },
+                { type: "tool", subtype: "suction" },
+                { type: "cart" },
+                { type: "box" }
+            ]
         },
-
-            // === Maintenance/Assembly ===
-            {
-                usage: "Module Assembly Station",
-                modules: resolveModules(["Robotic Shelf", "Robotic Arm (heavy)", "Rotary plate module",    // Add to list if you want
-                    "Onboard Computer", "Cart"])
-            },
-
-            // === Infrastructure ===
-            {
-                usage: "Communications Backbone",
-                modules: resolveModules(["Pole", "Battery Pack", "Communications Repeater"])
-            }, {
+        // === Bioreactor & Mycelium ===
+        {
+            usage: "Bioreactor Assembly",
+            modules: [
+                { type: "internalspace" },
+                { type: "actuator", subtype: "static" },
+                { type: "heating" },
+                { type: "sensor", subtype: "temp" },
+                { type: "sensor", subtype: "ph" },
+                { type: "sensor", subtype: "gas" },
+                { type: "tank" },
+                { type: "press" },
+                { type: "generator" }
+            ]
+        },
+        {
+            usage: "Mycelium Bricks Production",
+            modules: [
+                { type: "internalspace" },
+                { type: "shelf", subtype: "robotic" },
+                { type: "spreader", subtype: "spore" },
+                { type: "humidifier" },
+                { type: "sensor", subtype: "air" },
+                { type: "press" }
+            ]
+        },
+        // === Maintenance/Assembly ===
+        {
+            usage: "Module Assembly Station",
+            modules: [
+                { type: "shelf", subtype: "robotic" },
+                { type: "arm", subtype: "heavy" },
+                { type: "rotary" },
+                { type: "computer" },
+                { type: "cart" }
+            ]
+        },
+        // === Infrastructure ===
+        {
+            usage: "Communications Backbone",
+            modules: [
+                { type: "pole" },
+                { type: "battery" },
+                { type: "communications" }
+            ]
+        },
+        {
             usage: "Solar Charging Station",
-            modules: resolveModules(["Pole", "Solar Panel", "Battery Pack", "Rotary plate module",   // Add to list if you want
-                "Onboard Computer"])
+            modules: [
+                { type: "pole" },
+                { type: "solar" },
+                { type: "battery" },
+                { type: "rotary" },
+                { type: "computer" }
+            ]
         },
-
-            // === Mapping/Monitoring Variants ===
-            {
-                usage: "Topographic Mapping UGV",
-                modules: resolveModules(["UGV Transport (small)", "Battery Pack", "GPS Module", "Camera_rgb", "Sensor Module (soil)", "LIDAR module"           // Add to list if you want
-                ])
-            }, {
+        // === Mapping/Monitoring Variants ===
+        {
+            usage: "Topographic Mapping UGV",
+            modules: [
+                { type: "transport", subtype: "ground" },
+                { type: "battery" },
+                { type: "gps" },
+                { type: "camera", subtype: "rgb" },
+                { type: "sensor", subtype: "soil" },
+                { type: "sensor", subtype: "lidar" }
+            ]
+        },
+        {
             usage: "Topographic Mapping Drone",
-            modules: resolveModules(["Drone Transport (quadcopter)", "Battery Pack", "GPS Module", "Camera_rgb", "LIDAR module"           // Add to list if you want
-            ])
+            modules: [
+                { type: "transport", subtype: "flying" },
+                { type: "battery" },
+                { type: "gps" },
+                { type: "camera", subtype: "rgb" },
+                { type: "sensor", subtype: "lidar" }
+            ]
         },
+        // === Habitat & Sensor Deployment (LIDAR variant) ===
+        {
+            usage: "Habitat LIDAR Mapping",
+            modules: [
+                { type: "transport", subtype: "ground" },
+                { type: "battery" },
+                { type: "sensor", subtype: "lidar" },
+                { type: "camera", subtype: "rgb" },
+                { type: "sensor", subtype: "soil" },
+                { type: "gps" }
+            ]
+        },
+        // === Harvest/Monitor (LIDAR add-on) ===
+        {
+            usage: "LIDAR Harvester",
+            modules: [
+                { type: "transport", subtype: "ground" },
+                { type: "battery" },
+                { type: "gps" },
+                { type: "arm", subtype: "medium" },
+                { type: "camera", subtype: "rgb" },
+                { type: "sensor", subtype: "lidar" },
+                { type: "tool", subtype: "gripper" },
+                { type: "cart" }
+            ]
+        }
+    ]
 
-            // === Habitat & Sensor Deployment (LIDAR variant) ===
-            {
-                usage: "Habitat LIDAR Mapping",
-                modules: resolveModules(["UGV Transport (small)", "Battery Pack", "LIDAR module", "Camera_rgb", "Sensor Module (soil)", "GPS Module"])
-            },
-
-            // === Harvest/Monitor (LIDAR add-on) ===
-            {
-                usage: "LIDAR Harvester",
-                modules: resolveModules(["UGV Transport (small)", "Battery Pack", "GPS Module", "Robotic Arm (medium)", "Camera_rgb", "LIDAR module", "Gripper", "Cart"])
-            }];
 
 
     const activeAssemblies = ref([
         {
-        id: '65012c5e-0ef3-488f-98e4-3a4366b3eb17',
-        modules: resolveModules(["Animal Collar", "Battery Pack", "Audio Alarm", "Mild Shocker", "GPS Module"]),
-        name: "Test B",
-        deployed: false,
-        moves: 1,
-        actions: 1
-    },
+            id: '65012c5e-0ef3-488f-98e4-3a4366b3eb17',
+            modules: [
+                { type: 'collar' },
+                { type: 'battery' },
+                { type: 'alarm', subtype: 'sound' },
+                { type: 'alarm', subtype: 'electric' },
+                { type: 'gps' }
+            ],
+            name: "Geofence Collar",
+            deployed: false,
+            moves: 1,
+            actions: 1
+        },
         {
             id: 'af97e85f-4696-4ff2-8f43-3b3e742b94c2',
-            modules: resolveModules(["UGV Transport (small)", "Battery Pack", "GPS Module", "Seeder", "Robotic Arm (medium)", "Hole-Borer", "Camera_rgb", "Gripper"]),
+            modules: [
+                { type: 'transport', subtype: 'ground' },
+                { type: 'battery' },
+                { type: 'gps' },
+                { type: 'tool', subtype: 'seeder' },
+                { type: 'arm', subtype: 'medium' },
+                { type: 'tool', subtype: 'borer' },
+                { type: 'camera', subtype: 'rgb' },
+                { type: 'tool', subtype: 'gripper' }
+            ],
             name: "Tomato Planter/harvester",
             deployed: false,
             moves: 1,
             actions: 1
-        }, // Assembly to move a cow (heavy arm + gripper + transport + battery + collar)
+        },
         {
             id: '01c181ea-b591-4a7c-bc2b-0ee06c2e1287',
-            modules: resolveModules(["UGV Transport (large)", "Battery Pack", "Robotic Arm (heavy)", "Gripper", "Collar"]),
+            modules: [
+                { type: 'transport', subtype: 'ground' },
+                { type: 'cart' },
+                { type: 'arm', subtype: 'heavy' },
+                { type: 'tool', subtype: 'gripper' },
+                { type: 'alarm', subtype: 'electric' }
+            ],
             name: "Cow Mover",
             deployed: false,
-            moves: 1,
-            actions: 1
-        }, // Assembly to harvest milk from a cow (matches Milk requirements)
+            moves: 2,
+            actions: 2
+        },
         {
             id: '4be9bc91-75d8-457d-bdc1-1df33792e5e8',
-            modules: resolveModules(["UGV Transport (large)", "Battery Pack", "Camera_rgb", "Robotic Arm (medium)", "Gripper"]),
+            modules: [
+                { type: 'transport', subtype: 'ground' },
+                { type: 'battery' },
+                { type: 'camera', subtype: 'rgb' },
+                { type: 'arm', subtype: 'medium' },
+                { type: 'tool', subtype: 'gripper' }
+            ],
             name: "Cow Milker",
             deployed: false,
             moves: 1,
             actions: 1
-        }, // Assembly to harvest the cow (butchering)
+        },
         {
             id: 'f69f8fa3-dfd8-4f19-866e-e12c576c111e',
-            modules: resolveModules(["UGV Transport (large)", "Battery Pack", "Robotic Arm (heavy)", "Cutter/Saw"]),
+            modules: [
+                { type: 'transport', subtype: 'ground' },
+                { type: 'battery' },
+                { type: 'arm', subtype: 'heavy' },
+                { type: 'tool', subtype: 'cutter' }
+            ],
             name: "Cow Harvester",
             deployed: false,
             moves: 1,
             actions: 1
-        }])
+        }
+    ])
+
 
     const currentAssembly = ref([])
     return {availableModules, activeAssemblies, premadeAssemblies, currentAssembly}

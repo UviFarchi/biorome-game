@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
-import { userStore } from '/stores/userStore.js'
-const user = userStore()
+import { gameStateStore } from '/stores/gameStateStore.js'
+const gameState = gameStateStore()
 const name = ref('')
 import eventBus from "@/eventBus.js";
 
@@ -33,9 +33,9 @@ function startGame() {
     alert('Please enter your name!')
     return
   }
-  user.name = name.value
-  user.avatar = selectedAvatar.value
-  user.difficulty = selectedDifficulty.value
+  gameState.userName = name.value
+  gameState.userAvatar = selectedAvatar.value
+  gameState.difficulty = selectedDifficulty.value
   eventBus.emit('nav', 'main')
 }
 </script>

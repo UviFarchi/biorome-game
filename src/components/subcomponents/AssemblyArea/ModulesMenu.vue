@@ -1,10 +1,10 @@
 <script setup>
 import {ref, computed} from 'vue'
 import {modulesStore} from '/stores/modulesStore.js'
-import {userStore} from '/stores/userStore.js'
+import {gameStateStore} from '/stores/gameStateStore.js'
 
 const modules = modulesStore()
-const user = userStore()
+const gameState = gameStateStore()
 
 // Group modules by type for the menu
 const groupedModules = computed(() => {
@@ -28,11 +28,11 @@ function toggleType(type) {
 function buyModule(moduleName) {
   const mod = modules.availableModules.find(m => m.name === moduleName)
   if (!mod) return
-  if ((user.gold || 0) < mod.cost) {
+  if ((gameState.gold || 0) < mod.cost) {
     showToast('Not enough gold!')
     return
   }
-  user.gold -= mod.cost
+  gameState.gold -= mod.cost
   mod.count = (mod.count || 0) + 1
   showToast(`Bought ${mod.name} for 💰${mod.cost}`)
 }
@@ -41,7 +41,7 @@ function sellModule(moduleName) {
   const mod = modules.availableModules.find(m => m.name === moduleName)
   if (!mod || (mod.count || 0) <= 0) return
   let refund = Math.ceil((mod.cost / 2) / 5) * 5
-  user.gold += refund
+  gameState.gold += refund
   mod.count -= 1
   showToast(`Sold ${mod.name} for 💰${refund}`)
 }
@@ -133,7 +133,7 @@ function showToast(msg) {
                 </button>
                 <button
                     @click="buyModule(mod.name)"
-                    :disabled="user.gold < mod.cost"
+                    :disabled="gameState.gold < mod.cost"
                     class="buy-btn"
                 >
                   Buy
@@ -154,7 +154,7 @@ function showToast(msg) {
     </div>
     <div v-if="toast" class="toast">{{ toast }}</div>
     <div class="gold-status">
-      Gold: <span class="gold-amount">{{ user.gold }}</span>
+      Gold: <span class="gold-amount">{{ gameState.gold }}</span>
     </div>
   </div>
 </template>

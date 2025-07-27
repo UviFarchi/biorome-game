@@ -1,129 +1,67 @@
 <script setup>
-import {ref, computed} from 'vue'
 import {animalsStore} from '/stores/animalsStore.js'
 import {tilesStore} from '/stores/tilesStore.js'
-import {userStore} from '/stores/userStore.js'
 import {gameStateStore} from "../../../../stores/gameStateStore.js";
+import {computed, onBeforeUnmount, onMounted, ref} from "vue";
+import eventBus from "@/eventBus.js";
+import MoveAnimal from './Actions/Animals/Move.vue'
+import SetCollar from './Actions/Animals/SetCollar.vue';
+import HarvestProduct from "@/components/subcomponents/MainMap/Actions/Animals/HarvestProduct.vue";
 
 const animals = animalsStore()
 const tiles = tilesStore()
-const user = userStore()
 const gameState = gameStateStore();
-const showDeployModal = ref(false)
-const deployingAnimal = ref(null)
-const selectedRow = ref(null)
-const selectedCol = ref(null)
-const restrictedTiles = ref([])
+const mode = ref('normal')
+const selectedAnimal = computed(() => tiles.selectedSubject.value.animal)
+const isGate = computed(() => !tiles.selectedSubject.value.hasOwnProperty('row'))
 
-const fieldRows = tiles.tiles.length
-const fieldCols = tiles.tiles[0].length
-const rowOptions = computed(() => Array.from({length: fieldRows}, (_, i) => i + 1))
-const colOptions = computed(() => Array.from({length: fieldCols}, (_, i) => i + 1))
-
-const availableTiles = computed(() => {
-  let result = []
-  for (let row = 0; row < fieldRows; row++) {
-    for (let col = 0; col < fieldCols; col++) {
-      const tile = tiles.tiles[row][col]
-      if (!tile.animal) result.push({row, col})
-    }
-  }
-  return result
+onMounted(() => {
+  eventBus.on('menus-mode', changeMode)
+})
+onBeforeUnmount(() => {
+  eventBus.off('menus-mode', changeMode)
 })
 
-function toggleTileRestriction(row, col) {
-  const idx = restrictedTiles.value.findIndex(t => t.row === row && t.col === col)
-  if (idx !== -1) {
-    restrictedTiles.value.splice(idx, 1)
-  } else if (restrictedTiles.value.length < 3) {
-    restrictedTiles.value.push({row, col})
-  }
+function changeMode(e) {
+  mode.value = e
 }
 
-function openDeployModal(animal) {
-  deployingAnimal.value = animal
-  if (availableTiles.value.length > 0) {
-    selectedRow.value = availableTiles.value[0].row + 1
-    selectedCol.value = availableTiles.value[0].col + 1
-    showDeployModal.value = true
-  } else {
-    alert("No available tiles for animals.")
-  }
-}
-
-function closeDeployModal() {
-  showDeployModal.value = false
-  deployingAnimal.value = null
-  selectedRow.value = null
-  selectedCol.value = null
-}
-
-function confirmDeploy() {
-  if (!deployingAnimal.value) return
-  const row = Number(selectedRow.value) - 1
-  const col = Number(selectedCol.value) - 1
-  const tile = tiles.tiles[row][col]
-  if (!tile.animal) {
-    if (user.gold < deployingAnimal.value.cost) {
-      alert("Not enough gold!")
-      return
-    }
-
-    tile.animal = {
-      ...deployingAnimal.value,
-      mood: 100,
-      dateDeployed: gameState.day
-    }
-    user.gold -= deployingAnimal.value.cost
-    closeDeployModal()
-  } else {
-    alert("Tile already has an animal.")
-  }
+function buy(animal) {
+  tiles.gate.animals.push({...animal, mood: 100, dateDeployed: gameState.day})
+  gameState.gold -= animal.cost
 }
 </script>
 
 <template>
   <div class="verticalMenuArea">
     <div class="verticalMenuScroll">
-      <div
-          v-for="animal in animals.animalTypes"
-          :key="animal.type"
-          class="verticalMenuCard"
-      >
-        <span class="verticalMenu-icon">{{ animal.icon }}</span>
-        <span class="verticalMenu-type">{{ animal.type }}</span>
-        <span class="verticalMenu-cost">{{ animal.cost }}💰</span>
-        <button class="deployBtn" @click="openDeployModal(animal)">
-          Deploy
-        </button>
-      </div>
-    </div>
-
-    <!-- Deploy Modal -->
-    <div v-if="showDeployModal" class="modal-overlay">
-      <div class="modal">
-        <h4>Deploy {{ deployingAnimal.type }} ({{ deployingAnimal.icon }})</h4>
-        <label>
-          Tile:
-          <select v-model="selectedRow">
-            <option v-for="tile in availableTiles" :key="tile.row + '-' + tile.col" :value="tile.row + 1">
-              Row {{ tile.row + 1 }}
-            </option>
-          </select>
-          <select v-model="selectedCol">
-            <option v-for="tile in availableTiles" :key="tile.row + '-' + tile.col" :value="tile.col + 1">
-              Col {{ tile.col + 1 }}
-            </option>
-          </select>
-        </label>
-
-        <div class="modal-actions">
-          <button @click="confirmDeploy">OK</button>
-          <button @click="closeDeployModal">Cancel</button>
+      <template v-if="mode === 'normal'">
+        <div
+            v-for="animal in animals.animalTypes"
+            :key="animal.type"
+            class="verticalMenuCard"
+        >
+          <span class="verticalMenu-icon">{{ animal.icon }}</span>
+          <span class="verticalMenu-type">{{ animal.type }}</span>
+          <span class="verticalMenu-cost">{{ animal.cost }}💰</span>
+          <button class="buyBtn" :disabled="gameState.gold < animal.cost" @click="buy(animal)">
+            Buy
+          </button>
         </div>
-      </div>
-    </div>
+      </template>
+      <template v-else-if="mode === 'action'">
+        <MoveAnimal
+            :selected-animal="selectedAnimal"
+            :is-gate="isGate"
+        />
+        <SetCollar
+            :selected-animal="selectedAnimal"/>
 
+        <HarvestProduct v-if="!isGate"
+            :selected-animal="selectedAnimal"
+            :tile="tiles.selectedSubject"/>
+      </template>
+    </div>
   </div>
 </template>
 
@@ -168,7 +106,7 @@ function confirmDeploy() {
   font-size: 1.1em;
 }
 
-.deployBtn {
+.buyBtn {
   margin-left: auto;
   padding: 0.2em 1em;
   border-radius: 7px;
@@ -179,47 +117,15 @@ function confirmDeploy() {
   cursor: pointer;
 }
 
-.deployBtn:hover {
+.buyBtn:hover {
   background: #00bcd4;
   color: #fff;
 }
 
-.deployBtn:disabled {
+.buyBtn:disabled {
   background: #ddd !important;
   color: #888 !important;
   cursor: not-allowed !important;
   border: 1px solid #bbb;
 }
-
-.modal-overlay {
-  position: fixed;
-  z-index: 1000;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.35);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal {
-  background: #fff;
-  padding: 2em 1.5em;
-  border-radius: 12px;
-  box-shadow: 0 4px 24px #0002;
-  min-width: 250px;
-  max-width: 90vw;
-  max-height: 90vh;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1em;
-  margin-top: 0.7em;
-}
-
 </style>

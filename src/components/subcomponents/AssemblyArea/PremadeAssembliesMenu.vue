@@ -1,12 +1,12 @@
 <script setup>
 
 import { modulesStore } from '/stores/modulesStore.js'
-import { userStore } from '/stores/userStore.js'
+import { gameStateStore } from '/stores/gameStateStore.js'
 
 const emit = defineEmits(['close'])
 
 const modules = modulesStore()
-const user = userStore()
+const gameState = gameStateStore()
 const premadeAssemblies = modules.premadeAssemblies
 
 // Helper to get module object by name from store
@@ -34,18 +34,18 @@ function canSelectAssembly(assembly) {
 
 function canBuyAll(assembly) {
   const status = getAssemblyStatus(assembly)
-  return status.missing.length > 0 && user.gold >= status.totalCost
+  return status.missing.length > 0 && gameState.gold >= status.totalCost
 }
 
 // Buy all missing modules in this assembly
 function buyAllMissing(assembly) {
   const status = getAssemblyStatus(assembly)
-  if (user.gold < status.totalCost) return
+  if (gameState.gold < status.totalCost) return
   for (const mod of status.missing) {
     const storeMod = getModuleByName(mod.name)
     if (storeMod) storeMod.count = (storeMod.count || 0) + 1
   }
-  user.gold -= status.totalCost
+  gameState.gold -= status.totalCost
 }
 
 function selectAssembly(assembly) {

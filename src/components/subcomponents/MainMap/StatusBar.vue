@@ -1,18 +1,16 @@
 <script setup>
 import {computed, ref} from 'vue'
-import {userStore} from '/stores/userStore.js'
 import {gameStateStore} from '/stores/gameStateStore.js'
 // Store instances
-const user = userStore()
-const game = gameStateStore()
+const gameState = gameStateStore()
 import eventBus from "@/eventBus.js";
 
 
 // Real date for day 1
-const startDate = ref(new Date(game.startDate))
+const startDate = ref(new Date(gameState.startDate))
 
 // Day number (current turn): If game.day is 0, it's Day 1
-const dayNum = computed(() => (game.day ?? 0) + 1)
+const dayNum = computed(() => (gameState.day ?? 0) + 1)
 
 // Calculate in-game date by adding dayNum - 1 to startDate
 const inGameDate = computed(() => {
@@ -37,9 +35,9 @@ const season = computed(() => {
 })
 
 const weather = computed(() => {
-  const t = game.temperature
-  const r = game.rainfall
-  const c = game.cloudCover
+  const t = gameState.temperature
+  const r = gameState.rainfall
+  const c = gameState.cloudCover
 
   // ORDER MATTERS!!!
   if (t < -5 && r === 0 && c > 0.4) return { label: "Freezing Fog", icon: "🌫️" }
@@ -63,17 +61,17 @@ const weather = computed(() => {
 
 const weatherTooltip = computed(() =>
     `Weather affects soil, plants, and animals
-Temp: ${game.temperature}°C
-Rain: ${game.rainfall}mm
-Cloud: ${Math.round(game.cloudCover * 100)}%`
+Temp: ${gameState.temperature}°C
+Rain: ${gameState.rainfall}mm
+Cloud: ${Math.round(gameState.cloudCover * 100)}%`
 )
 
 // Player info
-const userName = computed(() => user.name)
-const userAvatar = computed(() => user.avatar)
+const userName = computed(() => gameState.userName)
+const userAvatar = computed(() => gameState.userAvatar)
 
 // Gold
-const gold = computed(() => user.gold)
+const gold = computed(() => gameState.gold)
 </script>
 
 <template>

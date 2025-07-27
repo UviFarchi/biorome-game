@@ -19,8 +19,8 @@ const currentAssembly = computed(() =>
     modules.activeAssemblies.find(a => a.id === deployingAssemblyId.value)
 )
 
-const fieldRows = 6
-const fieldCols = 6
+const fieldRows = tiles.tiles.length
+const fieldCols = tiles.tiles[0].length
 const rowOptions = computed(() => Array.from({ length: fieldRows }, (_, i) => i + 1))
 const colOptions = computed(() => Array.from({ length: fieldCols }, (_, i) => i + 1))
 
@@ -76,7 +76,7 @@ function confirmDeploy() {
             {{ assembly.name || 'Assembly' }}
           </span>
           <button
-              class="deployBtn"
+              class="buyBtn"
               @click="openDeployModal(assembly.id)"
           >
             Deploy
@@ -98,9 +98,9 @@ function confirmDeploy() {
             <span class="mod-label">Modules:</span>
             <span
                 v-for="mod in currentAssembly.modules"
-                :key="mod.name"
+                :key="mod.type"
                 class="moduleName"
-            >{{ mod.name }}</span>
+            >{{ mod.type }}</span>
           </div>
           <div class="modal-section">
             <span>Actions left: <b>{{ currentAssembly.actions }}</b></span>
@@ -183,7 +183,7 @@ function confirmDeploy() {
   font-size: 1.08em;
   margin-bottom: 0.15em;
 }
-.deployBtn {
+.buyBtn {
   margin-top: 0.2em;
   padding: 0.21em 1em;
   border-radius: 7px;
@@ -196,11 +196,11 @@ function confirmDeploy() {
   position: absolute;
   bottom: 5px;
 }
-.deployBtn:hover {
+.buyBtn:hover {
   background: #00bcd4;
   color: #fff;
 }
-.deployBtn:disabled {
+.buyBtn:disabled {
   background: #ddd !important;
   color: #888 !important;
   cursor: not-allowed !important;

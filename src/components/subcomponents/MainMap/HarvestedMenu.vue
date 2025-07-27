@@ -1,5 +1,4 @@
 <script setup>
-import eventBus from "@/eventBus.js";
 import {computed, ref} from "vue";
 
 
@@ -44,8 +43,6 @@ const harvested = computed(() => market.harvestedProducts)
   background: #f3fbe9;
   border-bottom: 1px solid #b2dfdb;
   border-top: 2px solid #b2dfdb;
-  background: #e0f7fa;
-  padding: 0.5rem 0;
 }
 .harvestedList {
   display: flex;

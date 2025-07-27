@@ -4,12 +4,12 @@ import StartingScreen from '@/components/StartingScreen.vue'
 import MainMap from '@/components/MainMap.vue'
 import AssemblyArea from '@/components/AssemblyArea.vue'
 import MarketArea from "@/components/MarketArea.vue";
-import { userStore } from '/stores/userStore.js'
+import { gameStateStore } from '/stores/gameStateStore.js'
 import eventBus from '@/eventBus.js'
 
-const user = userStore()
+const gameState = gameStateStore()
 const currentScreen = ref(
-    user.name && user.avatar && user.difficulty !== undefined ? 'main' : 'start'
+    gameState.userName && gameState.userAvatar && gameState.difficulty !== undefined ? 'main' : 'start'
 )
 
 function handleNav(e) {

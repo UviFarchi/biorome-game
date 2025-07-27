@@ -1,40 +1,13 @@
 <script setup>
-import {computed} from 'vue'
+
 import StatusBar from '@/components/subcomponents/MainMap/StatusBar.vue';
 import AssembliesMenu from "@/components/subcomponents/MainMap/AssembliesMenu.vue";
 import HarvestedMenu from "@/components/subcomponents/MainMap/HarvestedMenu.vue";
 import PlantsMenu from "@/components/subcomponents/MainMap/PlantsMenu.vue";
 import AnimalsMenu from "@/components/subcomponents/MainMap/AnimalsMenu.vue";
-import {modulesStore} from '/stores/modulesStore.js'
-import {animalsStore} from '/stores/animalsStore.js'
-import {plantsStore} from '/stores/plantsStore.js'
-import {marketStore} from '/stores/marketStore.js'
-import {gameStateStore} from '/stores/gameStateStore.js'
-import {tilesStore} from "../../stores/tilesStore.js";
 import TilesGrid from "@/components/subcomponents/MainMap/TilesGrid.vue";
-
-const modules = modulesStore()
-const animals = animalsStore();
-const plants = plantsStore();
-const villagers = marketStore();
-const game = gameStateStore();
-const tiles = tilesStore();
-const acceptedOrdersDisplay = computed(() =>
-    villagers.acceptedOrders.map(order => {
-      const villager = villagers.villagers.find(v => v.id === order.villagerId)
-      const startDate = new Date(game.startDate)
-      const due = new Date(startDate)
-      due.setDate(due.getDate() + (order.dueDate - 1))
-      const dueDateString = due.toLocaleDateString('en-US', {month: 'long', day: 'numeric'})
-      return {
-        ...order,
-        villagerName: villager ? villager.name : 'Unknown',
-        dueDateString
-      }
-    })
-)
-
 </script>
+
 <template>
   <div class="main-map-wrapper">
     <StatusBar class="status-bar"/>
@@ -49,8 +22,8 @@ const acceptedOrdersDisplay = computed(() =>
 <style scoped>
 .main-map-wrapper {
   display: grid;
-  grid-template-rows: 5% 15% 65% 15%;   /* Status, top-menu, center, bottom-menu */
-  grid-template-columns: 15% 70% 15%;   /* Left, center, right */
+  grid-template-rows: 5% 15% 65% 15%;
+  grid-template-columns: 15% 70% 15%;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
@@ -80,7 +53,7 @@ const acceptedOrdersDisplay = computed(() =>
   overflow-x: auto;
   overflow-y: hidden;
   max-height: 100%;
-  height: 100%;     /* Make sure it fills the grid row */
+  height: 100%;
   width: 100%;
 }
 .status-bar {
