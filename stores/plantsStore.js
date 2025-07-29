@@ -2,484 +2,707 @@ import {defineStore} from 'pinia'
 import {ref} from 'vue'
 
 export const plantsStore = defineStore('plantTypes', () => {
-    const plantTypes = ref(
-        [
+    const plantTypes = ref({
+        annuals: [
             {
-                type: 'Grass',
-                plantingOptions: ['Seed', 'Seedling'],
-                growthStages: ['Seed', 'Seedling', 'Growing', 'Mature', 'Overripe', 'Rotten'],
-                daysPerStage: [2, 3, 8, 8, 2, 2],
-                preferredSeason: 'Spring',
-                minWater: 0, maxWater: 2, minFertility: 0, maxFertility: 2,
-                waterRequired: 1, fertilizerRequired: 1,
-                yield: 1,
-                seedCost: 2, seedlingCost: 5,
-                basePrice: 1, shelfLife: 10,
+                type: 'grass',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'vegetative', 'ripe', 'overripe'],
+                daysPerGrowthStage: [7, 21, 40, 20, 8],
+                waterRequired: 600,
+                fertilizerRequired: 50,
+                yield: 8000,
+                harvestWindows: [{month: 5, day: 15}, {month: 6, day: 30}],
+                seedCost: 0.1,
+                seedlingCost: 0.5,
                 icon: '🌱',
-                product: 'Grass',
-                removedWhenHarvested: true,
-                effect: [
-                    { type: 'weed_suppression', strength: 1 },
-                    { type: 'synergy', strength: 1, target: ['Cow', 'Goat', 'Sheep'] }
-                ]
+                productKey: 'hay',
+                plantMaterialKey: 'biomass',
+                removedWhenHarvested: false,
+                effects: [{type: 'weed_suppression', strength: 1}],
+                synergies: [{target: 'clover', strength: 1}]
             },
             {
-                type: 'Corn',
-                plantingOptions: ['Seed', 'Seedling'],
-                growthStages: ['Seed', 'Seedling', 'Growing', 'Mature', 'Overripe', 'Rotten'],
-                daysPerStage: [3, 5, 12, 10, 4, 3],
-                preferredSeason: 'Summer',
-                minWater: 1, maxWater: 3, minFertility: 1, maxFertility: 3,
-                waterRequired: 2, fertilizerRequired: 2,
-                yield: 3,
-                seedCost: 3, seedlingCost: 8,
-                basePrice: 1, shelfLife: 15,
+                type: 'corn',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'vegetative', 'flowering', 'green fruit', 'ripe', 'overripe'],
+                daysPerGrowthStage: [7, 14, 50, 10, 8, 8, 4],
+                waterRequired: 600,
+                fertilizerRequired: 150,
+                yield: 8000,
+                harvestWindows: [{month: 9, day: 1}, {month: 10, day: 15}],
+                seedCost: 0.1,
+                seedlingCost: 0.5,
                 icon: '🌽',
-                product: 'Corn',
+                productKey: 'corn_cob',
+                plantMaterialKey: 'biomass',
                 removedWhenHarvested: true,
-                effect: [
-                    { type: 'water_consumption', strength: 2 },
-                    { type: 'synergy', strength: 1, target: ['Beans', 'Pumpkin'] }
-                ]
+                effects: [{type: 'water_consumption', strength: 2}],
+                synergies: [{target: 'beans', strength: 1}, {target: 'pumpkin', strength: 1}]
             },
             {
-                type: 'Tomato',
-                plantingOptions: ['Seed', 'Seedling'],
-                growthStages: ['Seed', 'Seedling', 'Growing', 'Mature', 'Overripe', 'Rotten'],
-                daysPerStage: [3, 5, 10, 12, 3, 2],
-                preferredSeason: 'Summer',
-                minWater: 1, maxWater: 3, minFertility: 0, maxFertility: 2,
-                waterRequired: 2, fertilizerRequired: 1,
-                yield: 2,
-                seedCost: 4, seedlingCost: 10,
-                basePrice: 1, shelfLife: 7,
+                type: 'tomato',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'vegetative', 'flowering', 'green fruit', 'ripe', 'overripe'],
+                daysPerGrowthStage: [8, 12, 30, 15, 10, 10, 5],
+                waterRequired: 700,
+                fertilizerRequired: 120,
+                yield: 50000,
+                harvestWindows: [{month: 7, day: 1}, {month: 9, day: 30}],
+                seedCost: 0.2,
+                seedlingCost: 1.0,
                 icon: '🍅',
-                product: 'Tomato',
+                productKey: 'tomato_fruit',
+                plantMaterialKey: 'biomass',
                 removedWhenHarvested: true,
-                effect: [
-                    { type: 'water_consumption', strength: 2 },
-                    { type: 'synergy', strength: 1, target: ['Basil', 'Marigold', 'Bee', 'Ladybug', 'Chicken'] }
+                effects: [{type: 'water_consumption', strength: 2}],
+                synergies: [
+                    {target: 'basil', strength: 1},
+                    {target: 'marigold', strength: 1},
+                    {target: 'bee', strength: 1},
+                    {target: 'ladybug', strength: 1},
+                    {target: 'chicken', strength: 1}
                 ]
             },
             {
-                type: 'Lettuce',
-                plantingOptions: ['Seed', 'Seedling'],
-                growthStages: ['Seed', 'Seedling', 'Growing', 'Mature', 'Overripe', 'Rotten'],
-                daysPerStage: [2, 4, 8, 6, 2, 2],
-                preferredSeason: 'Spring',
-                minWater: 1, maxWater: 2, minFertility: 1, maxFertility: 2,
-                waterRequired: 2, fertilizerRequired: 1,
-                yield: 2,
-                seedCost: 2, seedlingCost: 7,
-                basePrice: 1, shelfLife: 6,
+                type: 'lettuce',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'vegetative', 'green fruit', 'ripe', 'overripe'],
+                daysPerGrowthStage: [4, 10, 30, 7, 6, 4],
+                waterRequired: 300,
+                fertilizerRequired: 50,
+                yield: 25000,
+                harvestWindows: [{month: 5, day: 1}, {month: 6, day: 15}],
+                seedCost: 0.05,
+                seedlingCost: 0.5,
                 icon: '🥬',
-                product: 'Lettuce',
+                productKey: 'lettuce_leaf',
+                plantMaterialKey: 'biomass',
                 removedWhenHarvested: true,
-                effect: [
-                    { type: 'water_consumption', strength: 1 },
-                    { type: 'synergy', strength: 1, target: ['Clover', 'Duck', 'Ladybug'] }
-                ]
+                effects: [{type: 'water_consumption', strength: 1}],
+                synergies: [{target: 'clover', strength: 1}, {target: 'duck', strength: 1}]
             },
             {
-                type: 'Carrot',
-                plantingOptions: ['Seed', 'Seedling'],
-                growthStages: ['Seed', 'Seedling', 'Growing', 'Mature', 'Overripe', 'Rotten'],
-                daysPerStage: [3, 6, 15, 15, 3, 2],
-                preferredSeason: 'Autumn',
-                minWater: 1, maxWater: 2, minFertility: 1, maxFertility: 2,
-                waterRequired: 1, fertilizerRequired: 1,
-                yield: 2,
-                seedCost: 2, seedlingCost: 6,
-                basePrice: 1, shelfLife: 20,
+                type: 'carrot',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'vegetative', 'green fruit', 'ripe', 'overripe'],
+                daysPerGrowthStage: [14, 14, 35, 10, 10, 5],
+                waterRequired: 400,
+                fertilizerRequired: 80,
+                yield: 40000,
+                harvestWindows: [{month: 6, day: 1}, {month: 7, day: 31}],
+                seedCost: 0.02,
+                seedlingCost: 0.2,
                 icon: '🥕',
-                product: 'Carrot',
+                productKey: 'carrot_root',
+                plantMaterialKey: 'biomass',
                 removedWhenHarvested: true,
-                effect: [
-                    { type: 'soil_loosen', strength: 1 },
-                    { type: 'synergy', strength: 1, target: ['Rabbit', 'Pumpkin', 'Pig'] }
+                effects: [{type: 'soil_loosen', strength: 1}],
+                synergies: [
+                    {target: 'rabbit', strength: 1},
+                    {target: 'pumpkin', strength: 1},
+                    {target: 'pig', strength: 1}
                 ]
             },
             {
-                type: 'Coffee',
-                plantingOptions: ['Seed', 'Seedling'],
-                growthStages: ['Seed', 'Seedling', 'Growing', 'Mature', 'Overripe', 'Rotten'],
-                daysPerStage: [10, 20, 60, 80, 20, 10],
-                preferredSeason: 'Summer',
-                minWater: 2, maxWater: 3, minFertility: 2, maxFertility: 3,
-                waterRequired: 3, fertilizerRequired: 2,
-                yield: 2,
-                seedCost: 6, seedlingCost: 14,
-                basePrice: 2, shelfLife: 30,
-                icon: '☕',
-                product: 'Coffee Beans',
-                removedWhenHarvested: false,
-                effect: [
-                    { type: 'ph_down', strength: 0.2 },
-                    { type: 'synergy', strength: 1, target: ['Bee', 'Clover', 'Sunflower'] }
-                ]
-            },
-            {
-                type: 'Pumpkin',
-                plantingOptions: ['Seed', 'Seedling'],
-                growthStages: ['Seed', 'Seedling', 'Growing', 'Mature', 'Overripe', 'Rotten'],
-                daysPerStage: [5, 7, 14, 16, 5, 3],
-                preferredSeason: 'Autumn',
-                minWater: 2, maxWater: 4, minFertility: 1, maxFertility: 3,
-                waterRequired: 3, fertilizerRequired: 2,
-                yield: 4,
-                seedCost: 4, seedlingCost: 12,
-                basePrice: 2, shelfLife: 40,
+                type: 'pumpkin',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'vegetative', 'flowering', 'green fruit', 'ripe', 'overripe'],
+                daysPerGrowthStage: [7, 14, 40, 15, 15, 10, 6],
+                waterRequired: 500,
+                fertilizerRequired: 100,
+                yield: 35000,
+                harvestWindows: [{month: 9, day: 15}, {month: 10, day: 31}],
+                seedCost: 0.5,
+                seedlingCost: 2.0,
                 icon: '🎃',
-                product: 'Pumpkin',
+                productKey: 'pumpkin_fruit',
+                plantMaterialKey: 'biomass',
                 removedWhenHarvested: true,
-                effect: [
-                    { type: 'water_consumption', strength: 3 },
-                    { type: 'synergy', strength: 1, target: ['Corn', 'Beans', 'Bee', 'Pig'] }
+                effects: [{type: 'water_consumption', strength: 3}],
+                synergies: [
+                    {target: 'corn', strength: 1},
+                    {target: 'beans', strength: 1},
+                    {target: 'bee', strength: 1},
+                    {target: 'pig', strength: 1}
                 ]
             },
             {
-                type: 'Apple Tree',
-                plantingOptions: ['Seedling'],
-                growthStages: ['Seedling', 'Growing', 'Young Tree', 'Mature', 'Harvestable', 'Old'],
-                daysPerStage: [7, 40, 80, 90, 30, 180],
-                preferredSeason: 'Spring',
-                minWater: 2, maxWater: 4, minFertility: 2, maxFertility: 4,
-                waterRequired: 3, fertilizerRequired: 2,
-                yield: 5,
-                seedCost: 0, seedlingCost: 20,
-                basePrice: 4, shelfLife: 20,
-                icon: '🍏',
-                product: 'Apple',
-                removedWhenHarvested: false,
-                effect: [
-                    { type: 'pollination', strength: 1 },
-                    { type: 'synergy', strength: 2, target: ['Bee', 'Lavender', 'Sunflower'] }
-                ]
-            },
-            {
-                type: 'Pear Tree',
-                plantingOptions: ['Seedling'],
-                growthStages: ['Seedling', 'Growing', 'Young Tree', 'Mature', 'Harvestable', 'Old'],
-                daysPerStage: [7, 40, 80, 90, 30, 180],
-                preferredSeason: 'Spring',
-                minWater: 2, maxWater: 4, minFertility: 2, maxFertility: 4,
-                waterRequired: 3, fertilizerRequired: 2,
-                yield: 5,
-                seedCost: 0, seedlingCost: 20,
-                basePrice: 4, shelfLife: 20,
-                icon: '🍐',
-                product: 'Pear',
-                removedWhenHarvested: false,
-                effect: [
-                    { type: 'pollination', strength: 1 },
-                    { type: 'synergy', strength: 2, target: ['Bee', 'Lavender', 'Sunflower'] }
-                ]
-            },
-            {
-                type: 'Almond Tree',
-                plantingOptions: ['Seedling'],
-                growthStages: ['Seedling', 'Growing', 'Young Tree', 'Mature', 'Harvestable', 'Old'],
-                daysPerStage: [10, 50, 100, 100, 50, 200],
-                preferredSeason: 'Spring',
-                minWater: 2, maxWater: 4, minFertility: 2, maxFertility: 4,
-                waterRequired: 3, fertilizerRequired: 3,
-                yield: 5,
-                seedCost: 0, seedlingCost: 24,
-                basePrice: 6, shelfLife: 30,
-                icon: '🌰',
-                product: 'Almond',
-                removedWhenHarvested: false,
-                effect: [
-                    { type: 'pollination', strength: 1 },
-                    { type: 'synergy', strength: 2, target: ['Bee', 'Clover'] }
-                ]
-            },
-            {
-                type: 'Lavender',
-                plantingOptions: ['Seed', 'Seedling'],
-                growthStages: ['Seed', 'Seedling', 'Growing', 'Mature', 'Blooming', 'Overripe', 'Rotten'],
-                daysPerStage: [4, 7, 10, 12, 12, 2, 2],
-                preferredSeason: 'Spring',
-                minWater: 1, maxWater: 3, minFertility: 0, maxFertility: 2,
-                waterRequired: 1, fertilizerRequired: 1,
-                yield: 2,
-                seedCost: 2, seedlingCost: 8,
-                basePrice: 3, shelfLife: 15,
+                type: 'lavender',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'vegetative', 'flowering', 'green fruit', 'ripe', 'overripe'],
+                daysPerGrowthStage: [21, 30, 30, 20, 10, 10, 6],
+                waterRequired: 250,
+                fertilizerRequired: 20,
+                yield: 1000,
+                harvestWindows: [{month: 6, day: 1}, {month: 7, day: 15}],
+                seedCost: 0.1,
+                seedlingCost: 1.0,
                 icon: '💜',
-                product: 'Lavender',
-                removedWhenHarvested: true,
-                effect: [
-                    { type: 'pollination', strength: 1 },
-                    { type: 'synergy', strength: 1, target: ['Bee', 'Apple Tree', 'Pear Tree', 'Almond Tree'] }
+                productKey: 'lavender_flower',
+                plantMaterialKey: 'biomass',
+                removedWhenHarvested: false,
+                effects: [
+                    {type: 'pollination', strength: 1},
+                    {type: 'pest_control', strength: 1}
+                ],
+                synergies: [
+                    {target: 'bee', strength: 1},
+                    {target: 'apple_tree', strength: 1},
+                    {target: 'pear_tree', strength: 1},
+                    {target: 'almond_tree', strength: 1}
                 ]
             },
             {
-                type: 'Clover',
-                plantingOptions: ['Seed', 'Seedling'],
-                growthStages: ['Seed', 'Seedling', 'Growing', 'Mature', 'Flowering', 'Overripe', 'Rotten'],
-                daysPerStage: [2, 3, 8, 10, 10, 2, 2],
-                preferredSeason: 'Spring',
-                minWater: 1, maxWater: 2, minFertility: 0, maxFertility: 2,
-                waterRequired: 1, fertilizerRequired: 0,
-                yield: 1,
-                seedCost: 2, seedlingCost: 5,
-                basePrice: 1, shelfLife: 10,
+                type: 'clover',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'vegetative', 'flowering', 'green fruit', 'ripe', 'overripe'],
+                daysPerGrowthStage: [10, 14, 30, 10, 8, 8, 4],
+                waterRequired: 400,
+                fertilizerRequired: 0,
+                yield: 10000,
+                harvestWindows: [{month: 5, day: 1}, {month: 6, day: 30}],
+                seedCost: 0.01,
+                seedlingCost: 0.1,
                 icon: '☘️',
-                product: 'Clover',
-                removedWhenHarvested: true
+                productKey: 'clover_flower',
+                plantMaterialKey: 'biomass',
+                removedWhenHarvested: false,
+                effects: [{type: 'nitrogen_fixing', strength: 1}],
+                synergies: [
+                    {target: 'coffee', strength: 1},
+                    {target: 'apple_tree', strength: 1}
+                ]
             },
             {
-                type: 'Sunflower',
-                plantingOptions: ['Seed', 'Seedling'],
-                growthStages: ['Seed', 'Seedling', 'Growing', 'Mature', 'Flowering', 'Overripe', 'Rotten'],
-                daysPerStage: [3, 5, 8, 12, 6, 2, 2],
-                preferredSeason: 'Summer',
-                minWater: 1, maxWater: 3, minFertility: 1, maxFertility: 3,
-                waterRequired: 2, fertilizerRequired: 1,
-                yield: 3,
-                seedCost: 3, seedlingCost: 8,
-                basePrice: 2, shelfLife: 12,
+                type: 'sunflower',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'vegetative', 'flowering', 'green fruit', 'ripe', 'overripe'],
+                daysPerGrowthStage: [7, 10, 40, 15, 10, 10, 6],
+                waterRequired: 500,
+                fertilizerRequired: 80,
+                yield: 2500,
+                harvestWindows: [{month: 8, day: 15}, {month: 9, day: 30}],
+                seedCost: 0.1,
+                seedlingCost: 0.5,
                 icon: '🌻',
-                product: 'Sunflower Seed',
-                removedWhenHarvested: true
-            },
-            {
-                type: 'Oak Tree',
-                plantingOptions: ['Seedling'],
-                growthStages: ['Seedling', 'Growing', 'Sapling', 'Mature', 'Harvestable', 'Old'],
-                daysPerStage: [20, 120, 180, 360, 60, 600],
-                preferredSeason: 'Autumn',
-                minWater: 2, maxWater: 4, minFertility: 1, maxFertility: 3,
-                waterRequired: 3, fertilizerRequired: 2,
-                yield: 8,
-                seedCost: 0, seedlingCost: 28,
-                basePrice: 7, shelfLife: 60,
-                icon: '🌳',
-                product: 'Oak Wood',
-                removedWhenHarvested: false,
-                effect: [
-                    { type: 'weed_suppression', strength: 2 }
-                  //  TODO => oaks, poplars and willows are habitat, should add synergy with animals
-                ]
-            },
-            {
-                type: 'Poplar',
-                plantingOptions: ['Seedling'],
-                growthStages: ['Seedling', 'Growing', 'Sapling', 'Mature', 'Harvestable', 'Old'],
-                daysPerStage: [16, 90, 140, 240, 60, 400],
-                preferredSeason: 'Autumn',
-                minWater: 2, maxWater: 4, minFertility: 1, maxFertility: 3,
-                waterRequired: 3, fertilizerRequired: 2,
-                yield: 7,
-                seedCost: 0, seedlingCost: 18,
-                basePrice: 6, shelfLife: 55,
-                icon: '🌲',
-                product: 'Poplar Wood',
-                removedWhenHarvested: false,
-                effect: [
-                    { type: 'weed_suppression', strength: 2 }
-                ]
-            },
-            {
-                type: 'Willow',
-                plantingOptions: ['Seedling'],
-                growthStages: ['Seedling', 'Growing', 'Sapling', 'Mature', 'Harvestable', 'Old'],
-                daysPerStage: [12, 70, 110, 160, 40, 400],
-                preferredSeason: 'Autumn',
-                minWater: 2, maxWater: 4, minFertility: 1, maxFertility: 3,
-                waterRequired: 3, fertilizerRequired: 2,
-                yield: 7,
-                seedCost: 0, seedlingCost: 18,
-                basePrice: 6, shelfLife: 50,
-                icon: '🌳',
-                product: 'Willow Wood',
-                removedWhenHarvested: false,
-                effect: [
-                    { type: 'weed_suppression', strength: 2 }
-                ]
-            },
-            {
-                type: 'Strawberry',
-                plantingOptions: ['Seed', 'Seedling'],
-                growthStages: ['Seed', 'Seedling', 'Growing', 'Mature', 'Flowering', 'Harvestable', 'Overripe', 'Rotten'],
-                daysPerStage: [2, 4, 8, 10, 8, 3, 2, 2],
-                preferredSeason: 'Spring',
-                minWater: 1, maxWater: 2, minFertility: 1, maxFertility: 2,
-                waterRequired: 2, fertilizerRequired: 1,
-                yield: 2,
-                seedCost: 3, seedlingCost: 9,
-                basePrice: 3, shelfLife: 7,
-                icon: '🍓',
-                product: 'Strawberry',
+                productKey: 'sunflower_seed',
+                plantMaterialKey: 'biomass',
                 removedWhenHarvested: true,
-                effect: [
-                    { type: 'pollination', strength: 1 },
-                    { type: 'synergy', strength: 1, target: ['Bee', 'Ladybug'] }
+                effects: [{type: 'pollination', strength: 1}],
+                synergies: [
+                    {target: 'bee', strength: 1},
+                    {target: 'grape_vine', strength: 1},
+                    {target: 'coffee', strength: 1}
                 ]
             },
             {
-                type: 'Blueberry',
-                plantingOptions: ['Seed', 'Seedling'],
-                growthStages: ['Seed', 'Seedling', 'Growing', 'Mature', 'Flowering', 'Harvestable', 'Overripe', 'Rotten'],
-                daysPerStage: [2, 4, 10, 12, 8, 3, 2, 2],
-                preferredSeason: 'Spring',
-                minWater: 1, maxWater: 2, minFertility: 1, maxFertility: 2,
-                waterRequired: 2, fertilizerRequired: 1,
-                yield: 2,
-                seedCost: 3, seedlingCost: 9,
-                basePrice: 4, shelfLife: 7,
-                icon: '🫐',
-                product: 'Blueberry',
-                removedWhenHarvested: true,
-                effect: [
-                    { type: 'pollination', strength: 1 },
-                    { type: 'ph_down', strength: 0.2 },
-                    { type: 'synergy', strength: 1, target: ['Bee'] }
-                ]
-            },
-            // Cereal and fruit staples to add to plantTypes:
-            {
-                type: 'Wheat',
-                plantingOptions: ['Seed', 'Seedling'],
-                growthStages: ['Seed', 'Seedling', 'Growing', 'Mature', 'Overripe', 'Rotten'],
-                daysPerStage: [2, 5, 16, 10, 3, 2],
-                preferredSeason: 'Spring',
-                minWater: 1, maxWater: 2, minFertility: 1, maxFertility: 2,
-                waterRequired: 1, fertilizerRequired: 1,
-                yield: 3,
-                seedCost: 2, seedlingCost: 6,
-                basePrice: 1, shelfLife: 90,
+                type: 'wheat',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'vegetative', 'flowering', 'green fruit', 'ripe', 'overripe'],
+                daysPerGrowthStage: [7, 14, 60, 7, 7, 7, 4],
+                waterRequired: 500,
+                fertilizerRequired: 100,
+                yield: 4500,
+                harvestWindows: [{month: 7, day: 1}, {month: 8, day: 1}],
+                seedCost: 0.005,
+                seedlingCost: 0.05,
                 icon: '🌾',
-                product: 'Wheat',
+                productKey: 'wheat_grain',
+                plantMaterialKey: 'biomass',
                 removedWhenHarvested: true,
-                effect: [
-                    { type: 'weed_suppression', strength: 1 }
-                ]
+                effects: [{type: 'weed_suppression', strength: 1}],
+                synergies: []
             },
             {
-                type: 'Barley',
-                plantingOptions: ['Seed', 'Seedling'],
-                growthStages: ['Seed', 'Seedling', 'Growing', 'Mature', 'Overripe', 'Rotten'],
-                daysPerStage: [2, 5, 15, 9, 3, 2],
-                preferredSeason: 'Spring',
-                minWater: 1, maxWater: 2, minFertility: 1, maxFertility: 2,
-                waterRequired: 1, fertilizerRequired: 1,
-                yield: 3,
-                seedCost: 2, seedlingCost: 6,
-                basePrice: 1, shelfLife: 90,
+                type: 'barley',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'vegetative', 'flowering', 'green fruit', 'ripe', 'overripe'],
+                daysPerGrowthStage: [7, 14, 55, 7, 7, 7, 4],
+                waterRequired: 450,
+                fertilizerRequired: 80,
+                yield: 7000,
+                harvestWindows: [{month: 7, day: 1}, {month: 7, day: 31}],
+                seedCost: 0.005,
+                seedlingCost: 0.05,
                 icon: '🌾',
-                product: 'Barley',
+                productKey: 'barley_grain',
+                plantMaterialKey: 'biomass',
                 removedWhenHarvested: true,
-                effect: [
-                    { type: 'weed_suppression', strength: 1 }
-                ]
+                effects: [{type: 'weed_suppression', strength: 1}],
+                synergies: []
             },
             {
-                type: 'Oats',
-                plantingOptions: ['Seed', 'Seedling'],
-                growthStages: ['Seed', 'Seedling', 'Growing', 'Mature', 'Overripe', 'Rotten'],
-                daysPerStage: [2, 5, 15, 9, 3, 2],
-                preferredSeason: 'Spring',
-                minWater: 1, maxWater: 2, minFertility: 1, maxFertility: 2,
-                waterRequired: 1, fertilizerRequired: 1,
-                yield: 3,
-                seedCost: 2, seedlingCost: 6,
-                basePrice: 1, shelfLife: 90,
+                type: 'oats',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'vegetative', 'flowering', 'green fruit', 'ripe', 'overripe'],
+                daysPerGrowthStage: [7, 14, 50, 7, 7, 7, 4],
+                waterRequired: 500,
+                fertilizerRequired: 60,
+                yield: 5000,
+                harvestWindows: [{month: 8, day: 1}, {month: 8, day: 31}],
+                seedCost: 0.005,
+                seedlingCost: 0.05,
                 icon: '🌾',
-                product: 'Oats',
+                productKey: 'oats_grain',
+                plantMaterialKey: 'biomass',
                 removedWhenHarvested: true,
-                effect: [
-                    { type: 'weed_suppression', strength: 1 }
-                ]
-            },
-            {
-                type: 'Orange Tree',
-                plantingOptions: ['Seedling'],
-                growthStages: ['Seedling', 'Growing', 'Young Tree', 'Mature', 'Harvestable', 'Old'],
-                daysPerStage: [8, 50, 90, 90, 30, 250],
-                preferredSeason: 'Spring',
-                minWater: 2, maxWater: 4, minFertility: 2, maxFertility: 4,
-                waterRequired: 3, fertilizerRequired: 2,
-                yield: 6,
-                seedCost: 0, seedlingCost: 22,
-                basePrice: 5, shelfLife: 18,
-                icon: '🍊',
-                product: 'Orange',
-                removedWhenHarvested: false,
-                effect: [
-                    { type: 'pollination', strength: 1 },
-                    { type: 'synergy', strength: 1, target: ['Bee', 'Lavender'] }
-                ]
-            },
-            {
-                type: 'Lemon Tree',
-                plantingOptions: ['Seedling'],
-                growthStages: ['Seedling', 'Growing', 'Young Tree', 'Mature', 'Harvestable', 'Old'],
-                daysPerStage: [8, 50, 90, 90, 30, 250],
-                preferredSeason: 'Spring',
-                minWater: 2, maxWater: 4, minFertility: 2, maxFertility: 4,
-                waterRequired: 3, fertilizerRequired: 2,
-                yield: 6,
-                seedCost: 0, seedlingCost: 22,
-                basePrice: 5, shelfLife: 18,
-                icon: '🍋',
-                product: 'Lemon',
-                removedWhenHarvested: false,
-                effect: [
-                    { type: 'pollination', strength: 1 },
-                    { type: 'synergy', strength: 1, target: ['Bee', 'Lavender'] }
-                ]
-            },
-            {
-                type: 'Grape Vine',
-                plantingOptions: ['Seedling'],
-                growthStages: ['Seedling', 'Growing', 'Young Vine', 'Mature', 'Harvestable', 'Old'],
-                daysPerStage: [6, 25, 40, 40, 20, 200],
-                preferredSeason: 'Spring',
-                minWater: 2, maxWater: 4, minFertility: 1, maxFertility: 3,
-                waterRequired: 2, fertilizerRequired: 2,
-                yield: 4,
-                seedCost: 0, seedlingCost: 15,
-                basePrice: 5, shelfLife: 10,
-                icon: '🍇',
-                product: 'Grape',
-                removedWhenHarvested: false,
-                effect: [
-                    { type: 'pollination', strength: 1 },
-                    { type: 'synergy', strength: 1, target: ['Bee', 'Ladybug'] }
-                ]
+                effects: [{type: 'weed_suppression', strength: 1}],
+                synergies: []
             }
 
-        ])
-
-
-    const plantProducts =
-        [
-            {key: 'Grass', icon: '🌱', label: 'Grass', basePrice: 1, shelfLife: 10},
-            {key: 'Corn', icon: '🌽', label: 'Corn', basePrice: 1, shelfLife: 15},
-            {key: 'Tomato', icon: '🍅', label: 'Tomato', basePrice: 1, shelfLife: 7},
-            {key: 'Lettuce', icon: '🥬', label: 'Lettuce', basePrice: 1, shelfLife: 6},
-            {key: 'Carrot', icon: '🥕', label: 'Carrot', basePrice: 1, shelfLife: 20},
-            {key: 'Coffee Beans', icon: '☕', label: 'Coffee Beans', basePrice: 2, shelfLife: 30},
-            {key: 'Pumpkin', icon: '🎃', label: 'Pumpkin', basePrice: 2, shelfLife: 40},
-            {key: 'Apple', icon: '🍏', label: 'Apple', basePrice: 4, shelfLife: 20},
-            {key: 'Pear', icon: '🍐', label: 'Pear', basePrice: 4, shelfLife: 20},
-            {key: 'Almond', icon: '🌰', label: 'Almond', basePrice: 6, shelfLife: 30},
-            {key: 'Lavender', icon: '💜', label: 'Lavender', basePrice: 3, shelfLife: 15},
-            {key: 'Clover', icon: '☘️', label: 'Clover', basePrice: 1, shelfLife: 10},
-            {key: 'Sunflower Seed', icon: '🌻', label: 'Sunflower Seed', basePrice: 2, shelfLife: 12},
-            {key: 'Oak Wood', icon: '🌳', label: 'Oak Wood', basePrice: 7, shelfLife: 60},
-            {key: 'Poplar Wood', icon: '🌲', label: 'Poplar Wood', basePrice: 6, shelfLife: 55},
-            {key: 'Willow Wood', icon: '🌳', label: 'Willow Wood', basePrice: 6, shelfLife: 50},
-            {key: 'Strawberry', icon: '🍓', label: 'Strawberry', basePrice: 3, shelfLife: 7},
-            {key: 'Blueberry', icon: '🫐', label: 'Blueberry', basePrice: 4, shelfLife: 7},
-            {key: 'Wheat', icon: '🌾', label: 'Wheat', basePrice: 1, shelfLife: 90},
-            {key: 'Barley', icon: '🌾', label: 'Barley', basePrice: 1, shelfLife: 90},
-            {key: 'Oats', icon: '🌾', label: 'Oats', basePrice: 1, shelfLife: 90},
-            {key: 'Orange', icon: '🍊', label: 'Orange', basePrice: 5, shelfLife: 18},
-            {key: 'Lemon', icon: '🍋', label: 'Lemon', basePrice: 5, shelfLife: 18},
-            {key: 'Grape', icon: '🍇', label: 'Grape', basePrice: 5, shelfLife: 10}
-
+        ],
+        perennials: [
+            {
+                type: 'strawberry',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'juvenile', 'fruiting', 'old'],
+                daysPerGrowthStage: [14, 14, 90, 730, 730],
+                fruitStages: ['flowering', 'green fruit', 'ripe', 'overripe'],
+                daysPerFruitStage: [7, 10, 10, 5],
+                waterRequired: 600,
+                fertilizerRequired: 100,
+                yield: 20000,
+                harvestWindows: [{month: 6, day: 1}, {month: 7, day: 15}],
+                seedCost: 0.05,
+                seedlingCost: 1.0,
+                icon: '🍓',
+                productKey: 'strawberry_fruit',
+                plantMaterialKey: 'biomass',
+                removedWhenHarvested: false,
+                effects: [{type: 'pollination', strength: 1}],
+                synergies: [{target: 'bee', strength: 1}, {target: 'ladybug', strength: 1}]
+            },
+            {
+                type: 'blueberry',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'juvenile', 'fruiting', 'old'],
+                daysPerGrowthStage: [0, 30, 365, 3650, 3650],
+                fruitStages: ['flowering', 'green fruit', 'ripe', 'overripe'],
+                daysPerFruitStage: [10, 15, 10, 7],
+                waterRequired: 700,
+                fertilizerRequired: 50,
+                yield: 20000,
+                harvestWindows: [{month: 7, day: 1}, {month: 8, day: 15}],
+                seedCost: 0.1,
+                seedlingCost: 3.0,
+                icon: '🫐',
+                productKey: 'blueberry_fruit',
+                plantMaterialKey: 'biomass',
+                removedWhenHarvested: false,
+                effects: [{type: 'pollination', strength: 1}, {type: 'ph_down', strength: 0.2}],
+                synergies: [{target: 'bee', strength: 1}]
+            },
+            {
+                type: 'coffee',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'juvenile', 'fruiting', 'old'],
+                daysPerGrowthStage: [30, 730, 730, 1460, 1460],
+                fruitStages: ['flowering', 'green fruit', 'ripe', 'overripe'],
+                daysPerFruitStage: [14, 180, 30, 14],
+                waterRequired: 1500,
+                fertilizerRequired: 200,
+                yield: 3000,
+                harvestWindows: [{month: 11, day: 1}, {month: 1, day: 31}],
+                seedCost: 0.1,
+                seedlingCost: 1.0,
+                icon: '☕',
+                productKey: 'coffee_beans',
+                plantMaterialKey: 'biomass',
+                removedWhenHarvested: false,
+                effects: [{type: 'ph_down', strength: 0.2}],
+                synergies: [
+                    {target: 'bee', strength: 1},
+                    {target: 'clover', strength: 1},
+                    {target: 'sunflower', strength: 1}
+                ]
+            },
+            {
+                type: 'apple_tree',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'sapling', 'fruiting', 'old'],
+                daysPerGrowthStage: [60, 730, 1095, 5475, 5475],
+                fruitStages: ['flowering', 'green fruit', 'ripe', 'overripe'],
+                daysPerFruitStage: [10, 120, 30, 15],
+                waterRequired: 700,
+                fertilizerRequired: 80,
+                yield: 30000,
+                harvestWindows: [{month: 9, day: 1}, {month: 10, day: 15}],
+                seedCost: 0.2,
+                seedlingCost: 10.0,
+                icon: '🍏',
+                productKey: 'apple',
+                plantMaterialKey: 'wood',
+                removedWhenHarvested: false,
+                effects: [{type: 'pollination', strength: 1}],
+                synergies: [
+                    {target: 'bee', strength: 2},
+                    {target: 'lavender', strength: 2},
+                    {target: 'sunflower', strength: 2}
+                ]
+            },
+            {
+                type: 'oak_tree',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'sapling', 'fruiting', 'old'],
+                daysPerGrowthStage: [20, 730, 3650, 18250, 18250],
+                fruitStages: ['flowering', 'acorn', 'ripe', 'overripe'],
+                daysPerFruitStage: [10, 120, 30, 30],
+                waterRequired: 500,
+                fertilizerRequired: 0,
+                yield: 250000,
+                harvestWindows: [{month: 10, day: 1}, {month: 11, day: 15}],
+                seedCost: 0.05,
+                seedlingCost: 5.0,
+                icon: '🌳',
+                productKey: 'acorn',
+                plantMaterialKey: 'wood',
+                removedWhenHarvested: true,
+                effects: [{type: 'weed_suppression', strength: 2}],
+                synergies: []
+            },
+            {
+                type: 'poplar',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'juvenile', 'fruiting', 'old'],
+                daysPerGrowthStage: [1, 180, 1095, 2190, 2190],
+                fruitStages: ['flowering', 'seed_catkin', 'ripe', 'overripe'],
+                daysPerFruitStage: [7, 30, 7, 0],
+                waterRequired: 800,
+                fertilizerRequired: 100,
+                yield: 100000,
+                harvestWindows: [{month: 11, day: 1}, {month: 12, day: 31}],
+                seedCost: 0.05,
+                seedlingCost: 2.0,
+                icon: '🌲',
+                productKey: '',
+                plantMaterialKey: 'wood',
+                removedWhenHarvested: true,
+                effects: [{type: 'weed_suppression', strength: 2}],
+                synergies: []
+            },
+            {
+                type: 'willow',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'juvenile', 'fruiting', 'old'],
+                daysPerGrowthStage: [1, 180, 730, 2190, 2190],
+                fruitStages: ['flowering', 'seed_catkin', 'ripe', 'overripe'],
+                daysPerFruitStage: [7, 30, 7, 0],
+                waterRequired: 1000,
+                fertilizerRequired: 80,
+                yield: 30000,
+                harvestWindows: [{month: 1, day: 1}, {month: 2, day: 28}],
+                seedCost: 0.05,
+                seedlingCost: 1.0,
+                icon: '🌳',
+                productKey: 'willow_bark',
+                plantMaterialKey: 'wood',
+                removedWhenHarvested: false,
+                effects: [{type: 'weed_suppression', strength: 2}],
+                synergies: []
+            },
+            {
+                type: 'pear_tree',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'sapling', 'fruiting', 'old'],
+                daysPerGrowthStage: [60, 730, 1095, 5110, 5110],
+                fruitStages: ['flowering', 'green fruit', 'ripe', 'overripe'],
+                daysPerFruitStage: [10, 110, 20, 10],
+                waterRequired: 600,
+                fertilizerRequired: 60,
+                yield: 30000,
+                harvestWindows: [{month: 8, day: 15}, {month: 9, day: 30}],
+                seedCost: 0.2,
+                seedlingCost: 10.0,
+                icon: '🍐',
+                productKey: 'pear',
+                plantMaterialKey: 'wood',
+                removedWhenHarvested: false,
+                effects: [{type: 'pollination', strength: 1}],
+                synergies: [
+                    {target: 'bee', strength: 2},
+                    {target: 'lavender', strength: 2},
+                    {target: 'sunflower', strength: 2}
+                ]
+            },
+            {
+                type: 'almond_tree',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'sapling', 'fruiting', 'old'],
+                daysPerGrowthStage: [30, 730, 730, 3650, 3650],
+                fruitStages: ['flowering', 'green fruit', 'ripe', 'overripe'],
+                daysPerFruitStage: [7, 150, 30, 10],
+                waterRequired: 800,
+                fertilizerRequired: 150,
+                yield: 2800,
+                harvestWindows: [{month: 8, day: 1}, {month: 9, day: 15}],
+                seedCost: 0.2,
+                seedlingCost: 10.0,
+                icon: '🌰',
+                productKey: 'almond',
+                plantMaterialKey: 'wood',
+                removedWhenHarvested: false,
+                effects: [{type: 'pollination', strength: 1}],
+                synergies: [
+                    {target: 'bee', strength: 2},
+                    {target: 'clover', strength: 2}
+                ]
+            },
+            {
+                type: 'orange_tree',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'sapling', 'fruiting', 'old'],
+                daysPerGrowthStage: [30, 730, 730, 3650, 3650],
+                fruitStages: ['flowering', 'green fruit', 'ripe', 'overripe'],
+                daysPerFruitStage: [14, 240, 60, 30],
+                waterRequired: 1000,
+                fertilizerRequired: 180,
+                yield: 30000,
+                harvestWindows: [{month: 12, day: 1}, {month: 3, day: 1}],
+                seedCost: 0.1,
+                seedlingCost: 15.0,
+                icon: '🍊',
+                productKey: 'orange',
+                plantMaterialKey: 'wood',
+                removedWhenHarvested: false,
+                effects: [{type: 'pollination', strength: 1}],
+                synergies: [
+                    {target: 'bee', strength: 1},
+                    {target: 'lavender', strength: 1}
+                ]
+            },
+            {
+                type: 'lemon_tree',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'sapling', 'fruiting', 'old'],
+                daysPerGrowthStage: [30, 730, 730, 3285, 3285],
+                fruitStages: ['flowering', 'green fruit', 'ripe', 'overripe'],
+                daysPerFruitStage: [14, 180, 60, 30],
+                waterRequired: 1000,
+                fertilizerRequired: 180,
+                yield: 35000,
+                harvestWindows: [{month: 11, day: 1}, {month: 2, day: 28}],
+                seedCost: 0.1,
+                seedlingCost: 15.0,
+                icon: '🍋',
+                productKey: 'lemon',
+                plantMaterialKey: 'wood',
+                removedWhenHarvested: false,
+                effects: [{type: 'pollination', strength: 1}],
+                synergies: [
+                    {target: 'bee', strength: 1},
+                    {target: 'lavender', strength: 1}
+                ]
+            },
+            {
+                type: 'grape_vine',
+                plantingOptions: ['seed', 'seedling'],
+                growthStages: ['seed', 'seedling', 'juvenile', 'fruiting', 'old'],
+                daysPerGrowthStage: [30, 180, 730, 1825, 1825],
+                fruitStages: ['flowering', 'green fruit', 'ripe', 'overripe'],
+                daysPerFruitStage: [7, 60, 30, 14],
+                waterRequired: 600,
+                fertilizerRequired: 50,
+                yield: 25000,
+                harvestWindows: [{month: 8, day: 15}, {month: 10, day: 1}],
+                seedCost: 0.05,
+                seedlingCost: 5.0,
+                icon: '🍇',
+                productKey: 'grape',
+                plantMaterialKey: 'biomass',
+                removedWhenHarvested: false,
+                effects: [{type: 'pollination', strength: 1}],
+                synergies: [
+                    {target: 'bee', strength: 1},
+                    {target: 'ladybug', strength: 1}
+                ]
+            },
         ]
+    });
+
+    const plantProducts = {
+        // Annuals
+        hay: {
+            icon: '🌱',
+            label: 'Hay',
+            basePrice: 1,
+            shelfLife: 10,
+            harvestType: 'product'
+        },
+        corn_cob: {
+            icon: '🌽',
+            label: 'Corn Cob',
+            basePrice: 1,
+            shelfLife: 15,
+            harvestType: 'product'
+        },
+        tomato_fruit: {
+            icon: '🍅',
+            label: 'Tomato',
+            basePrice: 1,
+            shelfLife: 7,
+            harvestType: 'product'
+        },
+        lettuce_leaf: {
+            icon: '🥬',
+            label: 'Lettuce Leaf',
+            basePrice: 1,
+            shelfLife: 6,
+            harvestType: 'product'
+        },
+        carrot_root: {
+            icon: '🥕',
+            label: 'Carrot Root',
+            basePrice: 1,
+            shelfLife: 20,
+            harvestType: 'product'
+        },
+        pumpkin_fruit: {
+            icon: '🎃',
+            label: 'Pumpkin',
+            basePrice: 2,
+            shelfLife: 40,
+            harvestType: 'product'
+        },
+        lavender_flower: {
+            icon: '💜',
+            label: 'Lavender Flower',
+            basePrice: 3,
+            shelfLife: 15,
+            harvestType: 'product'
+        },
+        clover_flower: {
+            icon: '☘️',
+            label: 'Clover Flower',
+            basePrice: 1,
+            shelfLife: 10,
+            harvestType: 'product'
+        },
+        sunflower_seed: {
+            icon: '🌻',
+            label: 'Sunflower Seed',
+            basePrice: 2,
+            shelfLife: 12,
+            harvestType: 'product'
+        },
+        wheat_grain: {
+            icon: '🌾',
+            label: 'Wheat Grain',
+            basePrice: 1,
+            shelfLife: 90,
+            harvestType: 'product'
+        },
+        barley_grain: {
+            icon: '🌾',
+            label: 'Barley Grain',
+            basePrice: 1,
+            shelfLife: 90,
+            harvestType: 'product'
+        },
+        oats_grain: {
+            icon: '🌾',
+            label: 'Oats Grain',
+            basePrice: 1,
+            shelfLife: 90,
+            harvestType: 'product'
+        },
+
+        // Perennials & fruit/nut trees
+        strawberry_fruit: {
+            icon: '🍓',
+            label: 'Strawberry',
+            basePrice: 3,
+            shelfLife: 7,
+            harvestType: 'product'
+        },
+        blueberry_fruit: {
+            icon: '🫐',
+            label: 'Blueberry',
+            basePrice: 4,
+            shelfLife: 7,
+            harvestType: 'product'
+        },
+        coffee_beans: {
+            icon: '☕',
+            label: 'Coffee Beans',
+            basePrice: 2,
+            shelfLife: 30,
+            harvestType: 'product'
+        },
+        apple: {
+            icon: '🍏',
+            label: 'Apple',
+            basePrice: 4,
+            shelfLife: 20,
+            harvestType: 'product'
+        },
+        acorn: {
+            icon: '🌰',
+            label: 'Acorn',
+            basePrice: 1,
+            shelfLife: 45,
+            harvestType: 'product'
+        },
+        pear: {
+            icon: '🍐',
+            label: 'Pear',
+            basePrice: 4,
+            shelfLife: 20,
+            harvestType: 'product'
+        },
+        almond: {
+            icon: '🌰',
+            label: 'Almond',
+            basePrice: 6,
+            shelfLife: 30,
+            harvestType: 'product'
+        },
+        orange: {
+            icon: '🍊',
+            label: 'Orange',
+            basePrice: 5,
+            shelfLife: 18,
+            harvestType: 'product'
+        },
+        lemon: {
+            icon: '🍋',
+            label: 'Lemon',
+            basePrice: 5,
+            shelfLife: 18,
+            harvestType: 'product'
+        },
+        grape: {
+            icon: '🍇',
+            label: 'Grape',
+            basePrice: 5,
+            shelfLife: 10,
+            harvestType: 'product'
+        },
+        willow_bark: {
+            icon: '',
+            label: 'Willow Bark',
+            basePrice: 3,
+            shelfLife: 60,
+            harvestType: 'product'
+        },
+
+        // Plant material (removal/biomass/wood)
+        biomass: {
+            icon: '',
+            label: 'Plant Biomass',
+            basePrice: 0,
+            shelfLife: 7,
+            harvestType: 'plant'
+        },
+        wood: {
+            icon: '🪵',
+            label: 'Wood',
+            basePrice: 6,
+            shelfLife: 80,
+            harvestType: 'plant'
+        }
+    }
+
+
     return {plantTypes, plantProducts}
 })

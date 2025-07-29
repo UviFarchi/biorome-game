@@ -2,41 +2,37 @@
 import {ref, computed} from 'vue'
 import {modulesStore} from '/stores/modulesStore.js'
 import {tilesStore} from '/stores/tilesStore.js'
-import {validAnimalDestTiles, canMoveAnimal, getMissingModules} from '@/rules/utils.js'
+import {validPlantDestTiles, canSowPlant, getMissingModules} from '@/rules/utils.js'
 
 const props = defineProps({
-  isGate: Boolean,
   setFeedbackMsg: Function
 })
 
 const modules = modulesStore()
 const tiles = tilesStore()
-const selectedAnimal = tiles.selectedSubject.value.animal;
+const selectedPlant = tiles.selectedSubject.value.plant;
 const tilesGrid = tiles.tiles
 const availableTiles = computed(() => {
-  if (!selectedAnimal) return []
-  return validAnimalDestTiles(selectedAnimal, tilesGrid)
+  if (!selectedPlant) return []
+  return validPlantDestTiles(selectedPlant, tilesGrid)
 })
 
-const hasAnimalMoved = ref(false);
+const hasPlantBeenSown = ref(false);
 const assemblies = computed(() => {
-  if (props.isGate) {
-    return modules.activeAssemblies.filter(a => !a.deployed && canMoveAnimal(a))
-  } else {
-    return (tiles.selectedSubject.value.assemblies || []).filter(a => canMoveAnimal(a))
-  }
+  return modules.activeAssemblies.filter(assembly => !assembly.deployed && canSowPlant(assembly, selectedPlant.plantingType))
+
 })
 
 const selectedAssemblyIndex = ref(0)
 const selectedTileIndex = ref(0)
 
-const moveErrorsList = computed(() => {
-  if(!hasAnimalMoved.value) {
+const sowErrorsList = computed(() => {
+  if (!hasPlantBeenSown.value) {
     let errs = []
     if (availableTiles.value.length === 0) errs.push('No available destination tiles.')
     if (assemblies.value.length === 0) {
       const reqs = modules.activeAssemblies.length
-          ? getMissingModules(modules.activeAssemblies[0], "animal", "move")
+          ? getMissingModules(modules.activeAssemblies[0], "sowing", selectedPlant.plantingType)
           : ['No suitable assembly']
       errs.push('No eligible assemblies: ' + reqs.join(', '))
     }
@@ -44,43 +40,35 @@ const moveErrorsList = computed(() => {
   }
 })
 
-function moveAnimal() {
-  const animal = selectedAnimal
+function sowPlant() {
+  const plant = selectedPlant
   const assembly = assemblies.value[selectedAssemblyIndex.value]
   const dest = availableTiles.value[selectedTileIndex.value]
   if (!dest || !assembly) return
   const destTile = tiles.tiles[dest.row][dest.col]
   if (assembly.actions < 1 || assembly.moves < 1) return
-
-  if (props.isGate) {
-    const idx = tiles.gate.animals.indexOf(animal)
-    if (idx !== -1) tiles.gate.animals.splice(idx, 1)
-    const asmIdx = modules.activeAssemblies.findIndex(a => a.id === assembly.id)
-    if (asmIdx !== -1) modules.activeAssemblies.splice(asmIdx, 1)
-  } else {
-    const tile = tiles.selectedSubject.value
-    tile.animal = null
-    const aIdx = tile.assemblies.findIndex(a => a.id === assembly.id)
-    if (aIdx !== -1) tile.assemblies.splice(aIdx, 1)
-  }
+  const idx = tiles.gate.plants.indexOf(plant)
+  if (idx !== -1) tiles.gate.plants.splice(idx, 1)
+  const asmIdx = modules.activeAssemblies.findIndex(a => a.id === assembly.id)
+  if (asmIdx !== -1) modules.activeAssemblies.splice(asmIdx, 1)
 
   assembly.actions--
   assembly.moves--
 
-  destTile.animal = {...animal}
+  destTile.plant = {...plant}
   destTile.assemblies = destTile.assemblies || []
   destTile.assemblies.push(assembly)
-  props.setFeedbackMsg("Move Animal Instruction Received");
-  hasAnimalMoved.value = true;
+  props.setFeedbackMsg("Sow Plant Instruction Received");
+  hasPlantBeenSown.value = true;
 }
 </script>
 
 <template>
   <div>
-    <div v-if="selectedAnimal">
-      {{ selectedAnimal.type }}
-      <button @click="moveAnimal" :disabled="hasAnimalMoved || moveErrorsList.length > 0">Move Animal</button>
-      <span class="btn-error" v-if="!hasAnimalMoved">{{ moveErrorsList.join(', ') }}</span>
+    <div v-if="selectedPlant">
+      {{ selectedPlant.type }}
+      <button @click="sowPlant" :disabled="hasPlantBeenSown || sowErrorsList.length > 0">Sow Plant</button>
+      <span class="btn-error" v-if="!hasPlantBeenSown">{{ sowErrorsList.join(', ') }}</span>
       <select id="destinationTiles" v-model="selectedTileIndex">
         <option v-for="(tile, i) in availableTiles" :key="i" :value="i">
           {{ tile.row + 1 }},{{ tile.col + 1 }}
@@ -93,7 +81,7 @@ function moveAnimal() {
       </select>
     </div>
     <div v-else>
-      No animal selected
+      No plant selected
     </div>
   </div>
 </template>

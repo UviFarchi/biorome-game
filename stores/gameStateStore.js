@@ -159,7 +159,7 @@ export const gameStateStore = defineStore('gameState', () => {
         [{
             id: 'weather-1',
             type: 'weather',
-            season: 'Spring',
+            season: 'spring',
             headline: 'Steady Showers',
             details: 'Gentle rain soaks the fields. Soil moisture rises.',
             frequency: 0.15,
@@ -171,7 +171,7 @@ export const gameStateStore = defineStore('gameState', () => {
         {
             id: 'weather-2',
             type: 'weather',
-            season: 'Spring',
+            season: 'spring',
             headline: 'Cool Snap',
             details: 'Night temperatures drop. Growth slows for warm-season crops.',
             frequency: 0.05,
@@ -183,7 +183,7 @@ export const gameStateStore = defineStore('gameState', () => {
         {
             id: 'weather-3',
             type: 'weather',
-            season: 'Summer',
+            season: 'summer',
             headline: 'Drought',
             details: 'A persistent drought dries out the soil. Water demand increases.',
             frequency: 0.08,
@@ -196,7 +196,7 @@ export const gameStateStore = defineStore('gameState', () => {
         {
             id: 'weather-4',
             type: 'weather',
-            season: 'Summer',
+            season: 'summer',
             headline: 'Heatwave',
             details: 'High temperatures stress both plants and animals.',
             frequency: 0.05,
@@ -208,7 +208,7 @@ export const gameStateStore = defineStore('gameState', () => {
         {
             id: 'weather-5',
             type: 'weather',
-            season: 'Autumn',
+            season: 'autumn',
             headline: 'Early Frost',
             details: 'A surprise frost damages tender crops.',
             frequency: 0.04,
@@ -220,7 +220,7 @@ export const gameStateStore = defineStore('gameState', () => {
         {
             id: 'weather-6',
             type: 'weather',
-            season: 'Winter',
+            season: 'winter',
             headline: 'Snowfall',
             details: 'Snow insulates the soil, but harvests must wait.',
             frequency: 0.09,
@@ -233,7 +233,7 @@ export const gameStateStore = defineStore('gameState', () => {
         {
             id: 'weather-7',
             type: 'weather',
-            season: 'Spring',
+            season: 'spring',
             headline: 'Mild Spring',
             details: 'Perfect weather for planting and growth.',
             frequency: 0.12,
@@ -245,7 +245,7 @@ export const gameStateStore = defineStore('gameState', () => {
         {
             id: 'weather-8',
             type: 'weather',
-            season: 'Any',
+            season: 'any',
             headline: 'Thunderstorm',
             details: 'Heavy rains and wind. Occasional equipment outages.',
             frequency: 0.03,
@@ -256,22 +256,22 @@ export const gameStateStore = defineStore('gameState', () => {
             ]
         }]
     const seasonalWeather = {
-        Spring: {
+        spring: {
             temperature: { min: 12, max: 22, mean: 17 },
             rainfall: { min: 0, max: 8, mean: 2 },
             cloudCover: { min: 0.1, max: 0.5, mean: 0.25 }
         },
-        Summer: {
+        summer: {
             temperature: { min: 20, max: 35, mean: 28 },
             rainfall: { min: 0, max: 5, mean: 1 },
             cloudCover: { min: 0, max: 0.4, mean: 0.1 }
         },
-        Autumn: {
+        autumn: {
             temperature: { min: 10, max: 24, mean: 16 },
             rainfall: { min: 0, max: 10, mean: 3 },
             cloudCover: { min: 0.1, max: 0.7, mean: 0.35 }
         },
-        Winter: {
+        winter: {
             temperature: { min: 1, max: 12, mean: 7 },
             rainfall: { min: 0, max: 7, mean: 2 },
             cloudCover: { min: 0.3, max: 1, mean: 0.6 }

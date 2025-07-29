@@ -1081,16 +1081,24 @@ export const modulesStore = defineStore('modules', () => {
         {
             id: 'af97e85f-4696-4ff2-8f43-3b3e742b94c2',
             modules: [
-                { type: 'transport', subtype: 'ground' },
-                { type: 'battery' },
-                { type: 'gps' },
-                { type: 'tool', subtype: 'seeder' },
-                { type: 'arm', subtype: 'medium' },
-                { type: 'tool', subtype: 'borer' },
-                { type: 'camera', subtype: 'rgb' },
-                { type: 'tool', subtype: 'gripper' }
+                {type: 'transport'},
+                {type: 'arm'},
+                {type: 'seeder'},
+                {type: 'borer'}
             ],
-            name: "Tomato Planter/harvester",
+            name: "Seed Planter",
+            deployed: false,
+            moves: 1,
+            actions: 1
+        },        {
+            id: 'af97e85f-4696-4ff2-8f43-3b3e742b94c2',
+            modules: [
+                {type: 'transport'},
+                {type: 'arm'},
+                {type: 'cart'},
+                {type: 'gripper'}
+            ],
+            name: "Seedling Planter",
             deployed: false,
             moves: 1,
             actions: 1
@@ -1112,13 +1120,25 @@ export const modulesStore = defineStore('modules', () => {
         {
             id: '4be9bc91-75d8-457d-bdc1-1df33792e5e8',
             modules: [
-                { type: 'transport', subtype: 'ground' },
-                { type: 'battery' },
-                { type: 'camera', subtype: 'rgb' },
-                { type: 'arm', subtype: 'medium' },
-                { type: 'tool', subtype: 'gripper' }
+                {type: 'transport'},
+                {type: 'battery'},
+                {type: 'arm', subtype: 'medium'},
+                {type: 'gripper'}
             ],
-            name: "Cow Milker",
+            name: "Cow Milker 1",
+            deployed: false,
+            moves: 2,
+            actions: 2
+        },
+        {
+            id: 'cbee372c-685d-428d-aeb1-8274345d53cc',
+            modules: [
+                {type: 'transport'},
+                {type: 'battery'},
+                {type: 'arm', subtype: 'medium'},
+                {type: 'gripper'}
+            ],
+            name: "Cow Milker 2",
             deployed: false,
             moves: 1,
             actions: 1
@@ -1135,7 +1155,23 @@ export const modulesStore = defineStore('modules', () => {
             deployed: false,
             moves: 1,
             actions: 1
-        }
+        },
+        {
+            id: 'f69f8fa3-dfd8-4f19-866e-e12c576c111f',
+            modules: [
+                {type: 'transport'},
+                {type: 'battery'},
+                {type: 'camera', subtype: 'rgb'},
+                {type: 'arm', subtype: 'medium'},
+                {type: 'cart'},
+                {type: 'gripper'}
+            ],
+            name: "Corn Cob Collector   ",
+            deployed: false,
+            moves: 1,
+            actions: 1
+        },
+
     ])
 
 

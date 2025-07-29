@@ -28,8 +28,6 @@ function selectAssembly(assembly) {
 </script>
 
 <template>
-
-
     <div class="assemblies-scroll">
       <div
           v-for="assembly in assemblies"

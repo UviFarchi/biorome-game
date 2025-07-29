@@ -7,7 +7,7 @@ export const marketStore = defineStore('market', () => {
     // Example data; should be generated dynamically
     {
       id: 'contract-1',
-      productType: 'Wheat',
+      productType: 'wheat',
       quantity: 20,
       dueDate: '2025-08-01',
       pricePerUnit: 5,
@@ -18,7 +18,7 @@ export const marketStore = defineStore('market', () => {
     },
     {
       id: 'contract-2',
-      productType: 'Milk',
+      productType: 'milk',
       quantity: 10,
       dueDate: '2025-08-05',
       pricePerUnit: 4,
@@ -55,7 +55,7 @@ export const marketStore = defineStore('market', () => {
   // The buyable product list is derived in the component; store only special-cases if any
   // e.g., a special supply like Animal Feed always in stock
   const extraBuyables = ref([
-    { type: 'Animal Feed', basePrice: 2, icon: '🍽️', shelfLife: 30 }
+    { type: 'animal_feed', basePrice: 2, icon: '🍽️', shelfLife: 30 }
   ])
 
   return {

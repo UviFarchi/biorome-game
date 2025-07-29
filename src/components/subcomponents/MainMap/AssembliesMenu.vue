@@ -1,10 +1,31 @@
 <script setup>
-import { ref, computed } from 'vue'
+import {ref, computed, onMounted, onBeforeUnmount} from 'vue'
 import { modulesStore } from '/stores/modulesStore.js'
 import { tilesStore } from '/stores/tilesStore.js'
+import eventBus from "@/eventBus.js";
+import MoveAndRecall from "@/components/subcomponents/MainMap/Actions/Assemblies/MoveAndRecall.vue";
 
 const modules = modulesStore()
 const tiles = tilesStore()
+const mode = ref('normal')
+const actionToggle = ref('pool')
+const feedbackMsg = ref([]);
+function setFeedbackMsg(msg) { feedbackMsg.value.push(msg); }
+onMounted(() => {
+  eventBus.on('menus-mode', changeMode)
+})
+onBeforeUnmount(() => {
+  eventBus.off('menus-mode', changeMode)
+})
+
+function changeMode(e) {
+  mode.value = e;
+  feedbackMsg.value =[];
+}
+
+function toggleMode(){
+ actionToggle.value = actionToggle.value === 'tile' ? 'pool' : 'tile';
+}
 
 const availableAssemblies = computed(() =>
     modules.activeAssemblies.filter(a => a.deployed === false)
@@ -60,8 +81,17 @@ function confirmDeploy() {
 </script>
 
 <template>
-  <div>
-    <div class="assembliesScroll">
+    <div class="assemblies-menu-root">
+      <div v-if="mode === 'action'" class="toggle-col">
+        <button class="toggle-btn" @click="toggleMode">
+          View {{ actionToggle === 'pool' ? 'Tile Assemblies' : 'Available Assemblies' }}
+        </button>
+      </div> <MoveAndRecall v-if="actionToggle === 'tile'" />
+      <div
+          class="assembliesScroll"
+          v-if="mode === 'normal' || (mode === 'action' && actionToggle === 'pool')"
+      >
+
       <div
           v-for="assembly in availableAssemblies"
           :key="assembly.id"
@@ -138,17 +168,60 @@ function confirmDeploy() {
 
 <style scoped>
 
+.assemblies-menu-root {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.toggle-col {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  background: #e0f7fa;
+  min-width: 64px;
+  max-width: 64px;
+  height: 100%;
+  padding: 0;
+  border-radius: 10px 0 0 10px;
+  box-shadow: 1px 0 4px #00796b22;
+  margin-right: 0.5em;
+}
+
+.toggle-btn {
+  flex: 1 1 auto;
+  min-height: 90px;
+  border-radius: 10px 0 0 10px;
+  border: none;
+  background: #00bcd4;
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.12em;
+  padding: 1.1em 0.2em;
+  cursor: pointer;
+  writing-mode: vertical-rl;
+  text-align: center;
+  letter-spacing: 0.08em;
+  transition: background 0.2s;
+}
+.toggle-btn:hover {
+  background: #0097a7;
+}
 
 .assembliesScroll {
+  flex: 1 1 auto;
+  overflow-x: auto;
   display: flex;
   flex-direction: row;
   gap: 0.8em;
-  overflow-x: auto;
-  overflow-y: hidden;
-  width: 100%;
   height: 100%;
   padding-bottom: 0.2em;
 }
+
+
 .assemblyCard {
   background: #f9fbe7;
   border-radius: 8px;
@@ -271,5 +344,9 @@ function confirmDeploy() {
   justify-content: flex-end;
   gap: 1em;
   margin-top: 0.7em;
+}
+
+.toggle-btn {
+  max-width: 50px;
 }
 </style>

@@ -1,302 +1,29 @@
-  
-const requirements = {
-    harvest: {
-        // PLANTS
-        'Corn': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'camera', subtype: 'rgb'},
-            {type: 'arm', subtype: 'medium'},
-            {type: 'cart'},
-            {type: 'gripper'}
-        ],
-        'Tomato': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'camera', subtype: 'rgb'},
-            {type: 'arm', subtype: 'medium'},
-            {type: 'gripper'}
-        ],
-        'Lettuce': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'camera', subtype: 'rgb'},
-            {type: 'arm', subtype: 'small'},
-            {type: 'gripper'}
-        ],
-        'Pumpkin': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'arm', subtype: 'medium'},
-            {type: 'cart'},
-            {type: 'cutter'}
-        ],
-        'Carrot': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'arm', subtype: 'small'},
-            {type: 'digger'}
-        ],
-        'Grass': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'cutter', subtype: 'rotating'}
-        ],
-        'Coffee': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'arm', subtype: 'small'},
-            {type: 'gripper'}
-        ],
-        'Apple Tree': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'arm', subtype: 'medium'},
-            {type: 'cart'},
-            {type: 'gripper'}
-        ],
-        'Lavender': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'arm', subtype: 'small'},
-            {type: 'gripper'}
-        ],
-        'Clover': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'cutter', subtype: 'rotating'}
-        ],
-        'Sunflower': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'arm', subtype: 'medium'},
-            {type: 'gripper'}
-        ],
-        'Oak Tree': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'arm', subtype: 'heavy'},
-            {type: 'cart'},
-            {type: 'cutter', subtype: 'saw'}
-        ],
-        'Poplar': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'arm', subtype: 'heavy'},
-            {type: 'cart'},
-            {type: 'cutter', subtype: 'saw'}
-        ],
-        'Willow': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'arm', subtype: 'heavy'},
-            {type: 'cart'},
-            {type: 'cutter', subtype: 'saw'}
-        ],
-        'Strawberry': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'arm', subtype: 'small'},
-            {type: 'gripper'}
-        ],
-        'Blueberry': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'arm', subtype: 'small'},
-            {type: 'gripper'}
-        ],
-        'Pear Tree': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'arm', subtype: 'medium'},
-            {type: 'cart'},
-            {type: 'gripper'}
-        ],
-        'Almond Tree': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'arm', subtype: 'medium'},
-            {type: 'cart'},
-            {type: 'gripper'}
-        ],
-        'Wheat': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'arm', subtype: 'medium'},
-            {type: 'cutter', subtype: 'rotating'},
-            {type: 'cart'}
-        ],
-        'Barley': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'arm', subtype: 'medium'},
-            {type: 'cutter', subtype: 'rotating'},
-            {type: 'cart'}
-        ],
-        'Oats': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'arm', subtype: 'medium'},
-            {type: 'cutter', subtype: 'rotating'},
-            {type: 'cart'}
-        ],
-
-        // NEW FRUIT TREES
-        'Orange Tree': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'arm', subtype: 'medium'},
-            {type: 'cart'},
-            {type: 'gripper'}
-        ],
-        'Lemon Tree': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'arm', subtype: 'medium'},
-            {type: 'cart'},
-            {type: 'gripper'}
-        ],
-
-        // NEW VINE
-        'Grape Vine': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'arm', subtype: 'small'},
-            {type: 'gripper'},
-            {type: 'cart'}
-        ],
-
-        // ANIMAL PRODUCTS
-        'milk': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'arm', subtype: 'medium'},
-            {type: 'gripper'}
-        ],
-        'Goat Milk': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'arm', subtype: 'small'},
-            {type: 'gripper'}
-        ],
-        'Eggs': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'camera', subtype: 'rgb'},
-            {type: 'arm', subtype: 'small'},
-            {type: 'suction'},
-            {type: 'cart'}
-        ],
-        'Duck Eggs': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'camera', subtype: 'rgb'},
-            {type: 'arm', subtype: 'small'},
-            {type: 'suction'},
-            {type: 'cart'}
-        ],
-        'Honey': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'arm', subtype: 'small'},
-            {type: 'extractor', subtype: 'honey'}
-        ],
-        'Wool': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'arm', subtype: 'small'},
-            {type: 'brush'}
-        ],
-        'Cow': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'cart', subtype: 'animal'}
-        ],
-        'Goat': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'cart', subtype: 'animal'}
-        ],
-        'Sheep': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'cart', subtype: 'animal'}
-        ],
-        'Pig': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'cart', subtype: 'animal'}
-        ],
-        'Chicken': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'cage'}
-        ],
-        'Duck': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'cage'}
-        ],
-        'Rabbit': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'cage'}
-        ],
-        'Horse': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'cart', subtype: 'animal'}
-        ],
-        'Donkey': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'cart', subtype: 'animal'}
-        ],
-        'Bee': [
-            {type: 'transport'},
-            {type: 'battery'},
-            {type: 'box', subtype: 'hive'}
-        ]
-    },
-    planting:{
-        Seed: [
-            {type: 'transport'},
-            {type: 'arm'},
-            {type: 'seeder'},
-            {type: 'borer'}
-        ],
-        Seedling: [
-            {type: 'transport'},
-            {type: 'arm'},
-            {type: 'cart'},
-            {type: 'gripper'}
-        ]
-    },
-    collar: [
-        {type: 'collar'},
-        {type: "alarm", subtype: "electric"},
-        {type: "alarm", subtype: "sound"},
-        {type: 'battery'},
-        {type: "gps"},
-
-    ],
-    moveAnimal:  [
-        {type: 'transport'},
-        {type: 'arm'},
-        {type: 'cart'},
-        {type: "alarm", subtype: "electric"}
-    ]
-}
+import {requirements} from "@/rules/requirements.js";
 
 /**
- * Checks if the given assembly meets ALL requirementsType in a list.
+ * Returns a flat array of required modules (as strings) for a given product.
+ * @returns {Array<String>}
+ * @param {String} requirementType
+ * @param {String} requirementName
+ */
+function getRequiredModules(requirementType, requirementName) {
+    const reqs = requirements[requirementType][requirementName];
+    if (!reqs) return [];
+    return reqs.map(req => req.type + (req.subtype ? ` (${req.subtype})` : ''));
+}
+
+
+/**
+ * Checks if the given assembly meets ALL requirementType in a list.
  * Used for harvest, planting, moving, etc.
  * @param {Object} assembly
- * @param {String} requirementsType
+ * @param {String} requirementType
+ * @param {String}requirementName
  * @returns {Boolean}
  */
- function assemblyMeetsRequirements(assembly, requirementsType) {
-     let localRequirements = requirements[requirementsType]
+function assemblyMeetsRequirements(assembly, requirementType, requirementName) {
+    console.log(assembly, requirementType, requirementName)
+    let localRequirements = requirements[requirementType][requirementName]
     if (!assembly || !assembly.modules) return false
     return localRequirements.every(req =>
         assembly.modules.some(m =>
@@ -310,13 +37,14 @@ const requirements = {
 /**
  * Returns a list of human-readable missing modules for a requirement.
  * @param {Object} assembly
- * @param {Array} requirementsType
+ * @param {String} requirementType
+ * @param {String} requirementName
  * @returns {Array<String>}
  */
- function getMissingModules(assembly, requirementsType) {
-    let localRequirements = requirements[requirementsType]
-     if (!assembly || !assembly.modules) {
-        return requirementsType.map(req => req.name || req.type || JSON.stringify(req))
+function getMissingModules(assembly, requirementType, requirementName) {
+    let localRequirements = requirements[requirementType][requirementName]
+    if (!assembly || !assembly.modules) {
+        return localRequirements.map(req => req.name || req.type || JSON.stringify(req))
     }
     return localRequirements
         .filter(req =>
@@ -335,7 +63,7 @@ const requirements = {
  * @param {String} assemblyId
  * @returns {Boolean}
  */
- function canHarvestPlant(tile, assemblyId) {
+function canHarvestPlant(tile, assemblyId) {
     if (
         !tile.plant ||
         !(tile.plant.growthStage === 'Mature' || tile.plant.growthStage === 'Overripe') ||
@@ -344,54 +72,58 @@ const requirements = {
     ) return false
 
     const productType = tile.plant.type
-    const reqs =requirements[requirementsType][productType];
+    const reqs = requirements.harvest[productType];
     if (!reqs) return false
     const assembly = tile.assemblies.find(a => a.id === assemblyId)
-    return assembly && assemblyMeetsRequirements(assembly, reqs)
+    return assembly && assemblyMeetsRequirements(assembly, "harvest", productType)
 }
 
 /**
- * Rule: Can this assembly harvest this animal *product* now?
- * @param {Object} tile
- * @param {String} assemblyId
- * @param {Object} animalProduct - product object for this animal
- * @param {Number} today - current game day
- * @returns {Boolean}
+ * Returns a list of assemblies from the given array that can harvest this animal product now.
+ * @param {Object} animal - The animal being harvested from.
+ * @param {Object} animalProduct - The product object for this animal.
+ * @param {Array<Object>} assemblies - Array of assemblies to check (tile or pool).
+ * @param {Number} today - Current game day.
+ * @returns {Array<Object>} - Array of eligible assemblies.
  */
- function canHarvestAnimalProduct(tile, assemblyId, animalProduct, today) {
-    if (!tile.animal || !tile.assemblies || !animalProduct) return false
-    const reqs = requirements[requirementsType][animalProduct.key]
-    if (!reqs) return false
-    if (typeof tile.animal.nextHarvest === "undefined") tile.animal.nextHarvest = today
-    const assembly = tile.assemblies.find(a => a.id === assemblyId)
-    return assembly && assemblyMeetsRequirements(assembly, reqs) && today >= tile.animal.nextHarvest
+function canHarvestAnimalProduct(animal, animalProduct, assemblies, today) {
+    if (!animal || !animalProduct || !assemblies?.length) return []
+    const reqs = requirements.harvest[animalProduct.key]
+    if (!reqs) return []
+    if (typeof animal.nextHarvest === "undefined") animal.nextHarvest = today
+
+    // Return only assemblies that satisfy requirements and have actions left and are ready
+    return assemblies.filter(a =>
+        a.actions > 0 &&
+        assemblyMeetsRequirements(a, "harvest", animalProduct.key) &&
+        today >= animal.nextHarvest
+    )
 }
 
 /**
- * Rule: Can this assembly harvest (butcher) this animal now?
+ * Rule: Can this assembly harvest this animal now?
  * @param {Object} tile
  * @param {String} assemblyId
  * @returns {Boolean}
  */
- function canHarvestAnimal(tile, assemblyId) {
+function canHarvestAnimal(tile, assemblyId) {
     if (!tile.animal || !tile.assemblies) return false
     const animalType = tile.animal.type
-    const reqs = requirements[requirementsType][animalType]
+    const reqs = requirements["harvest"][animalType]
     if (!reqs) return false
     const assembly = tile.assemblies.find(a => a.id === assemblyId)
-    return assembly && assemblyMeetsRequirements(assembly, reqs)
+    return assembly && assemblyMeetsRequirements(assembly, "harvest", animalType)
 }
 
 /**
  * Rule: Can this assembly plant this seed/seedling on a tile?
  * This is a pure requirementsType check, not a placement logic.
  * @param {Object} assembly
- * @param {'Seed'|'Seedling'} plantingType
+ * @param {'seed'|'seedling'} plantingType
  * @returns {Boolean}
  */
- function canSowPlant(assembly, plantingType) {
-    const reqs = requirements.planting[plantingType] || []
-    return assemblyMeetsRequirements(assembly, reqs)
+function canSowPlant(assembly, plantingType) {
+    return assemblyMeetsRequirements(assembly, "sowing", plantingType)
 }
 
 /**
@@ -399,8 +131,8 @@ const requirements = {
  * @param {Object} assembly
  * @returns {Boolean}
  */
- function canMoveAnimal(assembly) {
-    return assemblyMeetsRequirements(assembly, "moveAnimal")
+function canMoveAnimal(assembly) {
+    return assemblyMeetsRequirements(assembly, "animal", "move")
 }
 
 /**
@@ -408,8 +140,8 @@ const requirements = {
  * @param {Object} assembly
  * @returns {Boolean}
  */
- function assemblyIsCollar(assembly) {
-    return assemblyMeetsRequirements(assembly, "collar")
+function assemblyIsCollar(assembly) {
+    return assemblyMeetsRequirements(assembly, "animal", "collar")
 }
 
 /**
@@ -419,7 +151,7 @@ const requirements = {
  * @param {Array<Array<Object>>} tiles - 2D grid of all tiles
  * @returns {Array<{row: Number, col: Number}>}
  */
- function validAnimalDestTiles(animal, tiles) {
+function validAnimalDestTiles(animal, tiles) {
     if (!animal) return []
     const restriction = animal.collar?.restrictedTiles
     const out = []
@@ -432,6 +164,17 @@ const requirements = {
         return out
     }
     return restriction.filter(({row, col}) => !tiles[row][col].animal)
+}
+
+/**
+ * @param {Object} plant - the plant being sowed
+ * @param {Array<Array<Object>>} tiles - 2D grid of all tiles
+ * @returns {Array<{row: Number, col: Number}>}
+ */
+function validPlantDestTiles(plant, tiles) {
+    if (!plant) return []
+
+    return tiles.flat().filter(({row, col}) => !tiles[row][col].plant)
 }
 
 
@@ -461,4 +204,40 @@ function getMatchingModuleNames(requirements, availableModules) {
 }
 
 
-export {assemblyMeetsRequirements, getMissingModules, canHarvestPlant, canHarvestAnimalProduct, canHarvestAnimal, canMoveAnimal, canSowPlant, assemblyIsCollar, validAnimalDestTiles, getMatchingModuleNames}
+function getAdjacentTiles(tile, tilesGrid) {
+    const dirs = [
+        [-1, -1], [-1, 0], [-1, 1],
+        [0, -1], [0, 1],
+        [1, -1], [1, 0], [1, 1],
+    ]
+    const adj = []
+    for (const [dr, dc] of dirs) {
+        const row = tile.row + dr
+        const col = tile.col + dc
+        if (
+            row >= 0 && row < tilesGrid.length &&
+            col >= 0 && col < tilesGrid[0].length &&
+            !(row === tile.row && col === tile.col)
+        ) {
+            adj.push(tilesGrid[row][col])
+        }
+    }
+    return adj
+}
+
+
+export {
+    assemblyMeetsRequirements,
+    getMissingModules,
+    canHarvestPlant,
+    canHarvestAnimalProduct,
+    canHarvestAnimal,
+    canMoveAnimal,
+    canSowPlant,
+    assemblyIsCollar,
+    validAnimalDestTiles,
+    validPlantDestTiles,
+    getMatchingModuleNames,
+    getRequiredModules,
+    getAdjacentTiles
+}

@@ -6,15 +6,16 @@ import {computed, onBeforeUnmount, onMounted, ref} from "vue";
 import eventBus from "@/eventBus.js";
 import MoveAnimal from './Actions/Animals/Move.vue'
 import SetCollar from './Actions/Animals/SetCollar.vue';
-import HarvestProduct from "@/components/subcomponents/MainMap/Actions/Animals/HarvestProduct.vue";
+import HarvestProduct from "@/components/subcomponents/MainMap/Actions/Animals/HarvestAnimalProduct.vue";
 
 const animals = animalsStore()
 const tiles = tilesStore()
 const gameState = gameStateStore();
-const mode = ref('normal')
-const selectedAnimal = computed(() => tiles.selectedSubject.value.animal)
-const isGate = computed(() => !tiles.selectedSubject.value.hasOwnProperty('row'))
 
+const isGate = computed(() => !tiles.selectedSubject.value.hasOwnProperty('row'))
+const mode = ref('normal')
+const feedbackMsg = ref([]);
+function setFeedbackMsg(msg) { feedbackMsg.value.push(msg); }
 onMounted(() => {
   eventBus.on('menus-mode', changeMode)
 })
@@ -23,11 +24,12 @@ onBeforeUnmount(() => {
 })
 
 function changeMode(e) {
-  mode.value = e
+  mode.value = e;
+  feedbackMsg.value =[];
 }
 
 function buy(animal) {
-  tiles.gate.animals.push({...animal, mood: 100, dateDeployed: gameState.day})
+  tiles.gate.animals.push({...animal, dateDeployed: gameState.day})
   gameState.gold -= animal.cost
 }
 </script>
@@ -50,16 +52,17 @@ function buy(animal) {
         </div>
       </template>
       <template v-else-if="mode === 'action'">
-        <MoveAnimal
-            :selected-animal="selectedAnimal"
-            :is-gate="isGate"
-        />
-        <SetCollar
-            :selected-animal="selectedAnimal"/>
-
-        <HarvestProduct v-if="!isGate"
-            :selected-animal="selectedAnimal"
-            :tile="tiles.selectedSubject"/>
+        <div v-if="tiles.selectedSubject.value.animal">
+          <div v-if="feedbackMsg.length > 0" class="feedback-msg">
+            <span v-for="msg in feedbackMsg">{{msg}}</span>
+          </div>
+          <MoveAnimal :is-gate="isGate" :set-feedback-msg="setFeedbackMsg"/>
+          <SetCollar :set-feedback-msg="setFeedbackMsg"/>
+          <HarvestProduct v-if="!isGate" :set-feedback-msg="setFeedbackMsg"/>
+        </div>
+        <div v-else>
+          No animal in this tile
+        </div>
       </template>
     </div>
   </div>
@@ -127,5 +130,11 @@ function buy(animal) {
   color: #888 !important;
   cursor: not-allowed !important;
   border: 1px solid #bbb;
+}
+.feedback-msg {
+  color: #388e3c;
+  font-weight: bold;
+  margin-top: 0.5em;
+  transition: opacity 0.3s;
 }
 </style>

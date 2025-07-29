@@ -18,7 +18,6 @@ function openTileModal(tile) {
   selectedTile.value = tile
   showTileModal.value = true
   eventBus.emit('menus-mode', 'action');
-  console.log(tile);
   tilesStoreInstance.selectedSubject.value = tile;
 }
 
@@ -43,19 +42,19 @@ function closeModal() {
     <div class="gate-bar">
       <span class="gate-label">Farm Gate:</span>
       <span
-          v-for="(a, i) in gate.animals"
+          v-for="(animal, i) in gate.animals"
           :key="'a-'+i"
           class="gate-icon"
-          :title="`Click to deploy ${a.type}`"
-          @click="openGateModal(a, 'animal')"
-      >{{ a.icon }}</span>
+          :title="`Click to deploy ${animal.type}`"
+          @click="openGateModal(animal, 'animal')"
+      >{{ animal.icon }}</span>
       <span
-          v-for="(p, i) in gate.plants"
+          v-for="(plant, i) in gate.plants"
           :key="'p-'+i"
           class="gate-icon"
-          :title="`Click to plant ${p.type, 'plant'}`"
-          @click="openGateModal(p)"
-      >{{ p.icon }}</span>
+          :title="`Click to plant ${plant.type}`"
+          @click="openGateModal(plant, 'plant')"
+      >{{ plant.icon }}</span>
       <span v-if="!gate.animals.length && !gate.plants.length" style="color:#bbb; margin-left:1em;">(empty)</span>
     </div>
     <!-- Fields Grid -->

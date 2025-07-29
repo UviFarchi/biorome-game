@@ -1,26 +1,46 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { plantsStore } from '/stores/plantsStore.js'
 import { tilesStore } from '/stores/tilesStore.js'
 import { gameStateStore } from '/stores/gameStateStore.js'
+import eventBus from '@/eventBus.js'
+
+import SowPlant from './Actions/Plants/Sow.vue'
+import HarvestPlant from './Actions/Plants/HarvestPlantProduct.vue'
 
 const plants = plantsStore()
 const tiles = tilesStore()
 const gameState = gameStateStore()
 
+const mode = ref('normal')
+const isGate = computed(() => !tiles.selectedSubject.value.hasOwnProperty('row'))
+const feedbackMsg = ref([])
+
+function setFeedbackMsg(msg) {
+  feedbackMsg.value.push(msg)
+}
+
+function changeMode(e) {
+  mode.value = e
+  feedbackMsg.value = []
+}
+
+onMounted(() => {
+  eventBus.on('menus-mode', changeMode)
+})
+
+onBeforeUnmount(() => {
+  eventBus.off('menus-mode', changeMode)
+})
+
 function buy(plant, plantingType) {
-  // Get cost based on planting type
-  const cost =
-      plantingType === 'Seed'
-          ? plant.seedCost
-          : plant.seedlingCost
+  const cost = plantingType === 'seed' ? plant.seedCost : plant.seedlingCost
 
   if (gameState.gold < cost) {
     alert('Not enough gold!')
     return
   }
 
-  // Add to gate (like animals)
   tiles.gate.plants = tiles.gate.plants || []
   tiles.gate.plants.push({
     ...plant,
@@ -34,31 +54,42 @@ function buy(plant, plantingType) {
 <template>
   <div class="verticalMenuArea">
     <div class="verticalMenuScroll">
-      <div
-          v-for="plant in plants.plantTypes"
-          :key="plant.type"
-          class="verticalMenuCard"
-      >
-        <span class="verticalMenu-icon">{{ plant.icon }}</span>
-        <span class="verticalMenu-type">{{ plant.type }}</span>
-        <div class="deploy-buttons">
-          <button
-              class="buyBtn"
-              @click="buy(plant, 'Seed')"
+      <template v-if="mode === 'normal'">
+        <template v-for="category in ['annuals', 'perennials']" :key="category">
+          <div
+              v-for="plant in plants.plantTypes[category]"
+              :key="plant.type"
+              class="verticalMenuCard"
           >
-            Seed — {{ plant.seedCost }}💰
-          </button>
-          <button
-              class="buyBtn"
-              @click="buy(plant, 'Seedling')"
-          >
-            Seedling — {{ plant.seedlingCost }}💰
-          </button>
+            <span class="verticalMenu-icon">{{ plant.icon }}</span>
+            <span class="verticalMenu-type">{{ plant.type }}</span>
+            <div class="deploy-buttons">
+              <button class="buyBtn" @click="buy(plant, 'seed')">
+                Seed: {{ plant.seedCost }}💰
+              </button>
+              <button class="buyBtn" @click="buy(plant, 'seedling')">
+                Seedling: {{ plant.seedlingCost }}💰
+              </button>
+            </div>
+          </div>
+        </template>
+      </template>
+
+      <template v-else-if="mode === 'action'">
+        <div v-if="isGate">
+          <SowPlant :set-feedback-msg="setFeedbackMsg" />
         </div>
-      </div>
+        <div v-else>
+          <div v-if="feedbackMsg.length > 0" class="feedback-msg">
+            <span v-for="msg in feedbackMsg" :key="msg">{{ msg }}</span>
+          </div>
+          <HarvestPlant :set-feedback-msg="setFeedbackMsg" />
+        </div>
+      </template>
     </div>
   </div>
 </template>
+
 
 <style scoped>
 .verticalMenuArea {
@@ -99,14 +130,14 @@ function buy(plant, plantingType) {
 }
 .deploy-buttons {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 0.4em;
   width: 100%;
   align-items: stretch;
   margin-top: 0.7em;
 }
 .buyBtn {
-  width: 100%;
+
   padding: 0.45em 0.6em;
   border-radius: 7px;
   background: #b2dfdb;
@@ -116,6 +147,7 @@ function buy(plant, plantingType) {
   cursor: pointer;
   font-size: 1em;
   transition: background 0.14s;
+  flex:1;
 }
 .buyBtn:hover {
   background: #00bcd4;

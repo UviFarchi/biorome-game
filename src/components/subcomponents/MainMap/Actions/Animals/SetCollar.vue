@@ -4,12 +4,11 @@ import { tilesStore } from '/stores/tilesStore.js'
 import { modulesStore } from '/stores/modulesStore.js'
 import { assemblyIsCollar } from '@/rules/utils.js'
 
-const props = defineProps({
-  selectedAnimal: { type: Object, required: true }
-})
 
-const tiles = tilesStore().tiles
+const tiles = tilesStore()
+const selectedAnimal = tiles.selectedSubject.value.animal;
 const modules = modulesStore()
+const props = defineProps({ setFeedbackMsg: Function});
 
 
 const showCollarUI = ref(false)
@@ -40,29 +39,31 @@ function toggleTile(row, col) {
 
 
 function saveRestriction() {
-  props.selectedAnimal.collar = {
+  selectedAnimal.collar = {
     restrictedTiles: restrictedTiles.value.map(t => ({ ...t })),
     assemblyId: assignedCollarAssembly.value.id
   }
   assignedCollarAssembly.value.deployed = true
   showCollarUI.value = false
+  props.setFeedbackMsg("Collar Set!");
 }
 
 
 function removeCollar() {
-  if (!props.selectedAnimal.collar) return
-  const idx = modules.activeAssemblies.findIndex(a => a.id === props.selectedAnimal.collar.assemblyId)
+  if (!selectedAnimal.collar) return
+  const idx = modules.activeAssemblies.findIndex(a => a.id === selectedAnimal.collar.assemblyId)
   if (idx !== -1) modules.activeAssemblies[idx].deployed = false
-  props.selectedAnimal.collar = null
+  selectedAnimal.collar = null
+  props.setFeedbackMsg("Collar Removed!");
 }
 </script>
 
 <template>
   <div>
-    <div v-if="props.selectedAnimal">
-      <div v-if="props.selectedAnimal.collar">
+    <div v-if="selectedAnimal">
+      <div v-if="selectedAnimal.collar">
         <p>
-          <strong>Collar:</strong> Restricted to {{ props.selectedAnimal.collar.restrictedTiles?.length || 0 }} tiles.
+          <strong>Collar:</strong> Restricted to {{ selectedAnimal.collar.restrictedTiles?.length || 0 }} tiles.
         </p>
         <button @click="removeCollar">Remove Collar</button>
       </div>
