@@ -106,7 +106,7 @@ function confirmDeploy() {
             {{ assembly.name || 'Assembly' }}
           </span>
           <button
-              class="buyBtn"
+              class="btn btn--buy buyBtn"
               @click="openDeployModal(assembly.id)"
           >
             Deploy
@@ -259,25 +259,8 @@ function confirmDeploy() {
 .buyBtn {
   margin-top: 0.2em;
   padding: 0.21em 1em;
-  border-radius: 7px;
-  background: #b2dfdb;
-  border: none;
-  color: #333;
-  font-weight: bold;
-  cursor: pointer;
-  font-size: 1em;
   position: absolute;
   bottom: 5px;
-}
-.buyBtn:hover {
-  background: #00bcd4;
-  color: #fff;
-}
-.buyBtn:disabled {
-  background: #ddd !important;
-  color: #888 !important;
-  cursor: not-allowed !important;
-  border: 1px solid #bbb;
 }
 .empty {
   color: #888;

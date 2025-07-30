@@ -35,18 +35,18 @@ function buy(animal) {
 </script>
 
 <template>
-  <div class="verticalMenuArea">
-    <div class="verticalMenuScroll">
+  <div class="menu-panel">
+    <div class="scroll-area">
       <template v-if="mode === 'normal'">
         <div
             v-for="animal in animals.animalTypes"
             :key="animal.type"
-            class="verticalMenuCard"
+            class="card card--horizontal"
         >
           <span class="verticalMenu-icon">{{ animal.icon }}</span>
           <span class="verticalMenu-type">{{ animal.type }}</span>
           <span class="verticalMenu-cost">{{ animal.cost }}💰</span>
-          <button class="buyBtn" :disabled="gameState.gold < animal.cost" @click="buy(animal)">
+          <button class="btn btn--buy" :disabled="gameState.gold < animal.cost" @click="buy(animal)">
             Buy
           </button>
         </div>
@@ -70,32 +70,11 @@ function buy(animal) {
 
 
 <style scoped>
-.verticalMenuArea {
-  border: 2px solid #b2dfdb;
-  border-radius: 10px;
-  background: #e0f7fa;
-  padding: 1rem 0.5rem;
-  display: flex;
-  flex-direction: column;
-}
-
-.verticalMenuScroll {
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
-  overflow-y: auto;
-  flex: 1 1 auto;
-  padding-right: 0.5em;
-}
-
 .verticalMenuCard {
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 0.8em;
-  background: #fff;
-  border-radius: 7px;
-  box-shadow: 0 1px 4px #0001;
   padding: 0.4em 0.8em;
   min-height: 45px;
 }
@@ -112,24 +91,6 @@ function buy(animal) {
 .buyBtn {
   margin-left: auto;
   padding: 0.2em 1em;
-  border-radius: 7px;
-  background: #b2dfdb;
-  border: none;
-  color: #333;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.buyBtn:hover {
-  background: #00bcd4;
-  color: #fff;
-}
-
-.buyBtn:disabled {
-  background: #ddd !important;
-  color: #888 !important;
-  cursor: not-allowed !important;
-  border: 1px solid #bbb;
 }
 .feedback-msg {
   color: #388e3c;

@@ -50,12 +50,12 @@ function returnAllToPool() {
     <ul class="current-modules-list">
       <li v-for="(mod, i) in modules.currentAssembly" :key="mod.name + i">
         <span>{{ mod.name }} — type: {{ mod.type }}</span>
-        <button class="return-btn" @click="returnToPool(i)">return to module pool</button>
+        <button class="btn btn--return return-btn" @click="returnToPool(i)">return to module pool</button>
       </li>
       <li v-if="!modules.currentAssembly.length" class="empty-msg">No modules added yet.</li>
     </ul>
     <button
-        class="return-all-btn"
+        class="btn btn--return return-all-btn"
         :disabled="!modules.currentAssembly.length"
         @click="returnAllToPool"
     >
@@ -63,7 +63,7 @@ function returnAllToPool() {
     </button>
     <hr/>
     <button
-        class="save-btn"
+        class="btn btn--save save-btn"
         :disabled="!modules.currentAssembly.length"
         @click="saveAssembly"
     >Save Assembly</button>
@@ -108,43 +108,13 @@ function returnAllToPool() {
   font-style: italic;
 }
 .save-btn {
-  background: #ffd600;
-  color: #333;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  font-size: 1em;
-  padding: 0.58em 1.8em;
-  cursor: pointer;
   margin-top: 0.6em;
-}
-.save-btn:disabled {
-  background: #eee;
-  color: #aaa;
-  cursor: not-allowed;
-}
-.save-btn:not(:disabled):hover {
-  background: #ffb300;
+  padding: 0.58em 1.8em;
 }
 
 .return-all-btn {
-  background: #e0f7fa;
-  color: #0097a7;
-  border: none;
-  border-radius: 8px;
-  font-size: 1em;
-  font-weight: 500;
-  padding: 0.45em 1.3em;
   margin-top: 0.3em;
   margin-left: 0.9em;
-  cursor: pointer;
-}
-.return-all-btn:disabled {
-  background: #eee;
-  color: #aaa;
-  cursor: not-allowed;
-}
-.return-all-btn:not(:disabled):hover {
-  background: #b2ebf2;
+  padding: 0.45em 1.3em;
 }
 </style>

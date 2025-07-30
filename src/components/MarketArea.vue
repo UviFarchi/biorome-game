@@ -232,7 +232,7 @@ function canSell(o) {
       </div>
       <div v-else class="ticker-inner">No news today.</div>
     </div>
-    <button class="return-btn" @click="eventBus.emit('nav', 'main')">Back to Map</button>
+    <button class="btn btn--return return-btn" @click="eventBus.emit('nav', 'main')">Back to Map</button>
     <h1>Market</h1>
     <div class="filter-row">
       <label>Filter:</label>
@@ -382,16 +382,7 @@ function canSell(o) {
 .return-btn {
   align-self: flex-end;
   margin-bottom: 0.5rem;
-  font-weight: bold;
   padding: 0.4em 1em;
-  background: #80deea;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.return-btn:hover {
-  background: #26c6da;
-  color: #fff;
 }
 
 @keyframes scroll {

@@ -52,22 +52,22 @@ function buy(plant, plantingType) {
 </script>
 
 <template>
-  <div class="verticalMenuArea">
-    <div class="verticalMenuScroll">
+  <div class="menu-panel">
+    <div class="scroll-area">
       <template v-if="mode === 'normal'">
         <template v-for="category in ['annuals', 'perennials']" :key="category">
           <div
               v-for="plant in plants.plantTypes[category]"
               :key="plant.type"
-              class="verticalMenuCard"
+              class="card card--vertical"
           >
             <span class="verticalMenu-icon">{{ plant.icon }}</span>
             <span class="verticalMenu-type">{{ plant.type }}</span>
             <div class="deploy-buttons">
-              <button class="buyBtn" @click="buy(plant, 'seed')">
+              <button class="btn btn--buy" @click="buy(plant, 'seed')">
                 Seed: {{ plant.seedCost }}💰
               </button>
-              <button class="buyBtn" @click="buy(plant, 'seedling')">
+              <button class="btn btn--buy" @click="buy(plant, 'seedling')">
                 Seedling: {{ plant.seedlingCost }}💰
               </button>
             </div>
@@ -92,30 +92,11 @@ function buy(plant, plantingType) {
 
 
 <style scoped>
-.verticalMenuArea {
-  border: 2px solid #b2dfdb;
-  border-radius: 10px;
-  background: #e0f7fa;
-  padding: 1rem 0.5rem;
-  display: flex;
-  flex-direction: column;
-}
-.verticalMenuScroll {
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
-  overflow-y: auto;
-  flex: 1 1 auto;
-  padding-right: 0.5em;
-}
 .verticalMenuCard {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.5em;
-  background: #fff;
-  border-radius: 7px;
-  box-shadow: 0 1px 4px #0001;
   padding: 0.7em 0.8em 0.8em 0.8em;
   min-height: 125px;
   position: relative;
@@ -135,22 +116,5 @@ function buy(plant, plantingType) {
   width: 100%;
   align-items: stretch;
   margin-top: 0.7em;
-}
-.buyBtn {
-
-  padding: 0.45em 0.6em;
-  border-radius: 7px;
-  background: #b2dfdb;
-  border: none;
-  color: #222;
-  font-weight: bold;
-  cursor: pointer;
-  font-size: 1em;
-  transition: background 0.14s;
-  flex:1;
-}
-.buyBtn:hover {
-  background: #00bcd4;
-  color: #fff;
 }
 </style>

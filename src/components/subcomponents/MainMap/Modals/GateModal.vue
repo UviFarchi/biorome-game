@@ -2,7 +2,7 @@
   <div class="areaModal" @click.self="$emit('close')">
     <div class="gate-modal-content">
       <h1>Farm Gate</h1>
-      <button class="close-btn" @click="$emit('close')">×</button>
+      <button class="btn btn--close close-btn" @click="$emit('close')">×</button>
       <div class="subject-header">
         <span class="icon">{{ item.icon }}</span>
         <span class="type">{{ item.type }}</span>
@@ -52,10 +52,7 @@ defineProps({
 .close-btn {
   position: absolute; top: 1.1em; right: 1.15em;
   font-size: 1.4em;
-  background: none; border: none; cursor: pointer;
-  color: #aaa; font-weight: bold;
 }
-.close-btn:hover { color: #222; }
 .subject-header {
   display: flex; gap: 0.8em; align-items: center; font-size: 1.15em;
 }

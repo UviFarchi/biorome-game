@@ -1,0 +1,142 @@
+:root {
+  --color-primary: #00bcd4;
+  --color-accent: #b2dfdb;
+  --color-warning: #ffd600;
+  --color-dark: #333;
+  --radius: 7px;
+}
+
+.menu-panel {
+  border: 2px solid var(--color-accent);
+  border-radius: 10px;
+  background: #e0f7fa;
+  padding: 1rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.scroll-area {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  padding-right: 0.5em;
+}
+
+.card {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: 0 1px 4px #0001;
+  padding: 0.7em 0.8em;
+  display: flex;
+  flex-direction: column;
+}
+
+.card--horizontal {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.8em;
+  padding: 0.4em 0.8em;
+}
+
+.card--vertical {
+  align-items: center;
+  gap: 0.5em;
+  justify-content: space-between;
+}
+
+.btn {
+  border: none;
+  border-radius: var(--radius);
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn--buy {
+  background: var(--color-accent);
+  color: var(--color-dark);
+}
+.btn--buy:hover {
+  background: var(--color-primary);
+  color: #fff;
+}
+.btn--buy:disabled {
+  background: #ddd;
+  color: #888;
+  cursor: not-allowed;
+  border: 1px solid #bbb;
+}
+
+.btn--return {
+  background: #80deea;
+  color: #2c2c2c;
+  padding: 0.39em 1.1em;
+  box-shadow: 0 2px 4px #0001;
+}
+.btn--return:hover {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.btn--new {
+  background: var(--color-warning);
+  margin-right: 0.8em;
+  padding: 0.35em 1.2em;
+}
+.btn--new:hover {
+  background: #ffb300;
+  color: #333;
+}
+
+.btn--close {
+  background: none;
+  color: #aaa;
+}
+.btn--close:hover {
+  color: #222;
+}
+
+.btn--save {
+  background: var(--color-warning);
+  color: var(--color-dark);
+  padding: 0.58em 1.8em;
+}
+.btn--save:hover {
+  background: #ffb300;
+}
+.btn--save:disabled {
+  background: #eee;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+.btn--add {
+  background: #c8e6c9;
+  color: #388e3c;
+  padding: 0.23em 0.85em;
+}
+.btn--add:hover {
+  background: #a5d6a7;
+  color: #1b5e20;
+}
+.btn--add:disabled {
+  background: #eee;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+.btn--sell {
+  background: #e0e0e0;
+  color: #37474f;
+  padding: 0.23em 0.85em;
+}
+.btn--sell:hover {
+  background: #cfd8dc;
+  color: #263238;
+}
+.btn--sell:disabled {
+  background: #eee;
+  color: #aaa;
+  cursor: not-allowed;
+}

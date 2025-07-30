@@ -32,11 +32,11 @@ function handlePremadeSelect(assembly) {
   <div class="assembly-area-main">
     <!-- Top bar with left, center, right -->
     <div class="top-bar">
-      <button @click="openNewAssemblyModal" class="new-btn">+ New Assembly</button>
+      <button @click="openNewAssemblyModal" class="btn btn--new">+ New Assembly</button>
       <div class="assemblies-bar">
         <ActiveAssemblyMenu/>
       </div>
-      <button class="return-btn" @click="eventBus.emit('nav', 'main')">
+      <button class="btn btn--return" @click="eventBus.emit('nav', 'main')">
         Return to Map
       </button>
     </div>
@@ -77,19 +77,7 @@ function handlePremadeSelect(assembly) {
   gap: 1.1em;
 }
 
-.new-btn {
-  padding: 0.35em 1.2em;
-  border-radius: 7px;
-  background: #ffd600;
-  border: none;
-  font-weight: bold;
-  cursor: pointer;
-  margin-right: 0.8em;
-}
-.new-btn:hover {
-  background: #ffb300;
-  color: #333;
-}
+
 
 .assemblies-bar {
   flex: 1 1 auto;
@@ -97,22 +85,7 @@ function handlePremadeSelect(assembly) {
   align-items: center;
 }
 
-.return-btn {
-  margin-left: auto;
-  font-weight: bold;
-  padding: 0.39em 1.1em;
-  background: #80deea;
-  color: #2c2c2c;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-size: 1.07em;
-  box-shadow: 0 2px 4px #0001;
-}
-.return-btn:hover {
-  background: #00bcd4;
-  color: #fff;
-}
+
 
 .workspace-row {
   flex: 1 1 auto;

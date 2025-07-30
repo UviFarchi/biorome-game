@@ -127,21 +127,21 @@ function showToast(msg) {
                     :title="!canAttach(mod) ? attachTooltip(mod) : ''"
 
                     @click="addModuleToAssembly(mod.name)"
-                    class="add-btn"
+                    class="btn btn--add add-btn"
                 >
                   + Add
                 </button>
                 <button
                     @click="buyModule(mod.name)"
                     :disabled="gameState.gold < mod.cost"
-                    class="buy-btn"
+                    class="btn btn--buy buy-btn"
                 >
                   Buy
                 </button>
                 <button
                     v-if="mod.count > 0"
                     @click="sellModule(mod.name)"
-                    class="sell-btn"
+                    class="btn btn--sell sell-btn"
                     title="Sell for half price"
                 >
                   Sell
@@ -245,45 +245,11 @@ h2 {
 }
 
 .buy-btn {
-  background: #ffd600;
-  border: none;
-  border-radius: 7px;
   padding: 0.23em 0.85em;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.buy-btn:disabled {
-  background: #eee;
-  color: #aaa;
-  cursor: not-allowed;
-}
-
-.buy-btn:not(:disabled):hover {
-  background: #ffb300;
-  color: #fff;
 }
 
 .sell-btn {
-  background: #e0e0e0;
-  border: none;
-  border-radius: 7px;
   padding: 0.23em 0.85em;
-  font-weight: bold;
-  cursor: pointer;
-  color: #37474f;
-  transition: background 0.15s;
-}
-
-.sell-btn:disabled {
-  background: #eee;
-  color: #aaa;
-  cursor: not-allowed;
-}
-
-.sell-btn:not(:disabled):hover {
-  background: #cfd8dc;
-  color: #263238;
 }
 
 
@@ -337,25 +303,7 @@ h2 {
 }
 
 .add-btn {
-  background: #c8e6c9;
-  border: none;
-  border-radius: 7px;
   padding: 0.23em 0.85em;
-  font-weight: bold;
-  cursor: pointer;
-  color: #388e3c;
-  transition: background 0.15s;
-}
-
-.add-btn:disabled {
-  background: #eee;
-  color: #aaa;
-  cursor: not-allowed;
-}
-
-.add-btn:not(:disabled):hover {
-  background: #a5d6a7;
-  color: #1b5e20;
 }
 
 .module-row {
