@@ -71,7 +71,7 @@ function startGame() {
       </div>
     </div>
 
-    <button type="submit">Start</button>
+    <button type="submit" class="btn start-btn">Start</button>
   </form>
 </template>
 
@@ -90,18 +90,14 @@ function startGame() {
   display: flex;
   gap: 1.2rem;
 }
-button[type="submit"] {
+.start-btn {
   margin-top: 1rem;
-  font-weight: bold;
   font-size: 1.1em;
   padding: 0.5em 1.2em;
-  border-radius: 8px;
-  border: none;
   background: #82c91e;
   color: #fff;
-  cursor: pointer;
 }
-button[type="submit"]:hover {
+.start-btn:hover {
   background: #5c940d;
 }
 </style>

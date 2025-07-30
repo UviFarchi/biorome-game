@@ -116,7 +116,7 @@ function close() {
 
 
       </div>
-      <button class="close-btn" @click="close">Cancel</button>
+      <button class="btn btn--close close-btn" @click="close">Cancel</button>
     </div>
   </div>
 </template>
@@ -224,17 +224,6 @@ h2 {
 .close-btn {
   margin-top: 1.5em;
   padding: 0.39em 1.7em;
-  background: #ffd600;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  font-size: 1em;
-  cursor: pointer;
-}
-
-.close-btn:hover {
-  background: #ffb300;
-  color: #222;
 }
 
 .assembly-card.blank {

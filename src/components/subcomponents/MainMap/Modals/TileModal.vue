@@ -103,7 +103,7 @@ const tileEffects = computed(() => {
 <template>
   <div class="areaModal" @click.self="$emit('close')">
     <div class="tile-modal-content">
-      <button class="close-btn" @click="$emit('close')">×</button>
+      <button class="btn btn--close close-btn" @click="$emit('close')">×</button>
       <h2>
         Tile ({{ tile.row + 1 }}, {{ tile.col + 1 }})
       </h2>
@@ -215,15 +215,6 @@ const tileEffects = computed(() => {
   top: 1.1em;
   right: 1.15em;
   font-size: 1.4em;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #aaa;
-  font-weight: bold;
-}
-
-.close-btn:hover {
-  color: #222;
 }
 
 .tile-soil {
