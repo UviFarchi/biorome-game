@@ -1,12 +1,12 @@
 <script setup>
-import {ref, computed} from 'vue'
-import {gameStateStore} from '/stores/gameStateStore.js'
+import ModuleRequirementsTable from '@/components/subcomponents/mainMap/actions/ModuleRequirementsTable.vue'
 import {animalsStore} from '/stores/animalsStore.js'
-import {assemblyMeetsRequirements, getMatchingModuleNames, getRequirements} from '@/rules/utils.js'
-import {tilesStore} from "/stores/tilesStore.js";
-import {marketStore} from "/stores/marketStore.js";
+import {gameStateStore} from '/stores/gameStateStore.js'
+import {marketStore} from '/stores/marketStore.js'
 import {modulesStore} from '/stores/modulesStore.js'
-import ModuleRequirementsTable from "@/components/subcomponents/mainMap/actions/ModuleRequirementsTable.vue";
+import {tilesStore} from '/stores/tilesStore.js'
+import {assemblyMeetsRequirements, getMatchingModuleNames, getRequirements} from '@/rules/utils.js'
+import {computed, ref} from 'vue'
 
 
 const tiles = tilesStore();

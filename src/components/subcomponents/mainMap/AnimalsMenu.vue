@@ -1,12 +1,12 @@
 <script setup>
-import {animalsStore} from '/stores/animalsStore.js'
-import {tilesStore} from '/stores/tilesStore.js'
-import {gameStateStore} from "../../../../stores/gameStateStore.js";
-import {computed, onBeforeUnmount, onMounted, ref} from "vue";
-import eventBus from "@/eventBus.js";
+import eventBus from '@/eventBus.js'
+import HarvestProduct from '@/components/subcomponents/mainMap/actions/animals/HarvestAnimalProduct.vue'
 import MoveAnimal from '@/components/subcomponents/mainMap/actions/animals/Move.vue'
-import SetCollar from '@/components/subcomponents/mainMap/actions/animals/SetCollar.vue';
-import HarvestProduct from "@/components/subcomponents/mainMap/actions/animals/HarvestAnimalProduct.vue";
+import SetCollar from '@/components/subcomponents/mainMap/actions/animals/SetCollar.vue'
+import { animalsStore } from '/stores/animalsStore.js'
+import { gameStateStore } from "../../../../stores/gameStateStore.js"
+import { tilesStore } from '/stores/tilesStore.js'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const animals = animalsStore()
 const tiles = tilesStore()
@@ -14,24 +14,27 @@ const gameState = gameStateStore();
 
 const isGate = computed(() => !tiles.selectedSubject.value.hasOwnProperty('row'))
 const mode = ref('normal')
-const feedbackMsg = ref([]);
-function setFeedbackMsg(msg) { feedbackMsg.value.push(msg); }
-onMounted(() => {
-  eventBus.on('menus-mode', changeMode)
-})
-onBeforeUnmount(() => {
-  eventBus.off('menus-mode', changeMode)
-})
+const feedbackMsg = ref([])
 
-function changeMode(e) {
-  mode.value = e;
-  feedbackMsg.value =[];
-}
+function setFeedbackMsg(msg) { feedbackMsg.value.push(msg) }
 
 function buy(animal) {
   tiles.gate.animals.push({...animal, dateDeployed: gameState.day})
   gameState.gold -= animal.cost
 }
+
+function changeMode(e) {
+  mode.value = e
+  feedbackMsg.value = []
+}
+
+onMounted(() => {
+  eventBus.on('menus-mode', changeMode)
+})
+
+onBeforeUnmount(() => {
+  eventBus.off('menus-mode', changeMode)
+})
 </script>
 
 <template>

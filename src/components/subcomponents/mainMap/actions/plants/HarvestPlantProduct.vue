@@ -1,12 +1,12 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { tilesStore } from '/stores/tilesStore.js'
+import ModuleRequirementsTable from '@/components/subcomponents/mainMap/actions/ModuleRequirementsTable.vue'
+import { gameStateStore } from '/stores/gameStateStore.js'
+import { marketStore } from '/stores/marketStore.js'
 import { modulesStore } from '/stores/modulesStore.js'
 import { plantsStore } from '/stores/plantsStore.js'
-import { marketStore } from '/stores/marketStore.js'
-import { gameStateStore } from '/stores/gameStateStore.js'
+import { tilesStore } from '/stores/tilesStore.js'
 import { assemblyMeetsRequirements, getRequirements, getMatchingModuleNames } from '@/rules/utils.js'
-import ModuleRequirementsTable from "@/components/subcomponents/mainMap/actions/ModuleRequirementsTable.vue";
+import { computed, ref } from 'vue'
 
 
 const props = defineProps({

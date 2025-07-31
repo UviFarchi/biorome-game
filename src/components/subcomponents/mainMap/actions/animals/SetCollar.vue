@@ -1,9 +1,9 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { tilesStore } from '/stores/tilesStore.js'
+import ModuleRequirementsTable from '@/components/subcomponents/mainMap/actions/ModuleRequirementsTable.vue'
 import { modulesStore } from '/stores/modulesStore.js'
-import ModuleRequirementsTable from "@/components/subcomponents/mainMap/actions/ModuleRequirementsTable.vue";
-import {assemblyMeetsRequirements, getRequirements, getMatchingModuleNames} from '@/rules/utils.js'
+import { tilesStore } from '/stores/tilesStore.js'
+import { assemblyMeetsRequirements, getRequirements, getMatchingModuleNames } from '@/rules/utils.js'
+import { computed, ref } from 'vue'
 
 
 const tiles = tilesStore()

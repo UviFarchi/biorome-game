@@ -1,7 +1,7 @@
 <script setup>
-import { ref } from 'vue'
 import { modulesStore } from '/stores/modulesStore.js'
 import { v4 as uuidv4 } from 'uuid'
+import { ref } from 'vue'
 
 const modules = modulesStore()
 const name = ref('')

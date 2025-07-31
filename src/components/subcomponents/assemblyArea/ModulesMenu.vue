@@ -1,7 +1,7 @@
 <script setup>
-import {ref, computed} from 'vue'
 import {modulesStore} from '/stores/modulesStore.js'
 import {gameStateStore} from '/stores/gameStateStore.js'
+import {computed, ref} from 'vue'
 
 const modules = modulesStore()
 const gameState = gameStateStore()
