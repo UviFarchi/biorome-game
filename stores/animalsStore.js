@@ -3,14 +3,14 @@ import {ref} from 'vue'
 
 export const animalsStore = defineStore('animaltypes', () => {
     const products = ref(
-        [
-            {key: 'milk', icon: '🥛', label: 'milk', basePrice: 3, shelfLife: 2},
-            {key: 'goat_milk', icon: '🥛', label: 'goat milk', basePrice: 4, shelfLife: 2},
-            {key: 'eggs', icon: '🥚', label: 'eggs', basePrice: 2, shelfLife: 3},
-            {key: 'duck_eggs', icon: '🥚', label: 'duck eggs', basePrice: 3, shelfLife: 3},
-            {key: 'honey', icon: '🍯', label: 'honey', basePrice: 5, shelfLife: 1000},
-            {key: 'wool', icon: '🧶', label: 'wool', basePrice: 7, shelfLife: 1000}
-        ])
+        {
+            milk:      { icon: '🥛', label: 'Milk', basePrice: 3, shelfLife: 2 },
+            goat_milk: { icon: '🥛', label: 'Goat milk', basePrice: 4, shelfLife: 2 },
+            eggs:      { icon: '🥚', label: 'Eggs', basePrice: 2, shelfLife: 3 },
+            duck_eggs: { icon: '🥚', label: 'Duck eggs', basePrice: 3, shelfLife: 3 },
+            honey:     { icon: '🍯', label: 'Honey', basePrice: 5, shelfLife: 1000 },
+            wool:      { icon: '🧶', label: 'Wool', basePrice: 7, shelfLife: 1000 }
+        })
 
     const animalTypes = ref([
         {
@@ -40,7 +40,7 @@ export const animalsStore = defineStore('animaltypes', () => {
             health: 100,
             cost: 15,
             appreciationPerTurn: 1,
-            product: 'goat milk',
+            product: 'goat_milk',
             outputFrequency: 2,
             wastePerTurn: 2,
             effects: [{type: 'fertilizer', strength: 1}],

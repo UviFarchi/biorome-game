@@ -5,8 +5,8 @@ import { tilesStore } from '/stores/tilesStore.js'
 import { gameStateStore } from '/stores/gameStateStore.js'
 import eventBus from '@/eventBus.js'
 
-import SowPlant from './Actions/Plants/Sow.vue'
-import HarvestPlant from './Actions/Plants/HarvestPlantProduct.vue'
+import SowPlant from '@/components/subcomponents/mainMap/actions/plants/Sow.vue'
+import HarvestPlant from '@/components/subcomponents/mainMap/actions/plants/HarvestPlantProduct.vue'
 
 const plants = plantsStore()
 const tiles = tilesStore()
@@ -77,13 +77,13 @@ function buy(plant, plantingType) {
 
       <template v-else-if="mode === 'action'">
         <div v-if="isGate">
-          <SowPlant :set-feedback-msg="setFeedbackMsg" />
+          <SowPlant class="action-area" :set-feedback-msg="setFeedbackMsg" />
         </div>
         <div v-else>
           <div v-if="feedbackMsg.length > 0" class="feedback-msg">
             <span v-for="msg in feedbackMsg" :key="msg">{{ msg }}</span>
           </div>
-          <HarvestPlant :set-feedback-msg="setFeedbackMsg" />
+          <HarvestPlant class="action-area" :set-feedback-msg="setFeedbackMsg" />
         </div>
       </template>
     </div>

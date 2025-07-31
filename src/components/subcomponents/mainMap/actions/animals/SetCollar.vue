@@ -2,7 +2,8 @@
 import { ref, computed } from 'vue'
 import { tilesStore } from '/stores/tilesStore.js'
 import { modulesStore } from '/stores/modulesStore.js'
-import { assemblyIsCollar } from '@/rules/utils.js'
+import ModuleRequirementsTable from "@/components/subcomponents/mainMap/actions/ModuleRequirementsTable.vue";
+import {assemblyMeetsRequirements, getRequirements, getMatchingModuleNames} from '@/rules/utils.js'
 
 
 const tiles = tilesStore()
@@ -14,9 +15,12 @@ const props = defineProps({ setFeedbackMsg: Function});
 const showCollarUI = ref(false)
 const restrictedTiles = ref([])
 
-
+const collarRequirements = computed(() => getRequirements('animal', 'collar'))
+const collarMatchingModules = computed(() =>
+    getMatchingModuleNames(collarRequirements.value, modules.availableModules)
+)
 const availableAssemblies = computed(() =>
-    modules.activeAssemblies.filter(a => !a.deployed && assemblyIsCollar(a))
+    modules.activeAssemblies.filter(assembly => !assembly.deployed && assemblyMeetsRequirements(assembly, "animal", "collar"))
 )
 
 const assignedCollarAssembly = ref(null)
@@ -110,6 +114,7 @@ function removeCollar() {
       </div>
 
     </div>
+    <ModuleRequirementsTable :matches="collarMatchingModules" />
   </div>
 </template>
 

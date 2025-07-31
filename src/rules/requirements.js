@@ -359,8 +359,8 @@ export const requirements = {
         'honey': [
             {type: 'transport'},
             {type: 'battery'},
-            {type: 'arm', subtype: 'small'},
-            {type: 'extractor', subtype: 'honey'}
+            {type: 'arm'},
+            {type: 'gripper'}
         ],
         'wool': [
             {type: 'transport'},
@@ -433,7 +433,6 @@ export const requirements = {
             {type: 'gripper'}
         ]
     },
-
     animal: {
         move: [
             {type: 'transport'},

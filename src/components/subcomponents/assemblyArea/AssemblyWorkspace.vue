@@ -48,7 +48,7 @@ function returnAllToPool() {
         maxlength="30"
     />
     <ul class="current-modules-list">
-      <li v-for="(mod, i) in modules.currentAssembly" :key="mod.name + i">
+      <li v-for="(mod, i) in modules.currentAssembly" :key="mod.type + i">
         <span>{{ mod.name }} — type: {{ mod.type }}</span>
         <button class="btn btn--return return-btn" @click="returnToPool(i)">return to module pool</button>
       </li>

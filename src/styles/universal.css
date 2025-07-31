@@ -1,6 +1,6 @@
 :root {
   --color-primary: #00bcd4;
-  --color-accent: #b2dfdb;
+  --color-accent: #cde4cf;
   --color-warning: #ffd600;
   --color-dark: #333;
   --radius: 7px;
@@ -25,7 +25,7 @@
 }
 
 .card {
-  background: #fff;
+  background: #adf0fd;
   border-radius: var(--radius);
   box-shadow: 0 1px 4px #0001;
   padding: 0.7em 0.8em;
@@ -139,4 +139,59 @@
   background: #eee;
   color: #aaa;
   cursor: not-allowed;
+}
+
+.action-area {
+  background: #f9fafb;
+  border-radius: 12px;
+  box-shadow: 0 1px 8px rgba(120, 140, 180, 0.06);
+  margin-bottom: 1.25em;
+  padding: 1.15em 1.4em 1.1em 1.4em;
+  border: 1px solid #e3e8ee;
+  transition: box-shadow 0.2s;
+  position: relative;
+}
+
+.action-area:not(:last-child) {
+  margin-bottom: 2em;
+}
+
+.action-area:hover, .action-area:focus-within {
+  box-shadow: 0 3px 14px rgba(60, 105, 170, 0.08);
+  border-color: #b0bec5;
+}
+
+.action-area h4, .action-area h5 {
+  margin-top: 0;
+  margin-bottom: 0.6em;
+  font-size: 1.17em;
+  font-weight: 600;
+  color: #3d4853;
+  letter-spacing: 0.01em;
+}
+
+.action-area button {
+  background: linear-gradient(90deg, #e0f2fe 0%, #b2ebf2 100%);
+  color: #37474f;
+  border: none;
+  border-radius: 7px;
+  padding: 0.36em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(100,120,130,0.06);
+  margin-right: 0.6em;
+  margin-bottom: 0.18em;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.action-area button:last-child {
+  margin-right: 0;
+}
+
+.action-area button:hover, .action-area button:focus {
+  background: linear-gradient(90deg, #b2ebf2 0%, #80deea 100%);
+  color: #01579b;
+  box-shadow: 0 3px 7px rgba(30,130,200,0.07);
+  outline: none;
 }

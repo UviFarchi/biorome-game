@@ -2,7 +2,8 @@
 import {ref, computed} from 'vue'
 import {modulesStore} from '/stores/modulesStore.js'
 import {tilesStore} from '/stores/tilesStore.js'
-import {validPlantDestTiles, canSowPlant, getMissingModules} from '@/rules/utils.js'
+import {assemblyMeetsRequirements, getRequirements, getMatchingModuleNames} from '@/rules/utils.js'
+import ModuleRequirementsTable from "@/components/subcomponents/mainMap/actions/ModuleRequirementsTable.vue";
 
 const props = defineProps({
   setFeedbackMsg: Function
@@ -14,12 +15,12 @@ const selectedPlant = tiles.selectedSubject.value.plant;
 const tilesGrid = tiles.tiles
 const availableTiles = computed(() => {
   if (!selectedPlant) return []
-  return validPlantDestTiles(selectedPlant, tilesGrid)
+  return tilesGrid.flat().filter(({row, col}) => !tilesGrid[row][col].plant)
 })
 
 const hasPlantBeenSown = ref(false);
 const assemblies = computed(() => {
-  return modules.activeAssemblies.filter(assembly => !assembly.deployed && canSowPlant(assembly, selectedPlant.plantingType))
+  return modules.activeAssemblies.filter(assembly => !assembly.deployed && assemblyMeetsRequirements(assembly, "sowing", selectedPlant.plantingType))
 
 })
 
@@ -31,15 +32,15 @@ const sowErrorsList = computed(() => {
     let errs = []
     if (availableTiles.value.length === 0) errs.push('No available destination tiles.')
     if (assemblies.value.length === 0) {
-      const reqs = modules.activeAssemblies.length
-          ? getMissingModules(modules.activeAssemblies[0], "sowing", selectedPlant.plantingType)
-          : ['No suitable assembly']
-      errs.push('No eligible assemblies: ' + reqs.join(', '))
+      errs.push('No eligible assemblies')
     }
     return errs
   }
 })
-
+const requiredModules = computed(() => getRequirements('animal', 'move'));
+const moduleMatches = computed(() =>
+    getMatchingModuleNames(requiredModules.value, modules.availableModules)
+);
 function sowPlant() {
   const plant = selectedPlant
   const assembly = assemblies.value[selectedAssemblyIndex.value]
@@ -79,6 +80,8 @@ function sowPlant() {
           {{ assembly.name }}
         </option>
       </select>
+      <ModuleRequirementsTable :matches="moduleMatches" />
+
     </div>
     <div v-else>
       No plant selected

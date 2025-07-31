@@ -1125,7 +1125,7 @@ export const modulesStore = defineStore('modules', () => {
                 {type: 'arm', subtype: 'medium'},
                 {type: 'gripper'}
             ],
-            name: "Cow Milker 1",
+            name: "Cow Milker",
             deployed: false,
             moves: 2,
             actions: 2
@@ -1135,10 +1135,10 @@ export const modulesStore = defineStore('modules', () => {
             modules: [
                 {type: 'transport'},
                 {type: 'battery'},
-                {type: 'arm', subtype: 'medium'},
+                {type: 'arm', subtype: 'small'},
                 {type: 'gripper'}
             ],
-            name: "Cow Milker 2",
+            name: "Goat Milker",
             deployed: false,
             moves: 1,
             actions: 1
@@ -1167,6 +1167,21 @@ export const modulesStore = defineStore('modules', () => {
                 {type: 'gripper'}
             ],
             name: "Corn Cob Collector   ",
+            deployed: false,
+            moves: 1,
+            actions: 1
+        },
+        {
+            id: 'f69f8fa3-dfd8-4f19-866e-e12c576c112a',
+            modules: [
+                {type: 'transport'},
+                {type: 'battery'},
+                {type: 'camera', subtype: 'rgb'},
+                {type: 'arm', subtype: 'small'},
+                {type: 'suction'},
+                {type: 'cart'}
+            ],
+            name: "Egg Collector   ",
             deployed: false,
             moves: 1,
             actions: 1

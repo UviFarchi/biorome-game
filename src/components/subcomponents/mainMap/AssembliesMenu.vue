@@ -3,7 +3,7 @@ import {ref, computed, onMounted, onBeforeUnmount} from 'vue'
 import { modulesStore } from '/stores/modulesStore.js'
 import { tilesStore } from '/stores/tilesStore.js'
 import eventBus from "@/eventBus.js";
-import MoveAndRecall from "@/components/subcomponents/MainMap/Actions/Assemblies/MoveAndRecall.vue";
+import MoveAndRecall from "@/components/subcomponents/mainMap/actions/assemblies/MoveAndRecall.vue";
 
 const modules = modulesStore()
 const tiles = tilesStore()
@@ -86,7 +86,8 @@ function confirmDeploy() {
         <button class="toggle-btn" @click="toggleMode">
           View {{ actionToggle === 'pool' ? 'Tile Assemblies' : 'Available Assemblies' }}
         </button>
-      </div> <MoveAndRecall v-if="actionToggle === 'tile'" />
+      </div>
+      <MoveAndRecall class="action-area" v-if="actionToggle === 'tile'" />
       <div
           class="assembliesScroll"
           v-if="mode === 'normal' || (mode === 'action' && actionToggle === 'pool')"

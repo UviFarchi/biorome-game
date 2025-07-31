@@ -1,8 +1,8 @@
 <script setup>
 import {ref, computed} from 'vue'
 import {tilesStore} from '/stores/tilesStore.js'
-import GateModal from '@/components/subcomponents/MainMap/Modals/GateModal.vue'
-import TileModal from '@/components/subcomponents/MainMap/Modals/TileModal.vue'
+import GateModal from '@/components/subcomponents/mainMap/modals/GateModal.vue'
+import TileModal from '@/components/subcomponents/mainMap/modals/TileModal.vue'
 import eventBus from "@/eventBus.js";
 
 const tilesStoreInstance = tilesStore()

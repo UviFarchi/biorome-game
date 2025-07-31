@@ -44,9 +44,7 @@ export const marketStore = defineStore('market', () => {
   // The player's on-hand inventory
   const harvestedProducts = ref([
 
-    // Should be kept in sync with actual game state/inventory logic
-    { type: 'tomato', qty: 10, icon: '🍅', shelfLife: 3 },
-    { type: 'milk', qty: 15, icon: '🥛', shelfLife: 2 }
+    { label: 'milk', qty: 15, icon: '🥛', shelfLife: 2 }
   ])
 
   // Recent notifications to display in market UI
@@ -55,7 +53,8 @@ export const marketStore = defineStore('market', () => {
   // The buyable product list is derived in the component; store only special-cases if any
   // e.g., a special supply like Animal Feed always in stock
   const extraBuyables = ref([
-    { type: 'animal_feed', basePrice: 2, icon: '🍽️', shelfLife: 30 }
+    { type: 'animal_feed', basePrice: 2, icon: '🍽️', shelfLife: 30 },
+    { type: 'fertilizer', basePrice: 2, icon: '💩', shelfLife: 30 },
   ])
 
   return {

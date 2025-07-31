@@ -17,7 +17,7 @@ const harvested = computed(() => market.harvestedProducts)
       <div v-if="harvested.length">
         <div class="harvestedList">
           <span v-for="prod in harvested" :key="prod.type" class="harvestedItem">
-            {{ prod.icon }} {{ prod.type }} &times;{{ prod.qty }}
+            {{ prod.icon }} {{ prod.label }} &times;{{ prod.qty }}
           </span>
         </div>
       </div>

@@ -4,9 +4,9 @@ import {tilesStore} from '/stores/tilesStore.js'
 import {gameStateStore} from "../../../../stores/gameStateStore.js";
 import {computed, onBeforeUnmount, onMounted, ref} from "vue";
 import eventBus from "@/eventBus.js";
-import MoveAnimal from './Actions/Animals/Move.vue'
-import SetCollar from './Actions/Animals/SetCollar.vue';
-import HarvestProduct from "@/components/subcomponents/MainMap/Actions/Animals/HarvestAnimalProduct.vue";
+import MoveAnimal from '@/components/subcomponents/mainMap/actions/animals/Move.vue'
+import SetCollar from '@/components/subcomponents/mainMap/actions/animals/SetCollar.vue';
+import HarvestProduct from "@/components/subcomponents/mainMap/actions/animals/HarvestAnimalProduct.vue";
 
 const animals = animalsStore()
 const tiles = tilesStore()
@@ -56,9 +56,9 @@ function buy(animal) {
           <div v-if="feedbackMsg.length > 0" class="feedback-msg">
             <span v-for="msg in feedbackMsg">{{msg}}</span>
           </div>
-          <MoveAnimal :is-gate="isGate" :set-feedback-msg="setFeedbackMsg"/>
-          <SetCollar :set-feedback-msg="setFeedbackMsg"/>
-          <HarvestProduct v-if="!isGate" :set-feedback-msg="setFeedbackMsg"/>
+          <MoveAnimal class="action-area" :is-gate="isGate" :set-feedback-msg="setFeedbackMsg"/>
+          <SetCollar class="action-area" :set-feedback-msg="setFeedbackMsg"/>
+          <HarvestProduct class="action-area" v-if="!isGate" :set-feedback-msg="setFeedbackMsg"/>
         </div>
         <div v-else>
           No animal in this tile

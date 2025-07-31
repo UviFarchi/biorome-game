@@ -1,11 +1,11 @@
 <script setup>
 
-import StatusBar from '@/components/subcomponents/MainMap/StatusBar.vue';
-import AssembliesMenu from "@/components/subcomponents/MainMap/AssembliesMenu.vue";
-import HarvestedMenu from "@/components/subcomponents/MainMap/HarvestedMenu.vue";
-import PlantsMenu from "@/components/subcomponents/MainMap/PlantsMenu.vue";
-import AnimalsMenu from "@/components/subcomponents/MainMap/AnimalsMenu.vue";
-import TilesGrid from "@/components/subcomponents/MainMap/TilesGrid.vue";
+import StatusBar from '@/components/subcomponents/mainMap/StatusBar.vue';
+import AssembliesMenu from "@/components/subcomponents/mainMap/AssembliesMenu.vue";
+import HarvestedMenu from "@/components/subcomponents/mainMap/HarvestedMenu.vue";
+import PlantsMenu from "@/components/subcomponents/mainMap/PlantsMenu.vue";
+import AnimalsMenu from "@/components/subcomponents/mainMap/AnimalsMenu.vue";
+import TilesGrid from "@/components/subcomponents/mainMap/TilesGrid.vue";
 </script>
 
 <template>

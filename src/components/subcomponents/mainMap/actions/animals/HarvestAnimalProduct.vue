@@ -2,10 +2,11 @@
 import {ref, computed} from 'vue'
 import {gameStateStore} from '/stores/gameStateStore.js'
 import {animalsStore} from '/stores/animalsStore.js'
-import {canHarvestAnimalProduct, getRequiredModules} from '@/rules/utils.js'
+import {assemblyMeetsRequirements, getMatchingModuleNames, getRequirements} from '@/rules/utils.js'
 import {tilesStore} from "/stores/tilesStore.js";
 import {marketStore} from "/stores/marketStore.js";
 import {modulesStore} from '/stores/modulesStore.js'
+import ModuleRequirementsTable from "@/components/subcomponents/mainMap/actions/ModuleRequirementsTable.vue";
 
 
 const tiles = tilesStore();
@@ -17,48 +18,54 @@ const selectedAnimal = tiles.selectedSubject.value.animal;
 
 const gameState = gameStateStore()
 const animals = animalsStore()
-
-const animalProduct = computed(() =>
-    animals.products.find(p => p.key === selectedAnimal.product)
-)
-
-
 const today = computed(() => gameState.day)
 
 
+const animalProductKey = computed(() => selectedAnimal?.product || '')
+const animalProduct = computed(() =>
+    animalProductKey.value ? animals.products[animalProductKey.value] : null
+)
+function canHarvestAnimalProduct(animal, animalProduct, assemblies, today) {
+  if (!animal || !animalProduct || !assemblies?.length) return []
+  const reqs = getRequirements('harvest', animalProduct)
+  if (!reqs) return []
+  if (typeof animal.nextHarvest === "undefined") animal.nextHarvest = today
+
+  // Return only assemblies that satisfy requirements and have actions left and are ready
+  return assemblies.filter(a =>
+      a.actions > 0 &&
+      assemblyMeetsRequirements(a, "harvest", animalProduct) &&
+      today >= animal.nextHarvest
+  )
+}
 const eligibleAssemblies = computed(() => {
-  if (!animalProduct.value || tile.value.assemblies.length < 1) return [];
-  const assembliesWithActions = (tile.value.assemblies).filter(assembly => assembly.actions > 0)
+  if (!animalProductKey.value || tile.value.assemblies.length < 1) return [];
+  const assembliesWithActions = tile.value.assemblies.filter(assembly => assembly.actions > 0)
   return canHarvestAnimalProduct(
       tile.value.animal,
-      animalProduct.value,
+      animalProductKey.value,
       assembliesWithActions,
       today.value
   );
 });
 
 const deployableAssemblies = computed(() => {
-  if (!animalProduct.value) return [];
+  if (!animalProductKey.value) return [];
   const validAssemblies = modules.activeAssemblies.filter(a => !a.deployed && a.actions > 0)
   return canHarvestAnimalProduct(
       tile.value.animal,
-      animalProduct.value,
+      animalProductKey.value,
       validAssemblies,
       today.value
   )
 });
-
 const requiredModules = computed(() => {
-  if (eligibleAssemblies.value.length) return [];
-  const assemblies = tile.value.assemblies || [];
-  if (!assemblies.length) {
-    // Show all modules needed for this product (full requirements, not missing)
-    return getRequiredModules("harvest", animalProduct.value.key);
-  } else {
-    // If there are assemblies but none eligible, show the full requirements anyway
-    return getRequiredModules("harvest", animalProduct.value.key);
-  }
-});
+  if (eligibleAssemblies.value.length) return []
+  return getRequirements('harvest', animalProductKey.value)
+})
+const moduleMatches = computed(() =>
+    getMatchingModuleNames(requiredModules.value, modules.availableModules)
+);
 
 
 // Harvest cooldown, frequency etc
@@ -131,20 +138,14 @@ function harvestProduct() {
           <ul>
             <li v-for="assembly in deployableAssemblies" :key="assembly.id">
               {{ assembly.name || 'Assembly' }} (modules: {{ assembly.modules.length }})
-              <!-- Optionally, offer a deploy button (future polish) -->
-              <!-- <button @click="deployToTile(asm)">Deploy Here</button> -->
+
             </li>
           </ul>
-          <!-- Add deploy logic if you want -->
-        </div>
+       </div>
         <div v-else-if="!eligibleAssemblies.length && !deployableAssemblies.length" class="error-msg">
           No eligible assemblies on tile or in pool. Required modules:
-          <ul>
-            <li v-for="(missing, i) in requiredModules" :key="i">
-              {{ missing }}
-            </li>
-          </ul>
         </div>
+        <ModuleRequirementsTable :matches="moduleMatches" />
       </div>
     </div>
   </div>

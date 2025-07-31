@@ -120,7 +120,7 @@ const tileEffects = computed(() => {
         <strong>Others stats:</strong>
         <span class="other-stat weeds" v-if="'weeds' in tile">Weeds: {{ tile.weeds }}</span>
         <span class="other-stat pests" v-if="'pests' in tile">Pests: {{ tile.pests }}</span>
-        <span class="other-stat pollination" v-if="'pollination' in tile">Pests: {{ tile.pollination }}</span>
+        <span class="other-stat pollination" v-if="'pollination' in tile">Pollination: {{ tile.pollination }}</span>
         <span class="other-stat defense" v-if="'defense' in tile">Defense: {{ tile.defense }}</span>
       </div>
 
@@ -155,7 +155,7 @@ const tileEffects = computed(() => {
             <span>{{ assembly.name || 'Assembly' }}</span>
             <span class="modules-label">— Modules:</span>
             <span class="modules-list">
-    <span v-for="mod in assembly.modules" :key="mod.name">{{ mod.name }}</span>
+    <span class="modules-list-items" v-for="mod in assembly.modules" :key="mod.name">{{ mod.type }} {{mod.subtype ? "(" + mod.subtype + ")" : ""}}</span>
             </span>
           </div>
         </template>
@@ -278,5 +278,11 @@ const tileEffects = computed(() => {
 
 .other-stat {
   display: block;
+}
+
+.modules-list-items {
+  background: #9d9ded;
+  border-radius: 10px;
+  padding: 5px;
 }
 </style>

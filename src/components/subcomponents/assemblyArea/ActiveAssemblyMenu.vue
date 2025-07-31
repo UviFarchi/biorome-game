@@ -32,13 +32,13 @@ function selectAssembly(assembly) {
       <div
           v-for="assembly in assemblies"
           :key="assembly.id"
-          class="assembly-card"
+          class="card assembly-card"
           @click="selectAssembly(assembly)"
       >
         <div class="assembly-name">{{ assembly.name || 'Assembly' }}</div>
         <ul class="modules-list">
           <li v-for="mod in assembly.modules" :key="mod.name">
-            {{ mod.name }}
+            {{ mod.type }} {{mod.subtype ? "(" + mod.subtype + ")" : ""}}
           </li>
         </ul>
       </div>
@@ -62,7 +62,6 @@ function selectAssembly(assembly) {
 }
 .assembly-card {
   flex: 0 0 185px;
-  background: #fff;
   border-radius: 8px;
   min-height: 60px;
   margin-bottom: 0.3em;

@@ -2,7 +2,8 @@
 import {ref, computed} from 'vue'
 import {modulesStore} from '/stores/modulesStore.js'
 import {tilesStore} from '/stores/tilesStore.js'
-import {validAnimalDestTiles, canMoveAnimal, getMissingModules} from '@/rules/utils.js'
+import {assemblyMeetsRequirements, getRequirements, getMatchingModuleNames} from '@/rules/utils.js'
+import ModuleRequirementsTable from "@/components/subcomponents/mainMap/actions/ModuleRequirementsTable.vue";
 
 const props = defineProps({
   isGate: Boolean,
@@ -13,17 +14,29 @@ const modules = modulesStore()
 const tiles = tilesStore()
 const selectedAnimal = tiles.selectedSubject.value.animal;
 const tilesGrid = tiles.tiles
-const availableTiles = computed(() => {
-  if (!selectedAnimal) return []
-  return validAnimalDestTiles(selectedAnimal, tilesGrid)
+
+const validAnimalDestTiles = computed(() => {
+  const restriction = selectedAnimal.collar?.restrictedTiles
+  const out = []
+  if (!restriction || !restriction.length) {
+    for (let row = 0; row < tilesGrid.length; row++) {
+      for (let col = 0; col < tilesGrid[0].length; col++) {
+        if (!tilesGrid[row][col].animal) out.push({row, col})
+      }
+    }
+    return out
+  }
+  return restriction.filter(({row, col}) => !tilesGrid[row][col].animal)
 })
 
+
 const hasAnimalMoved = ref(false);
+
 const assemblies = computed(() => {
   if (props.isGate) {
-    return modules.activeAssemblies.filter(a => !a.deployed && canMoveAnimal(a))
+    return modules.activeAssemblies.filter(assembly => !assembly.deployed && assemblyMeetsRequirements(assembly, "animal", "move"))
   } else {
-    return (tiles.selectedSubject.value.assemblies || []).filter(a => canMoveAnimal(a))
+    return (tiles.selectedSubject.value.assemblies || []).filter(assembly => assemblyMeetsRequirements(assembly, "animal", "move"))
   }
 })
 
@@ -31,23 +44,24 @@ const selectedAssemblyIndex = ref(0)
 const selectedTileIndex = ref(0)
 
 const moveErrorsList = computed(() => {
-  if(!hasAnimalMoved.value) {
+  if (!hasAnimalMoved.value) {
     let errs = []
-    if (availableTiles.value.length === 0) errs.push('No available destination tiles.')
+    if (validAnimalDestTiles.value.length === 0) errs.push('No available destination tiles.')
     if (assemblies.value.length === 0) {
-      const reqs = modules.activeAssemblies.length
-          ? getMissingModules(modules.activeAssemblies[0], "animal", "move")
-          : ['No suitable assembly']
-      errs.push('No eligible assemblies: ' + reqs.join(', '))
+      errs.push('No eligible assemblies: none meet requirements')
     }
     return errs
   }
+  return []
 })
-
+const requiredModules = computed(() => getRequirements('animal', 'move'));
+const moduleMatches = computed(() =>
+    getMatchingModuleNames(requiredModules.value, modules.availableModules)
+);
 function moveAnimal() {
   const animal = selectedAnimal
   const assembly = assemblies.value[selectedAssemblyIndex.value]
-  const dest = availableTiles.value[selectedTileIndex.value]
+  const dest = validAnimalDestTiles.value[selectedTileIndex.value]
   if (!dest || !assembly) return
   const destTile = tiles.tiles[dest.row][dest.col]
   if (assembly.actions < 1 || assembly.moves < 1) return
@@ -82,7 +96,7 @@ function moveAnimal() {
       <button @click="moveAnimal" :disabled="hasAnimalMoved || moveErrorsList.length > 0">Move Animal</button>
       <span class="btn-error" v-if="!hasAnimalMoved">{{ moveErrorsList.join(', ') }}</span>
       <select id="destinationTiles" v-model="selectedTileIndex">
-        <option v-for="(tile, i) in availableTiles" :key="i" :value="i">
+        <option v-for="(tile, i) in validAnimalDestTiles" :key="i" :value="i">
           {{ tile.row + 1 }},{{ tile.col + 1 }}
         </option>
       </select>
@@ -91,6 +105,8 @@ function moveAnimal() {
           {{ assembly.name }}
         </option>
       </select>
+      <ModuleRequirementsTable :matches="moduleMatches" />
+
     </div>
     <div v-else>
       No animal selected
