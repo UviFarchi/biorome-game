@@ -1,6 +1,6 @@
 <script setup>
-import { computed } from 'vue'
 import { modulesStore } from '/stores/modulesStore.js'
+import { computed } from 'vue'
 
 const modules = modulesStore()
 

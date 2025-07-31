@@ -1,9 +1,10 @@
 <script setup>
-import { ref } from 'vue'
+import eventBus from '@/eventBus.js'
 import { gameStateStore } from '/stores/gameStateStore.js'
+import { ref } from 'vue'
+
 const gameState = gameStateStore()
 const name = ref('')
-import eventBus from "@/eventBus.js";
 
 const avatarOptions = [
   { emoji: '😀', label: 'Smiling Face' },

@@ -1,11 +1,11 @@
 <script setup>
-import { ref } from 'vue'
-import eventBus from "@/eventBus.js";
+import ActiveAssemblyMenu from '@/components/subcomponents/assemblyArea/ActiveAssemblyMenu.vue'
+import AssemblyWorkspace from '@/components/subcomponents/assemblyArea/AssemblyWorkspace.vue'
+import eventBus from '@/eventBus.js'
 import ModulesMenu from '@/components/subcomponents/assemblyArea/ModulesMenu.vue'
-import ActiveAssemblyMenu from "@/components/subcomponents/assemblyArea/ActiveAssemblyMenu.vue";
-import PremadeAssembliesMenu from "@/components/subcomponents/assemblyArea/PremadeAssembliesMenu.vue"
-import AssemblyWorkspace from "@/components/subcomponents/assemblyArea/AssemblyWorkspace.vue";
+import PremadeAssembliesMenu from '@/components/subcomponents/assemblyArea/PremadeAssembliesMenu.vue'
 import { modulesStore } from '/stores/modulesStore.js'
+import { ref } from 'vue'
 
 const showPremadeModal = ref(false)
 const modules = modulesStore()

@@ -1,10 +1,10 @@
 <script setup>
-import {ref, computed} from 'vue'
-import {effects} from '@/rules/effects.js'
-import {modulesStore} from "/stores/modulesStore.js";
-import {tilesStore} from "/stores/tilesStore.js";
-import {gameStateStore} from "/stores/gameStateStore.js";
-import { getAdjacentTiles } from "@/rules/utils.js";
+import { getAdjacentTiles } from '@/rules/utils.js'
+import { effects } from '@/rules/effects.js'
+import { gameStateStore } from '/stores/gameStateStore.js'
+import { modulesStore } from '/stores/modulesStore.js'
+import { tilesStore } from '/stores/tilesStore.js'
+import { computed, ref } from 'vue'
 
 const modules = modulesStore()
 const tilesStoreInstance = tilesStore()

@@ -1,9 +1,9 @@
 <script setup>
-import {computed, ref} from 'vue'
-import {gameStateStore} from '/stores/gameStateStore.js'
+import eventBus from '@/eventBus.js'
+import { gameStateStore } from '/stores/gameStateStore.js'
+import { computed, ref } from 'vue'
 // Store instances
 const gameState = gameStateStore()
-import eventBus from "@/eventBus.js";
 
 
 // Real date for day 1

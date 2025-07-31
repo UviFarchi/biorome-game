@@ -1,7 +1,7 @@
 <script setup>
 
-import { modulesStore } from '/stores/modulesStore.js'
 import { gameStateStore } from '/stores/gameStateStore.js'
+import { modulesStore } from '/stores/modulesStore.js'
 
 const emit = defineEmits(['close'])
 

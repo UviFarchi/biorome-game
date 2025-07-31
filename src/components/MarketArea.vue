@@ -1,11 +1,11 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import { v4 as uuidv4 } from 'uuid'
-import { marketStore } from '/stores/marketStore.js'
-import { animalsStore } from '/stores/animalsStore.js'
-import { plantsStore } from '/stores/plantsStore.js'
-import { gameStateStore } from '/stores/gameStateStore.js'
 import eventBus from '@/eventBus.js'
+import { animalsStore } from '/stores/animalsStore.js'
+import { gameStateStore } from '/stores/gameStateStore.js'
+import { marketStore } from '/stores/marketStore.js'
+import { plantsStore } from '/stores/plantsStore.js'
+import { v4 as uuidv4 } from 'uuid'
+import { computed, onMounted, ref } from 'vue'
 
 const market = marketStore()
 

@@ -1,7 +1,7 @@
 <script setup>
-import { ref, computed } from 'vue'
 import { modulesStore } from '/stores/modulesStore.js'
-import { tilesStore} from "/stores/tilesStore.js";
+import { tilesStore } from '/stores/tilesStore.js'
+import { computed, ref } from 'vue'
 
 const tilesStoreInstance = tilesStore()
 const allTiles = computed(() => tilesStoreInstance.tiles.flat())

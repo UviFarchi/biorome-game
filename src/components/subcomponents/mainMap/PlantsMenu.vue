@@ -1,12 +1,11 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import eventBus from '@/eventBus.js'
+import HarvestPlant from '@/components/subcomponents/mainMap/actions/plants/HarvestPlantProduct.vue'
+import SowPlant from '@/components/subcomponents/mainMap/actions/plants/Sow.vue'
+import { gameStateStore } from '/stores/gameStateStore.js'
 import { plantsStore } from '/stores/plantsStore.js'
 import { tilesStore } from '/stores/tilesStore.js'
-import { gameStateStore } from '/stores/gameStateStore.js'
-import eventBus from '@/eventBus.js'
-
-import SowPlant from '@/components/subcomponents/mainMap/actions/plants/Sow.vue'
-import HarvestPlant from '@/components/subcomponents/mainMap/actions/plants/HarvestPlantProduct.vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const plants = plantsStore()
 const tiles = tilesStore()
@@ -25,14 +24,6 @@ function changeMode(e) {
   feedbackMsg.value = []
 }
 
-onMounted(() => {
-  eventBus.on('menus-mode', changeMode)
-})
-
-onBeforeUnmount(() => {
-  eventBus.off('menus-mode', changeMode)
-})
-
 function buy(plant, plantingType) {
   const cost = plantingType === 'seed' ? plant.seedCost : plant.seedlingCost
 
@@ -49,6 +40,14 @@ function buy(plant, plantingType) {
   })
   gameState.gold -= cost
 }
+
+onMounted(() => {
+  eventBus.on('menus-mode', changeMode)
+})
+
+onBeforeUnmount(() => {
+  eventBus.off('menus-mode', changeMode)
+})
 </script>
 
 <template>

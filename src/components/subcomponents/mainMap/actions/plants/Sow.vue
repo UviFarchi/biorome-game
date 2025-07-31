@@ -1,9 +1,9 @@
 <script setup>
-import {ref, computed} from 'vue'
+import ModuleRequirementsTable from '@/components/subcomponents/mainMap/actions/ModuleRequirementsTable.vue'
+import {assemblyMeetsRequirements, getRequirements, getMatchingModuleNames} from '@/rules/utils.js'
 import {modulesStore} from '/stores/modulesStore.js'
 import {tilesStore} from '/stores/tilesStore.js'
-import {assemblyMeetsRequirements, getRequirements, getMatchingModuleNames} from '@/rules/utils.js'
-import ModuleRequirementsTable from "@/components/subcomponents/mainMap/actions/ModuleRequirementsTable.vue";
+import {computed, ref} from 'vue'
 
 const props = defineProps({
   setFeedbackMsg: Function

@@ -1,11 +1,11 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
-import StartingScreen from '@/components/StartingScreen.vue'
-import MainMap from '@/components/MainMap.vue'
 import AssemblyArea from '@/components/AssemblyArea.vue'
-import MarketArea from "@/components/MarketArea.vue";
-import { gameStateStore } from '/stores/gameStateStore.js'
 import eventBus from '@/eventBus.js'
+import { gameStateStore } from '/stores/gameStateStore.js'
+import MainMap from '@/components/MainMap.vue'
+import MarketArea from '@/components/MarketArea.vue'
+import StartingScreen from '@/components/StartingScreen.vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 const gameState = gameStateStore()
 const currentScreen = ref(

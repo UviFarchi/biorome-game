@@ -1,10 +1,6 @@
 <script setup>
-import {computed, ref} from "vue";
-
-
-
-
 import { marketStore } from '/stores/marketStore.js'
+import { computed, ref } from 'vue'
 const market = marketStore()
 const harvested = computed(() => market.harvestedProducts)
 </script>
