@@ -160,11 +160,7 @@ export const requirements = {
             {type: 'cart'}
         ],
 
-        // Plant material (optional: for "removal" actions, not for regular harvest)
-        biomass: [
-            {type: 'transport'},
-            {type: 'battery'}
-        ],
+
         // plants
         'corn': [
             {type: 'transport'},
@@ -431,6 +427,16 @@ export const requirements = {
             {type: 'arm'},
             {type: 'cart'},
             {type: 'gripper'}
+        ],
+        fertilize:[
+            {type: 'transport'},
+            {type: 'arm'},
+            {type: 'cart'},
+            {
+                type: "tool",
+                subtype: "pitchfork"
+            },
+            {type: 'battery'}
         ]
     },
     animal: {
@@ -446,7 +452,14 @@ export const requirements = {
             {type: "alarm", subtype: "sound"},
             {type: 'battery'},
             {type: "gps"},
-
+        ],
+        feed: [
+            {type: 'transport'},
+            {type: 'arm'},
+            {type: 'cart'},
+            {type: 'tank'},
+            {type: "valve"},
+            {type: 'battery'}
         ]
     }
 }

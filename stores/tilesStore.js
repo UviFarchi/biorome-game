@@ -26,7 +26,7 @@ export const tilesStore = defineStore('tiles', () => {
         )
     )
 
-    const gate = ref({animals: [], plants: []})
+    const gate = ref({animals: [], plants: [], extras: []})
 
     const selectedSubject = ref({})
 

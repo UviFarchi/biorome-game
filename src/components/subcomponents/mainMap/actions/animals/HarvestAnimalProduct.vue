@@ -1,125 +1,179 @@
 <script setup>
 import ModuleRequirementsTable from '@/components/subcomponents/mainMap/actions/ModuleRequirementsTable.vue'
-import {animalsStore} from '/stores/animalsStore.js'
-import {gameStateStore} from '/stores/gameStateStore.js'
-import {marketStore} from '/stores/marketStore.js'
-import {modulesStore} from '/stores/modulesStore.js'
-import {tilesStore} from '/stores/tilesStore.js'
-import {assemblyMeetsRequirements, getMatchingModuleNames, getRequirements} from '@/rules/utils.js'
-import {computed, ref} from 'vue'
+import { animalsStore } from '/stores/animalsStore.js'
+import { gameStateStore } from '/stores/gameStateStore.js'
+import { marketStore } from '/stores/marketStore.js'
+import { modulesStore } from '/stores/modulesStore.js'
+import { tilesStore } from '/stores/tilesStore.js'
+import { assemblyMeetsRequirements, getMatchingModuleNames, getRequirements } from '@/rules/utils.js'
+import { computed, ref } from 'vue'
 
+const props = defineProps({
+  setFeedbackMsg: Function
+})
 
-const tiles = tilesStore();
-const tile = tiles.selectedSubject;
-const market = marketStore();
-const modules = modulesStore();
-
-const selectedAnimal = tiles.selectedSubject.value.animal;
-
+const tiles = tilesStore()
+const tile = tiles.selectedSubject
+const modules = modulesStore()
+const market = marketStore()
 const gameState = gameStateStore()
 const animals = animalsStore()
 const today = computed(() => gameState.day)
 
-
-const animalProductKey = computed(() => selectedAnimal?.product || '')
-const animalProduct = computed(() =>
-    animalProductKey.value ? animals.products[animalProductKey.value] : null
+const selectedAnimal = computed(() => tile.value?.animal)
+const animalDef = computed(() =>
+    selectedAnimal.value
+        ? animals.animalTypes.find(a => a.type === selectedAnimal.value.type)
+        : null
 )
-function canHarvestAnimalProduct(animal, animalProduct, assemblies, today) {
-  if (!animal || !animalProduct || !assemblies?.length) return []
-  const reqs = getRequirements('harvest', animalProduct)
-  if (!reqs) return []
-  if (typeof animal.nextHarvest === "undefined") animal.nextHarvest = today
+const animalProductKey = computed(() => animalDef.value?.product)
+const animalProduct = computed(() => animalProductKey.value ? animals.products[animalProductKey.value] : null)
 
-  // Return only assemblies that satisfy requirements and have actions left and are ready
-  return assemblies.filter(a =>
-      a.actions > 0 &&
-      assemblyMeetsRequirements(a, "harvest", animalProduct) &&
-      today >= animal.nextHarvest
-  )
-}
-const eligibleAssemblies = computed(() => {
-  if (!animalProductKey.value || tile.value.assemblies.length < 1) return [];
-  const assembliesWithActions = tile.value.assemblies.filter(assembly => assembly.actions > 0)
-  return canHarvestAnimalProduct(
-      tile.value.animal,
-      animalProductKey.value,
-      assembliesWithActions,
-      today.value
-  );
-});
+const currentStage = computed(() => selectedAnimal.value?.growthStage || '')
+const allowedStages = computed(() => animalDef.value?.productStages || ['adult', 'old'])
 
-const deployableAssemblies = computed(() => {
-  if (!animalProductKey.value) return [];
-  const validAssemblies = modules.activeAssemblies.filter(a => !a.deployed && a.actions > 0)
-  return canHarvestAnimalProduct(
-      tile.value.animal,
-      animalProductKey.value,
-      validAssemblies,
-      today.value
-  )
-});
-const requiredModules = computed(() => {
-  if (eligibleAssemblies.value.length) return []
-  return getRequirements('harvest', animalProductKey.value)
-})
-const moduleMatches = computed(() =>
-    getMatchingModuleNames(requiredModules.value, modules.availableModules)
-);
-
-
-// Harvest cooldown, frequency etc
-const freq = computed(() =>
-    selectedAnimal.outputFrequency || animalProduct.value?.outputFrequency || 1
+const growthStageIndex = computed(() =>
+    animalDef.value ? animalDef.value.growthStages.indexOf(currentStage.value) : -1
 )
-const nextHarvest = computed(() =>
-    typeof selectedAnimal.nextHarvest === 'number'
-        ? selectedAnimal.nextHarvest
-        : today.value
+const baseYield = computed(() =>
+    (animalDef.value && growthStageIndex.value >= 0)
+        ? animalDef.value.yieldPerStage[growthStageIndex.value]
+        : 0
 )
+
+// Placeholder for future yield modifiers
+const yieldModifier = computed(() => 1)
+
+const actualYield = computed(() =>
+    Math.max(0, Math.floor(baseYield.value * yieldModifier.value))
+)
+const inProductStage = computed(() =>
+    allowedStages.value.includes(currentStage.value)
+)
+const freq = computed(() => animalDef.value?.outputFrequency || 1)
+const nextHarvest = computed(() => typeof selectedAnimal.value?.nextHarvest === 'number'
+    ? selectedAnimal.value.nextHarvest
+    : today.value)
 const readyToHarvest = computed(() => today.value >= nextHarvest.value)
 const harvestCooldown = computed(() => readyToHarvest.value ? 0 : nextHarvest.value - today.value)
 
-// Assembly selection
+function canHarvestAnimalProduct(animal, productKey, assemblies) {
+  if (!animal || !productKey || !assemblies?.length) return []
+  if (!allowedStages.value.includes(currentStage.value)) return []
+  if (!readyToHarvest.value) return []
+  const reqs = getRequirements('harvest', productKey)
+  if (!reqs) return []
+  return assemblies.filter(a =>
+      a.actions > 0 &&
+      assemblyMeetsRequirements(a, "harvest", productKey)
+  )
+}
+
+const eligibleAssemblies = computed(() => {
+  if (!animalProductKey.value || !tile.value.assemblies?.length) return []
+  const assembliesWithActions = tile.value.assemblies.filter(a => a.actions > 0)
+  return canHarvestAnimalProduct(
+      selectedAnimal.value,
+      animalProductKey.value,
+      assembliesWithActions
+  )
+})
+
+const deployableAssemblies = computed(() => {
+  if (!animalProductKey.value) return []
+  const validAssemblies = modules.activeAssemblies.filter(a => !a.deployed && a.actions > 0)
+  return validAssemblies.filter(a =>
+      assemblyMeetsRequirements(a, "harvest", animalProductKey.value)
+  )
+})
+
+const requiredModules = computed(() => {
+  if (!selectedAnimal.value || !animalProductKey.value) return []
+
+  return getRequirements('harvest', animalProductKey.value)
+})
+const moduleMatches = computed(() => {
+  if (!selectedAnimal.value) return []
+  return getMatchingModuleNames(requiredModules.value, modules.availableModules)
+})
+
+const unmetConditions = computed(() => {
+  const msgs = []
+  if (!selectedAnimal.value) {
+    msgs.push("No animal on this tile.")
+  } else if (!animalProduct.value) {
+    msgs.push("No product to harvest for this animal.")
+  }
+  if (!allowedStages.value.includes(currentStage.value) && animalProduct.value) {
+    msgs.push("Animal is not at a harvestable stage.")
+  }
+  if (harvestCooldown.value > 0) {
+    msgs.push(`Next harvest in ${harvestCooldown.value} day(s).`)
+  }
+  if (eligibleAssemblies.value.length === 0) {
+    msgs.push("No eligible assemblies on this tile.")
+  }
+  return msgs
+})
+
 const selectedAssemblyIndex = ref(0)
 
 function harvestProduct() {
-  if (!readyToHarvest.value) return
+  if (!readyToHarvest.value || !allowedStages.value.includes(currentStage.value)) return
   const assembly = eligibleAssemblies.value[selectedAssemblyIndex.value]
   if (!assembly) return
 
-  // Consume action
   assembly.actions--
 
-  let existing = market.harvestedProducts.find(p => p.type === animalProduct.value.key)
+  let existing = market.harvestedProducts.find(p => p.type === animalProductKey.value)
   if (existing) {
-    existing.qty += 1
+    existing.qty += actualYield.value
   } else {
     market.harvestedProducts.push({
       ...animalProduct.value,
-      qty: 1
+      type: animalProductKey.value,
+      qty: actualYield.value
     })
   }
-  selectedAnimal.nextHarvest = today.value + freq.value
+  selectedAnimal.value.nextHarvest = today.value + freq.value
+  props.setFeedbackMsg(
+      `Harvested ${actualYield.value} ${animalProduct.value.label} (stage: ${currentStage.value})`
+  )
 }
 </script>
 
+
+
 <template>
-  <div class="animal-action-section">
-    <h4>Harvest Product</h4>
-    <div v-if="!animalProduct">
-      <span class="error-msg">No product to harvest for this animal.</span>
+  <div class="action-area">
+    <h4>Harvest Animal Product</h4>
+    <div v-if="!selectedAnimal">
+      <span class="error-msg">No animal on this tile.</span>
     </div>
     <div v-else>
       <div>
-        <strong>{{ animalProduct.label }}</strong>
-        <span v-if="animalProduct.icon" class="product-icon">{{ animalProduct.icon }}</span>
+        <strong>{{ animalProduct?.label }}</strong>
+        <span v-if="animalProduct?.icon" class="product-icon">{{ animalProduct.icon }}</span>
       </div>
-      <div v-if="harvestCooldown > 0" class="cooldown-msg">
-        Not ready. Next harvest in {{ harvestCooldown }} day<span v-if="harvestCooldown > 1">s</span>.
+      <div>
+        <p v-if="inProductStage && harvestCooldown === 0">
+          Yield: {{ actualYield }} ({{ animalProduct?.label }})
+        </p>
+        <p v-else-if="!inProductStage">
+          Not in a harvestable stage.
+        </p>
+        <p v-else-if="harvestCooldown > 0">
+          Not ready. Next harvest in {{ harvestCooldown }} day<span v-if="harvestCooldown > 1">s</span>.
+        </p>
+      </div>
+
+      <div v-if="unmetConditions.length">
+        <ul class="feedback-msg">
+          <li v-for="msg in unmetConditions" :key="msg">{{ msg }}</li>
+        </ul>
       </div>
       <div v-else>
-        <div v-if="eligibleAssemblies.length">
+        <div v-if="eligibleAssemblies.length > 0">
           <label v-if="eligibleAssemblies.length > 1">
             Use assembly:
             <select v-model="selectedAssemblyIndex">
@@ -132,29 +186,33 @@ function harvestProduct() {
             Harvest {{ animalProduct.label }}
           </button>
         </div>
-        <div v-if="deployableAssemblies.length">
-          <br>
-          You have assemblies in your pool that can do this job:
+        <div v-if="eligibleAssemblies.length === 0 && deployableAssemblies.length === 0 && requiredModules.length" class="error-msg">
+          Required modules:
           <ul>
-            <li v-for="assembly in deployableAssemblies" :key="assembly.id">
-              {{ assembly.name || 'Assembly' }} (modules: {{ assembly.modules.length }})
-
+            <li v-for="mod in requiredModules" :key="mod">
+              {{ mod.type }}<span v-if="mod.subtype"> ({{ mod.subtype }})</span>
             </li>
           </ul>
-       </div>
-        <div v-else-if="!eligibleAssemblies.length && !deployableAssemblies.length" class="error-msg">
-          No eligible assemblies on tile or in pool. Required modules:
         </div>
-        <ModuleRequirementsTable :matches="moduleMatches" />
       </div>
     </div>
+    <div v-if="deployableAssemblies.length">
+    <p>You have deployable assemblies that could do this job:</p>
+    <ul>
+      <li v-for="assembly in deployableAssemblies" :key="assembly.id">
+        {{ assembly.name || 'Assembly' }} (modules: {{ assembly.modules.length }})
+      </li>
+    </ul>
   </div>
+    <ModuleRequirementsTable :matches="moduleMatches" />
+  </div>
+
 </template>
 
+
+
 <style scoped>
-.animal-action-section {
-  margin: 1.1em 0 1.3em 0;
-}
+
 
 .error-msg {
   color: #c62828;
@@ -162,11 +220,7 @@ function harvestProduct() {
   margin-top: 0.5em;
 }
 
-.cooldown-msg {
-  color: #fbc02d;
-  margin: 0.6em 0;
-}
-
+requiredModules
 .harvest-btn {
   margin-left: 1em;
   background: #aed581;

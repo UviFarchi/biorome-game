@@ -130,6 +130,7 @@ function harvest() {
 
   assembly.actions--
 
+
   let existing = market.harvestedProducts.find(p => p.key === plantProductKey.value)
   if (existing) {
     existing.qty += actualYield.value
@@ -141,9 +142,15 @@ function harvest() {
     })
   }
 
-  if (plant.value && plant.value.fruitStage) {
-    plant.value.fruitStage = 'unripe'
+
+  if (plant.value && plant.value.removedWhenHarvested) {
+    tile.value.plant = null
+    gameState.waste = (gameState.waste || 0) + 1
+  } else if (plant.value && plant.value.fruitStage) {
+    // Only reset fruitStage for perennials, etc.
+    plant.value.fruitStage = 'vegetative'
   }
+
   props.setFeedbackMsg(
       `Harvested ${actualYield.value} ${plantProduct.value.label} (shelf life: ${actualShelfLife.value} days)`
   )
@@ -151,7 +158,6 @@ function harvest() {
 
 const requiredModules = computed(() => {
   if (!plant.value) return []
-  if (eligibleAssemblies.value.length) return []
   return getRequirements('harvest', plantProductKey.value)
 })
 const moduleMatches = computed(() => {
@@ -165,8 +171,14 @@ const unmetConditions = computed(() => {
   if (!plantProduct.value) msgs.push("No product defined for this plant.")
   if (!inHarvestStage.value) msgs.push("Plant is not at a harvestable stage.")
   if (!inHarvestWindow.value) msgs.push("Outside of harvest window.")
-  if (eligibleAssemblies.value.length === 0)
-    msgs.push("No eligible assemblies on this tile.")
+  // Only if all above are true, check for assemblies
+  if (
+    plant.value &&
+    plantProduct.value &&
+    inHarvestStage.value &&
+    inHarvestWindow.value &&
+    eligibleAssemblies.value.length === 0
+  ) msgs.push("No eligible assemblies on this tile.")
   return msgs
 })
 </script>
@@ -175,10 +187,10 @@ const unmetConditions = computed(() => {
 
 
 <template>
-  <div class="plant-action-section">
+  <div class="action-area">
     <h4>Harvest Plant Product</h4>
     <div v-if="!plant">
-      <span class="error-msg">No plant on this tile.</span>
+      <span class="error-msg">No plant sown on this tile.</span>
     </div>
     <div v-else>
       <div>
@@ -186,7 +198,8 @@ const unmetConditions = computed(() => {
         <span v-if="plantProduct?.icon" class="product-icon">{{ plantProduct.icon }}</span>
       </div>
       <div>
-        <p>Current stage: <b>{{ fruitStage }}</b></p>
+        <p>Plant stage: <b>{{ currentStage }}</b></p>
+        <p>Fruit stage: <b>{{ fruitStage }}</b></p>
         <p v-if="fruitStage === 'green fruit'">
           Early harvest: Yield {{ actualYield }}, Shelf life {{ actualShelfLife }} (bonus).
         </p>
@@ -228,17 +241,17 @@ const unmetConditions = computed(() => {
       </div>
 
     </div>
+    <div v-if="deployableAssemblies.length">
+      <p>You have deployable assemblies that could do this job:</p>
+      <ul>
+        <li v-for="assembly in deployableAssemblies" :key="assembly.id">
+          {{ assembly.name || 'Assembly' }} (modules: {{ assembly.modules.length }})
+        </li>
+      </ul>
+    </div>
+    <ModuleRequirementsTable :matches="moduleMatches" />
+  </div>
 
-  </div>
-  <div v-if="deployableAssemblies.length">
-    <p>You have deployable assemblies that could do this job:</p>
-    <ul>
-      <li v-for="assembly in deployableAssemblies" :key="assembly.id">
-        {{ assembly.name || 'Assembly' }} (modules: {{ assembly.modules.length }})
-      </li>
-    </ul>
-  </div>
-  <ModuleRequirementsTable :matches="moduleMatches" />
 
 </template>
 

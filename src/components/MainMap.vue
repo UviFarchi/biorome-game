@@ -2,7 +2,7 @@
 
 import AnimalsMenu from '@/components/subcomponents/mainMap/AnimalsMenu.vue'
 import AssembliesMenu from '@/components/subcomponents/mainMap/AssembliesMenu.vue'
-import HarvestedMenu from '@/components/subcomponents/mainMap/HarvestedMenu.vue'
+import HarvestedMenu from '@/components/subcomponents/mainMap/FarmGate.vue'
 import PlantsMenu from '@/components/subcomponents/mainMap/PlantsMenu.vue'
 import StatusBar from '@/components/subcomponents/mainMap/StatusBar.vue'
 import TilesGrid from '@/components/subcomponents/mainMap/TilesGrid.vue'
@@ -11,11 +11,12 @@ import TilesGrid from '@/components/subcomponents/mainMap/TilesGrid.vue'
 <template>
   <div class="main-map-wrapper">
     <StatusBar class="status-bar"/>
-    <AssembliesMenu class="top-menu"/>
+    <HarvestedMenu class="top-menu"/>
+    <AssembliesMenu class="bottom-menu"/>
     <AnimalsMenu class="left-menu"/>
     <TilesGrid class="center-grid"/>
     <PlantsMenu class="right-menu"/>
-    <HarvestedMenu class="bottom-menu"/>
+
   </div>
 </template>
 

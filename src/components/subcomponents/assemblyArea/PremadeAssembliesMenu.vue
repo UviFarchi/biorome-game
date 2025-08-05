@@ -9,9 +9,9 @@ const modules = modulesStore()
 const gameState = gameStateStore()
 const premadeAssemblies = modules.premadeAssemblies
 
-// Helper to get module object by name from store
-function getModuleByName(name) {
-  return modules.availableModules.find(m => m.name === name)
+// Helper to get module object by type from store
+function getModuleByType(type) {
+  return modules.availableModules.find(m => m.type === type)
 }
 
 // For each assembly, calculate missing modules & total buy cost
@@ -19,7 +19,7 @@ function getAssemblyStatus(assembly) {
   const missing = []
   let totalCost = 0
   for (const mod of assembly.modules) {
-    const storeMod = getModuleByName(mod.name)
+    const storeMod = getModuleByType(mod.type)
     if (!storeMod || (storeMod.count || 0) <= 0) {
       missing.push(mod)
       totalCost += storeMod ? storeMod.cost : 0
@@ -42,7 +42,7 @@ function buyAllMissing(assembly) {
   const status = getAssemblyStatus(assembly)
   if (gameState.gold < status.totalCost) return
   for (const mod of status.missing) {
-    const storeMod = getModuleByName(mod.name)
+    const storeMod = getModuleByType(mod.type)
     if (storeMod) storeMod.count = (storeMod.count || 0) + 1
   }
   gameState.gold -= status.totalCost
@@ -52,7 +52,7 @@ function selectAssembly(assembly) {
   if (!canSelectAssembly(assembly)) return
   // Deduct module counts from the store
   for (const mod of assembly.modules) {
-    const storeMod = getModuleByName(mod.name)
+    const storeMod = getModuleByType(mod.type)
     if (storeMod && storeMod.count > 0) {
       storeMod.count -= 1
     }
@@ -96,11 +96,11 @@ function close() {
             <ul class="modules-list">
               <li
                   v-for="mod in assembly.modules"
-                  :key="mod.name"
-                  :class="{ missing: (getModuleByName(mod.name)?.count || 0) <= 0 }"
+                  :key="mod.type"
+                  :class="{ missing: (getModuleByType(mod.type)?.count || 0) <= 0 }"
               >
-                {{ mod.name }}
-                <span v-if="(getModuleByName(mod.name)?.count || 0) <= 0"> (missing)</span>
+                {{ mod.type }}
+                <span v-if="(getModuleByType(mod.type)?.count || 0) <= 0"> (missing)</span>
               </li>
             </ul>
           </div>

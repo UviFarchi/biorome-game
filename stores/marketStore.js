@@ -44,7 +44,6 @@ export const marketStore = defineStore('market', () => {
   // The player's on-hand inventory
   const harvestedProducts = ref([
 
-    { label: 'milk', qty: 15, icon: '🥛', shelfLife: 2 }
   ])
 
   // Recent notifications to display in market UI
@@ -53,7 +52,7 @@ export const marketStore = defineStore('market', () => {
   // The buyable product list is derived in the component; store only special-cases if any
   // e.g., a special supply like Animal Feed always in stock
   const extraBuyables = ref([
-    { type: 'animal_feed', basePrice: 2, icon: '🍽️', shelfLife: 30 },
+    { type: 'feed', basePrice: 2, icon: '🍽️', shelfLife: 30 },
     { type: 'fertilizer', basePrice: 2, icon: '💩', shelfLife: 30 },
   ])
 
@@ -62,6 +61,6 @@ export const marketStore = defineStore('market', () => {
     openMarketOffers,
     harvestedProducts,
     notifications,
-    extraBuyables // Components merge this with plant/animal products for full buy list
+    extraBuyables
   }
 })

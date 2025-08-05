@@ -1,25 +1,22 @@
 <script setup>
 import { getAdjacentTiles } from '@/rules/utils.js'
 import { effects } from '@/rules/effects.js'
-import { gameStateStore } from '/stores/gameStateStore.js'
-import { modulesStore } from '/stores/modulesStore.js'
 import { tilesStore } from '/stores/tilesStore.js'
-import { computed, ref } from 'vue'
+import { computed, watchEffect } from 'vue'
+import { plantsStore } from '/stores/plantsStore.js'
+import { animalsStore } from '/stores/animalsStore.js'
+import {gameStateStore} from "/stores/gameStateStore.js";
 
-const modules = modulesStore()
+const plants = plantsStore()
+const animals = animalsStore()
+const gameState = gameStateStore()
+
 const tilesStoreInstance = tilesStore()
 const {tile} = defineProps({
   tile: {type: Object, required: true}
 })
 
-const gameState = gameStateStore()
-const destinationValue = ref('')
 const tiles = tilesStoreInstance.tiles;
-const allTilesFlat = computed(() => tiles.flat().filter(
-    t => t.row !== tile.row || t.col !== tile.col
-))
-
-
 const tileEffects = computed(() => {
   if (!tile) return []
 
@@ -95,7 +92,68 @@ const tileEffects = computed(() => {
 
 
 
+// --- Handle plant health and removal ---
+const plantDied = computed(() => tile.plant && tile.plant.health === 0)
+if (plantDied.value) {
+  tile.plant = null
+  gameState.waste = (gameState.waste || 0) + 1
+}
 
+// --- Handle animal health and removal ---
+const animalDied = computed(() => tile.animal && tile.animal.health === 0)
+if (animalDied.value) {
+  tile.animal = null
+  gameState.waste = (gameState.waste || 0) + 1
+}
+
+// --- Plant state and yields ---
+const plantDef = computed(() =>
+    tile.plant ? plants.plantTypes.find(p => p.type === tile.plant.type) : null
+)
+const plantStage = computed(() => tile.plant?.growthStage || '')
+const plantYield = computed(() => plantDef.value?.yield || '-')
+const plantProductLabel = computed(() =>
+    plantDef.value && plantDef.value.productKey ? plants.products[plantDef.value.productKey]?.label : ''
+)
+
+// --- Animal state and yields ---
+const animalDef = computed(() =>
+    tile.animal ? animals.animalTypes.find(a => a.type === tile.animal.type) : null
+)
+const animalStage = computed(() => tile.animal?.growthStage || '')
+const animalYield = computed(() => {
+  if (!animalDef.value || !animalDef.value.yieldPerStage) return '-'
+  const idx = animalDef.value.growthStages?.indexOf(animalStage.value)
+  return idx !== -1 ? animalDef.value.yieldPerStage[idx] : '-'
+})
+const animalProductLabel = computed(() =>
+    animalDef.value && animalDef.value.product ? animals.products[animalDef.value.product]?.label : ''
+)
+
+// --- Assemblies status ---
+const assembliesInfo = computed(() =>
+    tile.assemblies?.map(a => ({
+      ...a,
+      actions: a.actions,
+      moves: a.moves,
+      modules: a.modules
+    })) || []
+)
+
+watchEffect(() => {
+  if (tile.plant && tile.plant.health === 0) {
+    tile.plant = null
+    gameState.waste = (gameState.waste || 0) + 1
+  }
+})
+
+// Remove animal if health hits 0
+watchEffect(() => {
+  if (tile.animal && tile.animal.health === 0) {
+    tile.animal = null
+    gameState.waste = (gameState.waste || 0) + 1
+  }
+})
 
 </script>
 
@@ -129,7 +187,13 @@ const tileEffects = computed(() => {
         <strong>Plant:</strong>
         <template v-if="tile.plant">
           <span class="plant-icon">{{ tile.plant.icon }}</span>
-          <span>{{ tile.plant.type }} ({{ tile.plant.growthStage }})</span>
+          <span>{{ tile.plant.type }} ({{ plantStage }})</span>
+          <span v-if="tile.plant.health">— Health: {{ tile.plant.health }}</span>
+          <div class="plant-stats">
+      <span v-if="plantProductLabel">
+        Yield: {{ plantYield }} {{ plantProductLabel }}
+      </span>
+          </div>
         </template>
         <span v-else class="none">None</span>
       </div>
@@ -139,8 +203,15 @@ const tileEffects = computed(() => {
         <strong>Animal:</strong>
         <template v-if="tile.animal">
           <span class="animal-icon">{{ tile.animal.icon }}</span>
-          <span>{{ tile.animal.type }}</span>
-          <span v-if="tile.animal.health"> — State: {{ tile.animal.health }} Value: {{tile.animal.cost + tile.animal.appreciationPerTurn*(gameState.day - tile.animal.dateDeployed)}}</span>
+          <span>{{ tile.animal.type }} ({{ animalStage }})</span>
+          <span v-if="tile.animal.health">— Health: {{ tile.animal.health }}</span>
+          <span v-if="tile.animal.foodConsumption">— Food Consumption: {{ tile.animal.foodConsumption }}</span>
+
+          <div class="animal-stats">
+      <span v-if="animalProductLabel">
+        Yield: {{ animalYield }} {{ animalProductLabel }}
+      </span>
+          </div>
           <span v-if="tile.animal.collar"> — <em>Collar: Restricted to {{ tile.animal.collar.restrictedTiles.length }} tiles</em></span>
         </template>
         <span v-else class="none">None</span>
@@ -149,18 +220,23 @@ const tileEffects = computed(() => {
       <!-- Assemblies info -->
       <div class="tile-section">
         <strong>Assemblies:</strong>
-        <template v-if="tile.assemblies && tile.assemblies.length">
-          <div v-for="assembly in tile.assemblies" :key="assembly.id" class="assembly-block">
+        <template v-if="assembliesInfo.length">
+          <div v-for="assembly in assembliesInfo" :key="assembly.id" class="assembly-block">
             <span class="assembly-icon">{{ assembly.icon || '🤖' }}</span>
             <span>{{ assembly.name || 'Assembly' }}</span>
             <span class="modules-label">— Modules:</span>
             <span class="modules-list">
-    <span class="modules-list-items" v-for="mod in assembly.modules" :key="mod.name">{{ mod.type }} {{mod.subtype ? "(" + mod.subtype + ")" : ""}}</span>
-            </span>
+        <span class="modules-list-items" v-for="mod in assembly.modules" :key="mod.name">
+          {{ mod.type }}{{mod.subtype ? " (" + mod.subtype + ")" : ""}}
+        </span>
+      </span>
+            <span> | Actions left: {{ assembly.actions }}</span>
+            <span v-if="typeof assembly.moves !== 'undefined'"> | Moves left: {{ assembly.moves }}</span>
           </div>
         </template>
         <span v-else class="none">None</span>
       </div>
+
 
       <div class="tile-section interactions">
         <strong>Interactions:</strong>
@@ -284,5 +360,13 @@ const tileEffects = computed(() => {
   background: #9d9ded;
   border-radius: 10px;
   padding: 5px;
+}
+
+.plant-stats, .animal-stats {
+  display: block;
+  margin-left: 2.2em;
+  margin-top: 0.25em;
+  color: #388e3c;
+  font-size: 0.97em;
 }
 </style>

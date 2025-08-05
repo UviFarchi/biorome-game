@@ -24,7 +24,7 @@ const date = computed(() =>
     inGameDate.value.toLocaleDateString('en-US', {month: 'long', day: 'numeric'})
 )
 
-
+const waste = computed(() => gameState.waste)
 const season = computed(() => {
   const month = inGameDate.value.getMonth() + 1
   if (month === 12 || month === 1 || month === 2) return {label:'Winter', icon: "❄️"}
@@ -94,12 +94,9 @@ const gold = computed(() => gameState.gold)
     <div id="gold" title="Gold: Earned from orders, spend to add plants/animals" class="statusBarCell">
       💰{{ gold }}
     </div>
-    <button class="assemblyAreaButton" @click="eventBus.emit('nav', 'assembly')">
-      Go to Assembly Area
-    </button>
-    <button class="MarketAreaButton" @click="eventBus.emit('nav', 'market')">
-      Go to Market Area
-    </button>
+    <div id="waste" title="Waste" class="statusBarCell">
+      🗑{{ waste }}
+    </div>
   </div>
 </template>
 

@@ -195,3 +195,10 @@
   box-shadow: 0 3px 7px rgba(30,130,200,0.07);
   outline: none;
 }
+
+.action-area button:disabled {
+  background: gray;
+  color: black;
+  outline: none;
+  cursor: not-allowed;
+}

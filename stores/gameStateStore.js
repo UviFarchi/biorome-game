@@ -156,7 +156,8 @@ export const gameStateStore = defineStore('gameState', () => {
 
     const weatherEvents =
         // Weather events
-        [{
+        [
+            {
             id: 'weather-1',
             type: 'weather',
             season: 'spring',

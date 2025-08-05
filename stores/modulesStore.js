@@ -780,9 +780,6 @@ export const modulesStore = defineStore('modules', () => {
             cost: 100
         }
     ])
-
-
-
     const premadeAssemblies = [
         {
             usage: "Animal Geofencing Collar",
@@ -899,6 +896,14 @@ export const modulesStore = defineStore('modules', () => {
             usage: "Rain Capture Station",
             modules: [
                 { type: "barrel" },
+                { type: "valve" },
+                { type: "pump" }
+            ]
+        },
+        {
+            usage: "Flood water management station",
+            modules: [
+                { type: "panel" },
                 { type: "valve" },
                 { type: "pump" }
             ]
@@ -1060,9 +1065,6 @@ export const modulesStore = defineStore('modules', () => {
             ]
         }
     ]
-
-
-
     const activeAssemblies = ref([
         {
             id: '65012c5e-0ef3-488f-98e4-3a4366b3eb17',
@@ -1075,8 +1077,8 @@ export const modulesStore = defineStore('modules', () => {
             ],
             name: "Geofence Collar",
             deployed: false,
-            moves: 1,
-            actions: 1
+            moves: 3,
+            actions: 3
         },
         {
             id: 'af97e85f-4696-4ff2-8f43-3b3e742b94c2',
@@ -1091,14 +1093,14 @@ export const modulesStore = defineStore('modules', () => {
             moves: 1,
             actions: 1
         },        {
-            id: 'af97e85f-4696-4ff2-8f43-3b3e742b94c2',
+            id: 'af97e85f-4696-4ff2-8f43-3b3e742b94c3',
             modules: [
                 {type: 'transport'},
                 {type: 'arm'},
-                {type: 'cart'},
-                {type: 'gripper'}
+                {type: 'cart', subtype: 'animal'},
+                {type: 'battery'}
             ],
-            name: "Seedling Planter",
+            name: "Animal Harvester",
             deployed: false,
             moves: 1,
             actions: 1
@@ -1134,11 +1136,15 @@ export const modulesStore = defineStore('modules', () => {
             id: 'cbee372c-685d-428d-aeb1-8274345d53cc',
             modules: [
                 {type: 'transport'},
-                {type: 'battery'},
-                {type: 'arm', subtype: 'small'},
-                {type: 'gripper'}
+                {type: 'arm'},
+                {type: 'cart'},
+                {
+                    type: "tool",
+                    subtype: "pitchfork"
+                },
+                {type: 'battery'}
             ],
-            name: "Goat Milker",
+            name: "Field Fertilizer",
             deployed: false,
             moves: 1,
             actions: 1
@@ -1175,21 +1181,19 @@ export const modulesStore = defineStore('modules', () => {
             id: 'f69f8fa3-dfd8-4f19-866e-e12c576c112a',
             modules: [
                 {type: 'transport'},
-                {type: 'battery'},
-                {type: 'camera', subtype: 'rgb'},
-                {type: 'arm', subtype: 'small'},
-                {type: 'suction'},
-                {type: 'cart'}
+                {type: 'arm'},
+                {type: 'cart'},
+                {type: 'tank'},
+                {type: "valve"},
+                {type: 'battery'}
             ],
-            name: "Egg Collector   ",
+            name: "Animal Feeder",
             deployed: false,
             moves: 1,
             actions: 1
         },
 
     ])
-
-
     const currentAssembly = ref([])
     return {availableModules, activeAssemblies, premadeAssemblies, currentAssembly}
 })

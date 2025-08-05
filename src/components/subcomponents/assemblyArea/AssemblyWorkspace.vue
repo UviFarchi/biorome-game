@@ -25,13 +25,21 @@ function saveAssembly() {
 function returnToPool(index) {
   const [removed] = modules.currentAssembly.splice(index, 1)
   if (!removed) return
-  const mod = modules.availableModules.find(m => m.name === removed.name)
+  const mod = modules.availableModules.find(m =>
+      m.type === removed.type &&
+      (m.subtype === removed.subtype || (!m.subtype && !removed.subtype)) &&
+      (!removed.name || m.name === removed.name)
+  )
   if (mod) mod.count = (mod.count || 0) + 1
 }
 function returnAllToPool() {
   while (modules.currentAssembly.length > 0) {
     const removed = modules.currentAssembly.pop()
-    const mod = modules.availableModules.find(m => m.name === removed.name)
+    const mod = modules.availableModules.find(m =>
+        m.type === removed.type &&
+        (m.subtype === removed.subtype || (!m.subtype && !removed.subtype)) &&
+        (!removed.name || m.name === removed.name)
+    )
     if (mod) mod.count = (mod.count || 0) + 1
   }
 }

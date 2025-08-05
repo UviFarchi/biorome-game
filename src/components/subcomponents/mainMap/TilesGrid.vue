@@ -1,6 +1,6 @@
 <script setup>
 import eventBus from '@/eventBus.js'
-import GateModal from '@/components/subcomponents/mainMap/modals/GateModal.vue'
+
 import TileModal from '@/components/subcomponents/mainMap/modals/TileModal.vue'
 import { tilesStore } from '/stores/tilesStore.js'
 import { computed, ref } from 'vue'
@@ -8,10 +8,7 @@ import { computed, ref } from 'vue'
 const tilesStoreInstance = tilesStore()
 const tiles = tilesStoreInstance.tiles
 const flatTiles = computed(() => tiles.flat())
-const gate = tilesStoreInstance.gate
 const selectedTile = ref(null)
-const selectedBiotic = ref(null)
-const showGateModal = ref(false)
 const showTileModal = ref(false)
 
 function openTileModal(tile) {
@@ -21,43 +18,18 @@ function openTileModal(tile) {
   tilesStoreInstance.selectedSubject.value = tile;
 }
 
-function openGateModal(item, type) {
-  showGateModal.value = true;
-  selectedBiotic.value = item;
-  eventBus.emit('menus-mode', 'action');
- tilesStoreInstance.selectedSubject.value = {[type] : item};
-}
 
 function closeModal() {
-  showGateModal.value = false;
   showTileModal.value = false;
   eventBus.emit('menus-mode', 'normal');
   tilesStoreInstance.selectedSubject.value= {};
+  selectedTile.value=null;
 }
 </script>
 
 <template>
   <div class="farm-wrapper">
-    <!-- Farm Gate Bar -->
-    <div class="gate-bar">
-      <span class="gate-label">Farm Gate:</span>
-      <span
-          v-for="(animal, i) in gate.animals"
-          :key="'a-'+i"
-          class="gate-icon"
-          :title="`Click to deploy ${animal.type}`"
-          @click="openGateModal(animal, 'animal')"
-      >{{ animal.icon }}</span>
-      <span
-          v-for="(plant, i) in gate.plants"
-          :key="'p-'+i"
-          class="gate-icon"
-          :title="`Click to plant ${plant.type}`"
-          @click="openGateModal(plant, 'plant')"
-      >{{ plant.icon }}</span>
-      <span v-if="!gate.animals.length && !gate.plants.length" style="color:#bbb; margin-left:1em;">(empty)</span>
-    </div>
-    <!-- Fields Grid -->
+
     <div class="fieldsGrid" v-bind="$attrs">
       <div
           v-for="tile in flatTiles"
@@ -86,7 +58,6 @@ function closeModal() {
         </div>
       </div>
     </div>
-    <GateModal v-if="showGateModal" :gate="gate" @close="closeModal" :item="selectedBiotic"/>
     <TileModal v-if="showTileModal && selectedTile" :tile="selectedTile" @close="closeModal"/>
   </div>
 

@@ -79,10 +79,28 @@ function handlePremadeSelect(assembly) {
 
 
 
-.assemblies-bar {
-  flex: 1 1 auto;
+.top-bar {
   display: flex;
-  align-items: center;
+  flex-direction: row;
+  align-items: flex-start;
+  background: #e0f7fa;
+  padding: 0.7em 1.4em 0.7em 1em;
+  border-bottom: 1.5px solid #b2dfdb;
+  min-height: 58px;
+  gap: 1.1em;
+  /* new: prevent overflow */
+  position: relative;
+  z-index: 2;
+}
+.assemblies-bar {
+  /* new: vertical scroll, fixed max height */
+  max-height: 150px;   /* or whatever fits your design */
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1 1 auto;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
 }
 
 

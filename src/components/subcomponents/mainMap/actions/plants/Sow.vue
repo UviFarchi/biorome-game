@@ -3,6 +3,7 @@ import ModuleRequirementsTable from '@/components/subcomponents/mainMap/actions/
 import {assemblyMeetsRequirements, getRequirements, getMatchingModuleNames} from '@/rules/utils.js'
 import {modulesStore} from '/stores/modulesStore.js'
 import {tilesStore} from '/stores/tilesStore.js'
+import {gameStateStore} from "/stores/gameStateStore.js";
 import {computed, ref} from 'vue'
 
 const props = defineProps({
@@ -11,6 +12,7 @@ const props = defineProps({
 
 const modules = modulesStore()
 const tiles = tilesStore()
+const gameState = gameStateStore()
 const selectedPlant = tiles.selectedSubject.value.plant;
 const tilesGrid = tiles.tiles
 const availableTiles = computed(() => {
@@ -41,6 +43,7 @@ const requiredModules = computed(() => getRequirements('animal', 'move'));
 const moduleMatches = computed(() =>
     getMatchingModuleNames(requiredModules.value, modules.availableModules)
 );
+
 function sowPlant() {
   const plant = selectedPlant
   const assembly = assemblies.value[selectedAssemblyIndex.value]
@@ -56,11 +59,12 @@ function sowPlant() {
   assembly.actions--
   assembly.moves--
 
-  destTile.plant = {...plant}
+  destTile.plant = {...plant, dateDeployed: gameState.day}
   destTile.assemblies = destTile.assemblies || []
   destTile.assemblies.push(assembly)
   props.setFeedbackMsg("Sow Plant Instruction Received");
   hasPlantBeenSown.value = true;
+  tiles.gate.selectedItem = null;
 }
 </script>
 
@@ -80,7 +84,7 @@ function sowPlant() {
           {{ assembly.name }}
         </option>
       </select>
-      <ModuleRequirementsTable :matches="moduleMatches" />
+      <ModuleRequirementsTable :matches="moduleMatches"/>
 
     </div>
     <div v-else>

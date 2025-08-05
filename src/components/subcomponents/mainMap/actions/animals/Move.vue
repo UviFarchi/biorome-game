@@ -71,6 +71,7 @@ function moveAnimal() {
     if (idx !== -1) tiles.gate.animals.splice(idx, 1)
     const asmIdx = modules.activeAssemblies.findIndex(a => a.id === assembly.id)
     if (asmIdx !== -1) modules.activeAssemblies.splice(asmIdx, 1)
+    tiles.gate.selectedItem = null
   } else {
     const tile = tiles.selectedSubject.value
     tile.animal = null

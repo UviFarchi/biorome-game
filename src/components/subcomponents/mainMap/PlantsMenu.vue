@@ -1,11 +1,13 @@
 <script setup>
 import eventBus from '@/eventBus.js'
-import HarvestPlant from '@/components/subcomponents/mainMap/actions/plants/HarvestPlantProduct.vue'
+import HarvestPlantProduct from '@/components/subcomponents/mainMap/actions/plants/HarvestPlantProduct.vue'
 import SowPlant from '@/components/subcomponents/mainMap/actions/plants/Sow.vue'
-import { gameStateStore } from '/stores/gameStateStore.js'
-import { plantsStore } from '/stores/plantsStore.js'
-import { tilesStore } from '/stores/tilesStore.js'
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import HarvestPlant from "@/components/subcomponents/mainMap/actions/plants/RemovePlant.vue";
+import {gameStateStore} from '/stores/gameStateStore.js'
+import {plantsStore} from '/stores/plantsStore.js'
+import {tilesStore} from '/stores/tilesStore.js'
+import {computed, onBeforeUnmount, onMounted, ref} from 'vue'
+
 
 const plants = plantsStore()
 const tiles = tilesStore()
@@ -54,35 +56,37 @@ onBeforeUnmount(() => {
   <div class="menu-panel">
     <div class="scroll-area">
       <template v-if="mode === 'normal'">
-        <template v-for="category in ['annuals', 'perennials']" :key="category">
-          <div
-              v-for="plant in plants.plantTypes[category]"
-              :key="plant.type"
-              class="card card--vertical"
-          >
-            <span class="verticalMenu-icon">{{ plant.icon }}</span>
-            <span class="verticalMenu-type">{{ plant.type }}</span>
-            <div class="deploy-buttons">
-              <button class="btn btn--buy" @click="buy(plant, 'seed')">
-                Seed: {{ plant.seedCost }}💰
-              </button>
-              <button class="btn btn--buy" @click="buy(plant, 'seedling')">
-                Seedling: {{ plant.seedlingCost }}💰
-              </button>
-            </div>
+        <div
+            v-for="plant in plants.plantTypes"
+            :key="plant.type"
+            class="card card--vertical"
+        >
+          <span class="verticalMenu-icon">{{ plant.icon }}</span>
+          <span class="verticalMenu-type">{{ plant.type }}</span>
+          <div class="deploy-buttons">
+            <button class="btn btn--buy" @click="buy(plant, 'seed')">
+              Seed: {{ plant.seedCost }}💰
+            </button>
+            <button class="btn btn--buy" @click="buy(plant, 'seedling')">
+              Seedling: {{ plant.seedlingCost }}💰
+            </button>
           </div>
-        </template>
+        </div>
       </template>
 
       <template v-else-if="mode === 'action'">
-        <div v-if="isGate">
-          <SowPlant class="action-area" :set-feedback-msg="setFeedbackMsg" />
-        </div>
-        <div v-else>
-          <div v-if="feedbackMsg.length > 0" class="feedback-msg">
-            <span v-for="msg in feedbackMsg" :key="msg">{{ msg }}</span>
+          <div v-if="isGate">
+            <SowPlant class="action-area" :set-feedback-msg="setFeedbackMsg"/>
           </div>
-          <HarvestPlant class="action-area" :set-feedback-msg="setFeedbackMsg" />
+          <div v-else-if="tiles.selectedSubject.value.plant">
+            <div v-if="feedbackMsg.length > 0" class="feedback-msg">
+              <span v-for="msg in feedbackMsg" :key="msg">{{ msg }}</span>
+            </div>
+            <HarvestPlantProduct class="action-area" :set-feedback-msg="setFeedbackMsg"/>
+            <HarvestPlant class="action-area" :set-feedback-msg="setFeedbackMsg"/>
+          </div>
+        <div v-else>
+          No plant in this tile
         </div>
       </template>
     </div>
@@ -101,13 +105,16 @@ onBeforeUnmount(() => {
   position: relative;
   justify-content: space-between;
 }
+
 .verticalMenu-icon {
   font-size: 2em;
 }
+
 .verticalMenu-type {
   font-weight: bold;
   font-size: 1.12em;
 }
+
 .deploy-buttons {
   display: flex;
   flex-direction: row;

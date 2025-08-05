@@ -19,10 +19,21 @@ function selectAssembly(assembly) {
   modules.editingAssemblyName = assembly.name || ''
   modules.editingAssemblyId = assembly.id || null
 
+  // Remove these modules from the pool
+  for (const mod of assembly.modules) {
+    const found = modules.availableModules.find(m =>
+        m.name === mod.name &&
+        m.type === mod.type &&
+        (m.subtype === mod.subtype || (!m.subtype && !mod.subtype))
+    )
+    if (found && found.count > 0) found.count--
+  }
+
   // Remove from activeAssemblies (by id)
   const idx = modules.activeAssemblies.findIndex(a => a.id === assembly.id)
   if (idx !== -1) modules.activeAssemblies.splice(idx, 1)
 }
+
 
 
 </script>
@@ -57,13 +68,13 @@ function selectAssembly(assembly) {
   flex-direction: row;
   gap: 1.1em;
   overflow-x: scroll;
+  overflow-y: hidden;
   padding-bottom: 0.2em;
   flex: 8;
 }
 .assembly-card {
   flex: 0 0 185px;
   border-radius: 8px;
-  min-height: 60px;
   margin-bottom: 0.3em;
   padding: 0.7rem 1rem;
   box-shadow: 0 1px 4px #0001;
@@ -73,6 +84,7 @@ function selectAssembly(assembly) {
   align-items: flex-start;
   cursor: pointer;
   transition: box-shadow 0.15s;
+  max-height: 100%;
 }
 .assembly-card:hover {
   box-shadow: 0 4px 12px #00bcd455;
