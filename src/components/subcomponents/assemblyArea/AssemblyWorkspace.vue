@@ -11,7 +11,7 @@ function saveAssembly() {
   const id = uuidv4()
   modules.activeAssemblies.push({
     id,
-    name: name.value || 'Unnamed Assembly',
+    name: name.value || id,
     modules: modules.currentAssembly.map(m => ({ ...m })),
     deployed: false,
     moves: 1,
@@ -57,7 +57,7 @@ function returnAllToPool() {
     />
     <ul class="current-modules-list">
       <li v-for="(mod, i) in modules.currentAssembly" :key="mod.type + i">
-        <span>{{ mod.name }} — type: {{ mod.type }}</span>
+        <span>type: {{ mod.type }}</span>
         <button class="btn btn--return return-btn" @click="returnToPool(i)">return to module pool</button>
       </li>
       <li v-if="!modules.currentAssembly.length" class="empty-msg">No modules added yet.</li>
