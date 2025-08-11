@@ -40,6 +40,11 @@ const stationAssemblies = computed(() => modules.activeAssemblies.filter(a => !a
 // Assemblies on the selected tile
 const tileAssemblies = computed(() => tile.value?.assemblies || [])
 
+
+const showingStation = computed(() => !tile.value || actionToggle.value === 'station')
+const currentAssemblies = computed(() => showingStation.value ? stationAssemblies.value : tileAssemblies.value)
+const currentTitle = computed(() => showingStation.value ? 'Assemblies at Station' : 'Assemblies on this Tile')
+const emptyText = computed(() => showingStation.value ? 'No assemblies at station.' : 'No assemblies on this tile.')
 // Toggle between tile and station views if a tile is selected
 function toggleMode() {
   if (!tile.value) return
@@ -66,6 +71,7 @@ function canBuild(assembly) {
 }
 
 
+
 </script>
 
 <template>
@@ -79,45 +85,24 @@ function canBuild(assembly) {
       </button>
     </div>
 
-    <!-- Assemblies at Station (if no tile selected, or in station mode) -->
-    <div v-if="!tile || actionToggle === 'station'" class="assemblies-section">
-      <h4>Assemblies at Station</h4>
-      <div
-          v-for="assembly in stationAssemblies"
-          :key="assembly.id"
-          class="assembly-block"
-      >
+    <div class="assemblies-section">
+      <h4>{{ currentTitle }}</h4>
+
+      <div v-for="assembly in currentAssemblies" :key="assembly.id" class="assembly-block">
         <div class="assembly-name">{{ assembly.name || 'Assembly' }}</div>
-        <Move v-if="canAssemblyMoveAlone(assembly)" :assembly="assembly"/>
-        <ApplyFertilizer v-if="canFertilize(assembly)" :assembly="assembly"/>
-        <ProvideFeed v-if="canFeed(assembly)" :assembly="assembly"/>
-        <TransportAssembly v-if="canTransport" :assembly="assembly"></TransportAssembly>
-        <BuildAssembly v-if="canBuild" :assembly="assembly"></BuildAssembly>
+
+        <div class="actions-row">
+          <Move v-if="canAssemblyMoveAlone(assembly)" :assembly="assembly" />
+          <ApplyFertilizer v-if="canFertilize(assembly)" :assembly="assembly" />
+          <ProvideFeed v-if="canFeed(assembly)" :assembly="assembly" />
+          <TransportAssembly v-if="canTransport(assembly)" :assembly="assembly" />
+          <BuildAssembly v-if="canBuild(assembly)" :assembly="assembly" />
+        </div>
       </div>
-      <div v-if="stationAssemblies.length === 0" class="empty">
-        No assemblies at station.
-      </div>
+
+      <div v-if="currentAssemblies.length === 0" class="empty">{{ emptyText }}</div>
     </div>
 
-    <!-- Assemblies on this Tile (only if a tile is selected and in tile mode) -->
-    <div v-if="tile && actionToggle === 'tile'" class="assemblies-section">
-      <h4>Assemblies on this Tile</h4>
-      <div
-          v-for="assembly in tileAssemblies"
-          :key="assembly.id"
-          class="assembly-block"
-      >
-        <span>{{ assembly.name || 'Assembly' }}</span>
-        <Move v-if="canAssemblyMoveAlone(assembly)" :assembly="assembly"/>
-        <ApplyFertilizer v-if="canFertilize(assembly)" :assembly="assembly"/>
-        <ProvideFeed v-if="canFeed(assembly)" :assembly="assembly"/>
-        <TransportAssembly v-if="canTransport" :assembly="assembly"></TransportAssembly>
-        <BuildAssembly v-if="canBuild" :assembly="assembly"></BuildAssembly>
-      </div>
-      <div v-if="tileAssemblies.length === 0" class="empty">
-        No assemblies on this tile.
-      </div>
-    </div>
   </div>
 </template>
 
@@ -177,34 +162,48 @@ function canBuild(assembly) {
   overflow-y: hidden;
   scrollbar-width: thin;
 }
-
 .assembly-block {
+  display: grid;
+  grid-template-columns: 1fr;        /* explicit single column */
+  grid-template-rows: auto auto;     /* title, actions */
+  row-gap: 0.5em;
   background: #f9fbe7;
   border-radius: 8px;
   padding: 0.5em 1em;
+  width: max-content;
+  box-shadow: 0 1px 4px rgba(60,60,60,0.05);
+}
+
+.assembly-name {
+  grid-row: 1;
+  grid-column: 1;
+  justify-self: center;
+  text-align: center;
+  white-space: nowrap;
+  font-weight: bold;
+  font-size: 1.05em;
+}
+
+.actions-row {
+  grid-row: 2;
   display: grid;
-  grid-template-rows: auto auto;
-  grid-auto-flow: column;
+  grid-auto-flow: column;            /* one column per control */
   grid-auto-columns: max-content;
   column-gap: 0.6em;
-  row-gap: 0.5em;
-  width: max-content;
-  position: relative;
-  box-shadow: 0 1px 4px rgba(60, 60, 60, 0.05);
-}
-
-.assembly-block .assembly-name {
-  grid-row: 1;
-  width: 100%;
-  background: red;
-  display: block;
-  text-align: center;
-}
-
-.assembly-block > :not(span) {
-  grid-row: 2;
+  align-items: start;
   white-space: nowrap;
 }
+
+/* errors from action components go on their own line inside the actions grid */
+.actions-row .btn-error {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin-top: 0.25em;
+}
+
+
+
+
 
 .assemblies-section {
   flex: 1 1 auto;
