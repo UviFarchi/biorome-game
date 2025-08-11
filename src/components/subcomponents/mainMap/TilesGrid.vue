@@ -51,7 +51,8 @@ function closeModal() {
               v-for="a in tile.assemblies"
               :key="a.id"
               class="tileAssembly"
-          >{{ a.icon || '🤖' }}</span>
+              :class="{ 'not-built': !a.built }"
+          >{{ a.built ? (a.icon || '🤖') : 'not built yet' }}</span>
         </div>
         <div class="tileStats">
           Tile {{ tile.row + 1 }} , {{ tile.col + 1 }}
@@ -144,6 +145,11 @@ function closeModal() {
 
 .tilePlant, .tileAnimal, .tileAssembly {
   font-size: 1.3em;
+}
+
+.tileAssembly.not-built {
+  font-size: 0.8em;
+  color: #b71c1c;
 }
 
 .tileStats {
