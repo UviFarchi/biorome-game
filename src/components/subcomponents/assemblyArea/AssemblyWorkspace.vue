@@ -2,6 +2,7 @@
 import { modulesStore } from '/stores/modulesStore.js'
 import { v4 as uuidv4 } from 'uuid'
 import { ref } from 'vue'
+import { canAssemblyMoveAlone } from '@/rules/utils.js'
 
 const modules = modulesStore()
 const name = ref('')
@@ -9,11 +10,13 @@ const name = ref('')
 function saveAssembly() {
   if (!modules.currentAssembly.length) return
   const id = uuidv4()
+  const built = canAssemblyMoveAlone({ modules: modules.currentAssembly })
   modules.activeAssemblies.push({
     id,
     name: name.value || id,
     modules: modules.currentAssembly.map(m => ({ ...m })),
     deployed: false,
+    built,
     moves: 1,
     actions: 1
   })
