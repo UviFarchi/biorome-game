@@ -6,7 +6,9 @@ import eventBus from "@/eventBus.js"
 import Move from "@/components/subcomponents/mainMap/actions/assemblies/Move.vue"
 import ApplyFertilizer from "@/components/subcomponents/mainMap/actions/assemblies/ApplyFertilizer.vue"
 import ProvideFeed from "@/components/subcomponents/mainMap/actions/assemblies/ProvideFeed.vue"
-import { assemblyMeetsRequirements } from "@/rules/utils.js"
+import { assemblyMeetsRequirements, canAssemblyMoveAlone } from "@/rules/utils.js"
+import TransportAssembly from "@/components/subcomponents/mainMap/actions/assemblies/TransportAssembly.vue";
+import BuildAssembly from "@/components/subcomponents/mainMap/actions/assemblies/BuildAssembly.vue";
 
 const modules = modulesStore()
 const tiles = tilesStore()
@@ -45,12 +47,22 @@ function toggleMode() {
 }
 
 // Requirements helpers
+
+
 function canFertilize(assembly) {
   return assemblyMeetsRequirements(assembly, 'sowing', 'fertilize')
 }
 function canFeed(assembly) {
   return assemblyMeetsRequirements(assembly, 'animal', 'feed')
 }
+function canTransport(assembly) {
+  return assemblyMeetsRequirements(assembly, 'assemblies', 'transportAssembly')
+}
+function canBuild(assembly) {
+  return assemblyMeetsRequirements(assembly, 'assemblies', 'buildAssembly')
+}
+
+
 </script>
 
 <template>
@@ -73,9 +85,11 @@ function canFeed(assembly) {
           class="assembly-block"
       >
         <span>{{ assembly.name || 'Assembly' }}</span>
-        <Move :assembly="assembly" />
+        <Move v-if="canAssemblyMoveAlone(assembly)" :assembly="assembly" />
         <ApplyFertilizer v-if="canFertilize(assembly)" :assembly="assembly" />
         <ProvideFeed v-if="canFeed(assembly)" :assembly="assembly" />
+        <TransportAssembly v-if="canTransport" :assembly="assembly"></TransportAssembly>
+        <BuildAssembly v-if="canBuild" :assembly="assembly"></BuildAssembly>
       </div>
       <div v-if="stationAssemblies.length === 0" class="empty">
         No assemblies at station.
@@ -91,7 +105,7 @@ function canFeed(assembly) {
           class="assembly-block"
       >
         <span>{{ assembly.name || 'Assembly' }}</span>
-        <Move :assembly="assembly" />
+        <Move v-if="canAssemblyMoveAlone(assembly)" :assembly="assembly" />
         <ApplyFertilizer v-if="canFertilize(assembly)" :assembly="assembly" />
         <ProvideFeed v-if="canFeed(assembly)" :assembly="assembly" />
       </div>

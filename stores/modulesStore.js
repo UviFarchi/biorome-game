@@ -2,7 +2,36 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const modulesStore = defineStore('modules', () => {
+
+    const constants= ref({
+        // Units used across the sim
+        units: {
+            electricity: 'kWh',
+                water: 'm³',
+                waste: 'ton',
+                batteryPack: 'pack'
+        },
+
+        // Battery pack spec used by all modules
+        battery: {
+            moduleKey: 'battery',       // the moduleTypes key for batteries
+                kWhPerPack: 5               // nominal ~48V·100Ah ≈ 5 kWh
+        }
+    })
+
     const availableModules = ref([
+        {
+            name: "Battery Pack",
+            type: "battery",
+            subtype: null,
+            attachesTo: ["transport", "pole"],
+            requires: [],
+            slots: [],
+            maxSlots: 0,
+            count: 0,
+            cost: 60,
+
+        },
         // TRANSPORT & MOBILE BASES
         {
             name: "UGV Transport (small)",
@@ -243,9 +272,20 @@ export const modulesStore = defineStore('modules', () => {
             slots: [],
             maxSlots: 0,
             count: 0,
+
             cost: 70
         },
-
+        {
+            name: "Anchor Driver Module",
+            type: "tool",
+            subtype: "anchor_driver",
+            attachesTo: ["arm"],
+            requires: ["arm"],
+            slots: [],
+            maxSlots: 0,
+            count: 0,
+            cost: 55
+        },
         // FIELD MODULES (CARRY/SPRAY/STORAGE)
         {
             name: "Cart",
@@ -482,18 +522,7 @@ export const modulesStore = defineStore('modules', () => {
             cost: 50,
           
         },
-        {
-            name: "Battery Pack",
-            type: "battery",
-            subtype: null,
-            attachesTo: ["transport", "pole"],
-            requires: [],
-            slots: [],
-            maxSlots: 0,
-            count: 0,
-            cost: 60,
-          
-        },
+
 
         // SUPPLY / WASTE
         {
@@ -1069,16 +1098,20 @@ export const modulesStore = defineStore('modules', () => {
         {
             id: '65012c5e-0ef3-488f-98e4-3a4366b3eb17',
             modules: [
-                { type: 'collar' },
-                { type: 'battery' },
-                { type: 'alarm', subtype: 'sound' },
-                { type: 'alarm', subtype: 'electric' },
-                { type: 'gps' }
+                { type: "internalSpace" },
+                { type: "actuator", subtype: "static" },
+                { type: "heating" },
+                { type: "sensor", subtype: "temp" },
+                { type: "sensor", subtype: "ph" },
+                { type: "sensor", subtype: "gas" },
+                { type: "tank" },
+                { type: "press" },
+                { type: "generator" }
             ],
-            name: "Geofence Collar",
+            name: "Bioreactor",
             deployed: false,
-            moves: 3,
-            actions: 3
+            moves: 0,
+            actions: 1
         },
         {
             id: 'af97e85f-4696-4ff2-8f43-3b3e742b94c2',
@@ -1195,5 +1228,5 @@ export const modulesStore = defineStore('modules', () => {
 
     ])
     const currentAssembly = ref([])
-    return {availableModules, activeAssemblies, premadeAssemblies, currentAssembly}
+    return {availableModules, activeAssemblies, premadeAssemblies, currentAssembly, constants}
 })

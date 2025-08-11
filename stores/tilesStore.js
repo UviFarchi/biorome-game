@@ -7,6 +7,7 @@ export const tilesStore = defineStore('tiles', () => {
             Array.from({length: 6}, (_, col) => ({
                 row,
                 col,
+                surveyed: false,
                 soil: {
                     health: 100,
                     water: 0,

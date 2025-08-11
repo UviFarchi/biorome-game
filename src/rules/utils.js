@@ -42,7 +42,10 @@ function getAdjacentTiles(tile, tilesGrid) {
     return adj
 }
 
+function canAssemblyMoveAlone(assembly){
+   return assembly.modules.filter(module => module.type === "transport").length > 0
+}
 
 export {
-    assemblyMeetsRequirements, getMatchingModuleNames, getRequirements, getAdjacentTiles
+    assemblyMeetsRequirements, getMatchingModuleNames, getRequirements, getAdjacentTiles, canAssemblyMoveAlone
 }

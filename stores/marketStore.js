@@ -56,11 +56,19 @@ export const marketStore = defineStore('market', () => {
     { type: 'fertilizer', basePrice: 2, icon: '💩', shelfLife: 30 },
   ])
 
+  const utilityPrices =ref({
+    electricityBuyPerKWh: 0.19,
+    electricitySellPerKWh: 0.19,
+    waterBuyPerM3: 3.50,
+    wasteDisposalPerTon: 100
+  })
+
   return {
     contracts,
     openMarketOffers,
     harvestedProducts,
     notifications,
-    extraBuyables
+    extraBuyables,
+    utilityPrices
   }
 })

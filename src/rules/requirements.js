@@ -461,5 +461,23 @@ export const requirements = {
             {type: "valve"},
             {type: 'battery'}
         ]
+    },
+    assemblies: {
+        transportAssembly: [
+            { type: 'transport' },
+            { type: 'battery' },
+            { type: 'cart' },
+            { type: 'arm', subtype: 'medium' } // or heavy for larger loads
+        ],
+        buildAssembly: [
+            { type: 'transport' },
+            { type: 'battery' },
+            { type: 'arm', subtype: 'heavy' },
+            { type: 'tool', subtype: 'borer' },
+            { type: 'tool', subtype: 'digger' },
+            { type: 'tool', subtype: 'flattener' },
+            { type: 'tool', subtype: 'grader' },
+            { type: 'tool', subtype: 'anchor_driver' } // new module
+        ]
     }
 }
