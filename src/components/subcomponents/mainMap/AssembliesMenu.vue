@@ -1,12 +1,12 @@
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
-import { modulesStore } from '/stores/modulesStore.js'
-import { tilesStore } from '/stores/tilesStore.js'
+import {ref, computed, watch, onMounted, onBeforeUnmount} from 'vue'
+import {modulesStore} from '/stores/modulesStore.js'
+import {tilesStore} from '/stores/tilesStore.js'
 import eventBus from "@/eventBus.js"
 import Move from "@/components/subcomponents/mainMap/actions/assemblies/Move.vue"
 import ApplyFertilizer from "@/components/subcomponents/mainMap/actions/assemblies/ApplyFertilizer.vue"
 import ProvideFeed from "@/components/subcomponents/mainMap/actions/assemblies/ProvideFeed.vue"
-import { assemblyMeetsRequirements, canAssemblyMoveAlone } from "@/rules/utils.js"
+import {assemblyMeetsRequirements, canAssemblyMoveAlone} from "@/rules/utils.js"
 import TransportAssembly from "@/components/subcomponents/mainMap/actions/assemblies/TransportAssembly.vue";
 import BuildAssembly from "@/components/subcomponents/mainMap/actions/assemblies/BuildAssembly.vue";
 
@@ -52,12 +52,15 @@ function toggleMode() {
 function canFertilize(assembly) {
   return assemblyMeetsRequirements(assembly, 'sowing', 'fertilize')
 }
+
 function canFeed(assembly) {
   return assemblyMeetsRequirements(assembly, 'animal', 'feed')
 }
+
 function canTransport(assembly) {
   return assemblyMeetsRequirements(assembly, 'assemblies', 'transportAssembly')
 }
+
 function canBuild(assembly) {
   return assemblyMeetsRequirements(assembly, 'assemblies', 'buildAssembly')
 }
@@ -84,10 +87,10 @@ function canBuild(assembly) {
           :key="assembly.id"
           class="assembly-block"
       >
-        <span>{{ assembly.name || 'Assembly' }}</span>
-        <Move v-if="canAssemblyMoveAlone(assembly)" :assembly="assembly" />
-        <ApplyFertilizer v-if="canFertilize(assembly)" :assembly="assembly" />
-        <ProvideFeed v-if="canFeed(assembly)" :assembly="assembly" />
+        <div class="assembly-name">{{ assembly.name || 'Assembly' }}</div>
+        <Move v-if="canAssemblyMoveAlone(assembly)" :assembly="assembly"/>
+        <ApplyFertilizer v-if="canFertilize(assembly)" :assembly="assembly"/>
+        <ProvideFeed v-if="canFeed(assembly)" :assembly="assembly"/>
         <TransportAssembly v-if="canTransport" :assembly="assembly"></TransportAssembly>
         <BuildAssembly v-if="canBuild" :assembly="assembly"></BuildAssembly>
       </div>
@@ -105,9 +108,11 @@ function canBuild(assembly) {
           class="assembly-block"
       >
         <span>{{ assembly.name || 'Assembly' }}</span>
-        <Move v-if="canAssemblyMoveAlone(assembly)" :assembly="assembly" />
-        <ApplyFertilizer v-if="canFertilize(assembly)" :assembly="assembly" />
-        <ProvideFeed v-if="canFeed(assembly)" :assembly="assembly" />
+        <Move v-if="canAssemblyMoveAlone(assembly)" :assembly="assembly"/>
+        <ApplyFertilizer v-if="canFertilize(assembly)" :assembly="assembly"/>
+        <ProvideFeed v-if="canFeed(assembly)" :assembly="assembly"/>
+        <TransportAssembly v-if="canTransport" :assembly="assembly"></TransportAssembly>
+        <BuildAssembly v-if="canBuild" :assembly="assembly"></BuildAssembly>
       </div>
       <div v-if="tileAssemblies.length === 0" class="empty">
         No assemblies on this tile.
@@ -126,6 +131,7 @@ function canBuild(assembly) {
   position: relative;
   background: #f5f5f5;
 }
+
 .toggle-col {
   display: flex;
   flex-direction: column;
@@ -139,6 +145,7 @@ function canBuild(assembly) {
   box-shadow: 1px 0 4px #00796b22;
   margin-right: 0.5em;
 }
+
 .toggle-btn {
   flex: 1 1 auto;
   border-radius: 10px 0 0 10px;
@@ -154,9 +161,11 @@ function canBuild(assembly) {
   letter-spacing: 0.08em;
   transition: background 0.2s;
 }
+
 .toggle-btn:hover {
   background: #0097a7;
 }
+
 .assemblies-section {
   flex: 1 1 auto;
   display: flex;
@@ -168,24 +177,67 @@ function canBuild(assembly) {
   overflow-y: hidden;
   scrollbar-width: thin;
 }
+
 .assembly-block {
   background: #f9fbe7;
   border-radius: 8px;
   padding: 0.5em 1em;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  margin-bottom: 0.6em;
+  display: grid;
+  grid-template-rows: auto auto;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  column-gap: 0.6em;
+  row-gap: 0.5em;
+  width: max-content;
   position: relative;
   box-shadow: 0 1px 4px rgba(60, 60, 60, 0.05);
-  gap: 0.6em;
 }
-.assembly-block span {
-  font-weight: bold;
+
+.assembly-block .assembly-name {
+  grid-row: 1;
+  width: 100%;
+  background: red;
+  display: block;
   text-align: center;
-  font-size: 1.05em;
-  margin-bottom: 0.18em;
 }
+
+.assembly-block > :not(span) {
+  grid-row: 2;
+  white-space: nowrap;
+}
+
+.assemblies-section {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+  padding: 1em;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+
+.assembly-block button:hover {
+  background: #43a047;
+  color: #fff;
+}
+
+.assembly-block button:disabled {
+  background: #ddd !important;
+  color: #888 !important;
+  cursor: not-allowed !important;
+  border: 1px solid #bbb;
+}
+
+.assembly-block select {
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  min-width: 70px;
+  margin-top: 0.1em;
+}
+
 .empty {
   color: #888;
   font-style: italic;

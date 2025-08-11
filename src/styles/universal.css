@@ -141,6 +141,14 @@
   cursor: not-allowed;
 }
 
+
+.btn-error {
+  display: block;
+  grid-column: 1 / -1;
+  grid-row: auto !important;
+  white-space: nowrap;
+  margin: 0.25em 0 0;
+}
 .action-area {
   background: #f9fafb;
   border-radius: 12px;
